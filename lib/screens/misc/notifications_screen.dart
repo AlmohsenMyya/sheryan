@@ -39,23 +39,8 @@ class NotificationsScreen extends StatefulWidget {
   State<NotificationsScreen> createState() => _NotificationsScreenState();
 }
 
-class _NotificationsScreenState extends State<NotificationsScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
+class _NotificationsScreenState extends State<NotificationsScreen> {
   final String? _userId = FirebaseAuth.instance.currentUser?.uid;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController =
-        TabController(length: _NotifTab.values.length, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
   void _markAllRead() {
     if (_userId != null) {
@@ -79,7 +64,9 @@ class _NotificationsScreenState extends State<NotificationsScreen>
       _TabDef(label: l10n.notifTabSystem, filter: _NotifTab.system),
     ];
 
-    return Scaffold(
+    return DefaultTabController(
+      length: tabs.length,
+      child: Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
@@ -98,7 +85,6 @@ class _NotificationsScreenState extends State<NotificationsScreen>
           ),
         ],
         bottom: TabBar(
-          controller: _tabController,
           isScrollable: true,
           tabAlignment: TabAlignment.start,
           indicatorColor: colorScheme.primary,
@@ -131,7 +117,6 @@ class _NotificationsScreenState extends State<NotificationsScreen>
               .toList();
 
           return TabBarView(
-            controller: _tabController,
             children: tabs
                 .map((t) => _NotifList(
                       all: allItems,
@@ -143,6 +128,7 @@ class _NotificationsScreenState extends State<NotificationsScreen>
           );
         },
       ),
+    ),
     );
   }
 }

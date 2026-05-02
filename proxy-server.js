@@ -22,6 +22,7 @@ const MIME_TYPES = {
   '.otf': 'font/otf',
   '.ico': 'image/x-icon',
   '.map': 'application/json',
+  '.wasm': 'application/wasm',
   '.bin': 'application/octet-stream',
 };
 

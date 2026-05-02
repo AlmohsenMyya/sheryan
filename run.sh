@@ -51,7 +51,7 @@ fi
 echo "Generated .env successfully"
 
 echo "Building Flutter web app..."
-flutter build web --release
+flutter build web --debug
 
 echo "Serving Flutter web app on port 5000 (with /__mockup proxy to :23636)..."
 node proxy-server.js

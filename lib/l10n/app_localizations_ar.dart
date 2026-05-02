@@ -1271,4 +1271,89 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get allCities => 'جميع المدن';
+
+  @override
+  String get superAdminLabel => 'سوبر أدمن';
+
+  @override
+  String get adminOverview => 'نظرة عامة';
+
+  @override
+  String get totalDonors => 'إجمالي المتبرعين';
+
+  @override
+  String get totalHospitals => 'المستشفيات';
+
+  @override
+  String get openRequests => 'طلبات مفتوحة';
+
+  @override
+  String get totalDonations => 'التبرعات الموثّقة';
+
+  @override
+  String get manageDonors => 'المتبرعون';
+
+  @override
+  String get allBloodRequests => 'طلبات الدم';
+
+  @override
+  String get broadcastNotif => 'الإشعارات';
+
+  @override
+  String get donorDeleted => 'تم حذف المتبرع بنجاح';
+
+  @override
+  String get confirmDeleteBody =>
+      'لا يمكن التراجع عن هذا الإجراء. هل أنت متأكد؟';
+
+  @override
+  String get notifTitleField => 'عنوان الإشعار';
+
+  @override
+  String get notifBodyField => 'نص الإشعار';
+
+  @override
+  String get targetAudience => 'الجمهور المستهدف';
+
+  @override
+  String get targetAll => 'جميع المستخدمين';
+
+  @override
+  String get targetByCity => 'مدينة محددة';
+
+  @override
+  String get targetByBloodGroup => 'زمرة دم محددة';
+
+  @override
+  String get sendNotif => 'إرسال الإشعار';
+
+  @override
+  String get notifSent => 'تم إرسال الإشعار بنجاح';
+
+  @override
+  String get filterByBloodGroup => 'تصفية حسب زمرة الدم';
+
+  @override
+  String get allBloodGroups => 'كل زمر الدم';
+
+  @override
+  String get searchDonors => 'بحث عن متبرع...';
+
+  @override
+  String get editHospital => 'تعديل المستشفى';
+
+  @override
+  String get hospitalUpdated => 'تم تحديث المستشفى بنجاح';
+
+  @override
+  String get requestDeletedSuccess => 'تم حذف الطلب بنجاح';
+
+  @override
+  String get allStatuses => 'كل الحالات';
+
+  @override
+  String get announcementHistory => 'الإشعارات المرسلة';
+
+  @override
+  String get noAnnouncementsYet => 'لا توجد إشعارات مرسلة بعد';
 }

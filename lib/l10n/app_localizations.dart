@@ -2461,6 +2461,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All Cities'**
   String get allCities;
+
+  /// No description provided for @superAdminLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Super Admin'**
+  String get superAdminLabel;
+
+  /// No description provided for @adminOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get adminOverview;
+
+  /// No description provided for @totalDonors.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Donors'**
+  String get totalDonors;
+
+  /// No description provided for @totalHospitals.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospitals'**
+  String get totalHospitals;
+
+  /// No description provided for @openRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Requests'**
+  String get openRequests;
+
+  /// No description provided for @totalDonations.
+  ///
+  /// In en, this message translates to:
+  /// **'Donations'**
+  String get totalDonations;
+
+  /// No description provided for @manageDonors.
+  ///
+  /// In en, this message translates to:
+  /// **'Donors'**
+  String get manageDonors;
+
+  /// No description provided for @allBloodRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood Requests'**
+  String get allBloodRequests;
+
+  /// No description provided for @broadcastNotif.
+  ///
+  /// In en, this message translates to:
+  /// **'Broadcast'**
+  String get broadcastNotif;
+
+  /// No description provided for @donorDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Donor deleted successfully'**
+  String get donorDeleted;
+
+  /// No description provided for @confirmDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This action cannot be undone. Are you sure?'**
+  String get confirmDeleteBody;
+
+  /// No description provided for @notifTitleField.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Title'**
+  String get notifTitleField;
+
+  /// No description provided for @notifBodyField.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Message'**
+  String get notifBodyField;
+
+  /// No description provided for @targetAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Audience'**
+  String get targetAudience;
+
+  /// No description provided for @targetAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All Users'**
+  String get targetAll;
+
+  /// No description provided for @targetByCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Specific City'**
+  String get targetByCity;
+
+  /// No description provided for @targetByBloodGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Specific Blood Group'**
+  String get targetByBloodGroup;
+
+  /// No description provided for @sendNotif.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Notification'**
+  String get sendNotif;
+
+  /// No description provided for @notifSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification sent successfully'**
+  String get notifSent;
+
+  /// No description provided for @filterByBloodGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Blood Group'**
+  String get filterByBloodGroup;
+
+  /// No description provided for @allBloodGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'All Blood Groups'**
+  String get allBloodGroups;
+
+  /// No description provided for @searchDonors.
+  ///
+  /// In en, this message translates to:
+  /// **'Search donors...'**
+  String get searchDonors;
+
+  /// No description provided for @editHospital.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Hospital'**
+  String get editHospital;
+
+  /// No description provided for @hospitalUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital updated successfully'**
+  String get hospitalUpdated;
+
+  /// No description provided for @requestDeletedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Request deleted successfully'**
+  String get requestDeletedSuccess;
+
+  /// No description provided for @allStatuses.
+  ///
+  /// In en, this message translates to:
+  /// **'All Statuses'**
+  String get allStatuses;
+
+  /// No description provided for @announcementHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent Announcements'**
+  String get announcementHistory;
+
+  /// No description provided for @noAnnouncementsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No announcements sent yet'**
+  String get noAnnouncementsYet;
 }
 
 class _AppLocalizationsDelegate
