@@ -1368,6 +1368,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noAnnouncementsYet => 'No announcements sent yet';
 
   @override
+  String get requestDetails => 'Request Details';
+
+  @override
+  String get markAsVerified => 'Mark as Verified';
+
+  @override
+  String get manualDonationTitle => 'Register Donation Manually';
+
+  @override
+  String get enterDonorId => 'Enter the donor\'s ID to look them up.';
+
+  @override
+  String get urgentLabel => 'URGENT';
+
+  @override
+  String get requestDate => 'Date';
+
+  @override
+  String get fulfilledLabel => 'Fulfilled';
+
+  @override
+  String get verifiedLabel => 'Verified';
+
+  @override
+  String get manualOverrideNote =>
+      'QR unavailable? Use the buttons below to update manually.';
+
+  @override
+  String get manualBadge => 'Manual';
+
+  @override
   String get manageHospitalAdminsSubtitle => 'Assign admins to hospitals';
 
   @override

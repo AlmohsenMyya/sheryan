@@ -1358,6 +1358,37 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noAnnouncementsYet => 'لا توجد إشعارات مرسلة بعد';
 
   @override
+  String get requestDetails => 'تفاصيل الطلب';
+
+  @override
+  String get markAsVerified => 'تحديد كموثق';
+
+  @override
+  String get manualDonationTitle => 'تسجيل تبرع يدوي';
+
+  @override
+  String get enterDonorId => 'أدخل معرف المتبرع للبحث عنه.';
+
+  @override
+  String get urgentLabel => 'طارئ';
+
+  @override
+  String get requestDate => 'التاريخ';
+
+  @override
+  String get fulfilledLabel => 'مكتملة';
+
+  @override
+  String get verifiedLabel => 'موثقة';
+
+  @override
+  String get manualOverrideNote =>
+      'رمز QR غير متاح؟ استخدم الأزرار أدناه للتحديث يدوياً.';
+
+  @override
+  String get manualBadge => 'يدوي';
+
+  @override
   String get manageHospitalAdminsSubtitle => 'تعيين المسؤولين للمستشفيات';
 
   @override

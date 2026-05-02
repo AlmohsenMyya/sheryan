@@ -47,3 +47,9 @@ id = "A8rAeshcHwThJomwt5jSQ"
 uri = "file://hospital_admin_proposal.md"
 type = "text"
 title = "Hospital Admin Role — Development Proposal"
+
+[[outputs]]
+id = "RCEYol5SBVdI9vMCmfCMC"
+uri = "file://docs/hospital_admin_phase1_implementation.md"
+type = "text"
+title = "Hospital Admin Phase 1 — Implementation Docs"

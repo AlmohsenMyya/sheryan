@@ -2630,6 +2630,66 @@ abstract class AppLocalizations {
   /// **'No announcements sent yet'**
   String get noAnnouncementsYet;
 
+  /// No description provided for @requestDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Details'**
+  String get requestDetails;
+
+  /// No description provided for @markAsVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Verified'**
+  String get markAsVerified;
+
+  /// No description provided for @manualDonationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Register Donation Manually'**
+  String get manualDonationTitle;
+
+  /// No description provided for @enterDonorId.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the donor\'s ID to look them up.'**
+  String get enterDonorId;
+
+  /// No description provided for @urgentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'URGENT'**
+  String get urgentLabel;
+
+  /// No description provided for @requestDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get requestDate;
+
+  /// No description provided for @fulfilledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fulfilled'**
+  String get fulfilledLabel;
+
+  /// No description provided for @verifiedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get verifiedLabel;
+
+  /// No description provided for @manualOverrideNote.
+  ///
+  /// In en, this message translates to:
+  /// **'QR unavailable? Use the buttons below to update manually.'**
+  String get manualOverrideNote;
+
+  /// No description provided for @manualBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get manualBadge;
+
   /// No description provided for @manageHospitalAdminsSubtitle.
   ///
   /// In en, this message translates to:
