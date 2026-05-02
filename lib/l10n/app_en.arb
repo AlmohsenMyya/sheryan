@@ -561,5 +561,21 @@
   "requestDeletedSuccess": "Request deleted successfully",
   "allStatuses": "All Statuses",
   "announcementHistory": "Sent Announcements",
-  "noAnnouncementsYet": "No announcements sent yet"
+  "noAnnouncementsYet": "No announcements sent yet",
+  "requestDetails": "Request Details",
+  "markAsVerified": "Mark as Verified",
+  "manualDonationTitle": "Register Donation Manually",
+  "enterDonorId": "Enter the donor's ID to look them up.",
+  "urgentLabel": "URGENT",
+  "requestDate": "Date",
+  "fulfilledLabel": "Fulfilled",
+  "verifiedLabel": "Verified",
+  "manualOverrideNote": "QR unavailable? Use the buttons below to update manually.",
+  "manualBadge": "Manual",
+  "manageHospitalAdminsSubtitle": "Assign admins to hospitals",
+  "assignedHospital": "Hospital",
+  "editCity": "Edit City",
+  "cityUpdated": "City updated successfully",
+  "editSponsor": "Edit Sponsor",
+  "sponsorUpdated": "Sponsor updated successfully"
 }

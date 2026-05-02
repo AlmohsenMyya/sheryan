@@ -593,5 +593,21 @@
   "requestDeletedSuccess": "تم حذف الطلب بنجاح",
   "allStatuses": "كل الحالات",
   "announcementHistory": "الإشعارات المرسلة",
-  "noAnnouncementsYet": "لا توجد إشعارات مرسلة بعد"
+  "noAnnouncementsYet": "لا توجد إشعارات مرسلة بعد",
+  "requestDetails": "تفاصيل الطلب",
+  "markAsVerified": "تحديد كموثق",
+  "manualDonationTitle": "تسجيل تبرع يدوي",
+  "enterDonorId": "أدخل معرف المتبرع للبحث عنه.",
+  "urgentLabel": "طارئ",
+  "requestDate": "التاريخ",
+  "fulfilledLabel": "مكتملة",
+  "verifiedLabel": "موثقة",
+  "manualOverrideNote": "رمز QR غير متاح؟ استخدم الأزرار أدناه للتحديث يدوياً.",
+  "manualBadge": "يدوي",
+  "manageHospitalAdminsSubtitle": "تعيين المسؤولين للمستشفيات",
+  "assignedHospital": "المستشفى",
+  "editCity": "تعديل المدينة",
+  "cityUpdated": "تم تحديث المدينة بنجاح",
+  "editSponsor": "تعديل الجهة الراعية",
+  "sponsorUpdated": "تم تحديث الجهة الراعية بنجاح"
 }

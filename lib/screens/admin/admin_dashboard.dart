@@ -206,7 +206,7 @@ class _AdminSidebar extends StatelessWidget {
           // Logout
           Container(height: 1, color: Colors.grey.shade100),
           GestureDetector(
-            onTap: () => AuthService().logoutUser(),
+            onTap: () async => await AuthService().logoutUser(),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               child: isWide
@@ -849,7 +849,7 @@ class _HospitalAdminManagerState extends State<HospitalAdminManager> {
           icon: Icons.admin_panel_settings,
           color: _color,
           title: l10n.manageHospitalAdmins,
-          subtitle: l10n.createAdmin,
+          subtitle: l10n.manageHospitalAdminsSubtitle,
           action: FilledButton.icon(
             style: FilledButton.styleFrom(backgroundColor: _color),
             onPressed: _showCreateDialog,
@@ -880,6 +880,7 @@ class _HospitalAdminManagerState extends State<HospitalAdminManager> {
                   final admin = docs[i];
                   final name = admin['name'] ?? '—';
                   final email = admin['email'] ?? '—';
+                  final hospitalId = admin['hospitalId'] as String?;
                   return Card(
                     margin: const EdgeInsets.only(bottom: 10),
                     elevation: 0,
@@ -900,9 +901,36 @@ class _HospitalAdminManagerState extends State<HospitalAdminManager> {
                       ),
                       title: Text(name,
                           style: const TextStyle(fontWeight: FontWeight.w600)),
-                      subtitle: Text(email,
-                          style: TextStyle(
-                              fontSize: 12, color: Colors.grey[600])),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(email,
+                              style: TextStyle(
+                                  fontSize: 12, color: Colors.grey[600])),
+                          if (hospitalId != null && hospitalId.isNotEmpty)
+                            FutureBuilder<DocumentSnapshot>(
+                              future: FirebaseFirestore.instance
+                                  .collection('hospitals')
+                                  .doc(hospitalId)
+                                  .get(),
+                              builder: (_, snap) {
+                                final hName =
+                                    snap.data?.get('name') as String? ?? '…';
+                                return Row(children: [
+                                  Icon(Icons.local_hospital_outlined,
+                                      size: 11,
+                                      color: _color.withOpacity(0.7)),
+                                  const SizedBox(width: 3),
+                                  Text(hName,
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          color: _color.withOpacity(0.85))),
+                                ]);
+                              },
+                            ),
+                        ],
+                      ),
+                      isThreeLine: hospitalId != null && hospitalId.isNotEmpty,
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -1251,6 +1279,50 @@ class _CityManagerState extends State<CityManager> {
     );
   }
 
+  void _showEditCityDialog(DocumentSnapshot city) {
+    final nameCtrl = TextEditingController(text: city['name'] as String?);
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final l10n = AppLocalizations.of(ctx)!;
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(l10n.editCity),
+          content: TextFormField(
+            controller: nameCtrl,
+            autofocus: true,
+            decoration: InputDecoration(
+                labelText: l10n.cityName,
+                prefixIcon: const Icon(Icons.location_city_outlined)),
+          ),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text(l10n.cancel)),
+            FilledButton(
+              onPressed: () async {
+                final name = nameCtrl.text.trim();
+                if (name.isEmpty) return;
+                await _fs
+                    .collection('cities')
+                    .doc(city.id)
+                    .update({'name': name});
+                if (ctx.mounted) Navigator.pop(ctx);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.cityUpdated)));
+                }
+              },
+              child: Text(l10n.saveChanges),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _deleteCity(String id) async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await _confirmDelete(context, l10n.confirmDeleteBody);
@@ -1312,10 +1384,19 @@ class _CityManagerState extends State<CityManager> {
                       ),
                       title: Text(city['name'],
                           style: const TextStyle(fontWeight: FontWeight.w600)),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline,
-                            color: Colors.red),
-                        onPressed: () => _deleteCity(city.id),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit_outlined, color: _color),
+                            onPressed: () => _showEditCityDialog(city),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline,
+                                color: Colors.red),
+                            onPressed: () => _deleteCity(city.id),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -1491,6 +1572,87 @@ class _SponsorOrgManagerState extends State<SponsorOrgManager> {
     );
   }
 
+  void _showEditSponsorDialog(DocumentSnapshot sponsor) {
+    final nameCtrl =
+        TextEditingController(text: sponsor['name'] as String? ?? '');
+    String? selectedCity = sponsor['city'] as String?;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setS) {
+          final l10n = AppLocalizations.of(ctx)!;
+          return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: Text(l10n.editSponsor),
+            content: SizedBox(
+              width: 360,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    controller: nameCtrl,
+                    decoration: InputDecoration(
+                        labelText: l10n.sponsorOrgName,
+                        prefixIcon: const Icon(Icons.store_outlined)),
+                  ),
+                  const SizedBox(height: 12),
+                  StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('cities')
+                        .orderBy('name')
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const LinearProgressIndicator();
+                      }
+                      final cities = snapshot.data!.docs;
+                      return DropdownButtonFormField<String>(
+                        value: selectedCity,
+                        decoration: InputDecoration(
+                            labelText: l10n.city,
+                            prefixIcon:
+                                const Icon(Icons.location_city_outlined)),
+                        items: cities
+                            .map((c) => DropdownMenuItem(
+                                value: c['name'] as String,
+                                child: Text(c['name'])))
+                            .toList(),
+                        onChanged: (v) => setS(() => selectedCity = v),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(l10n.cancel)),
+              FilledButton(
+                onPressed: () async {
+                  final name = nameCtrl.text.trim();
+                  if (name.isEmpty) return;
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(sponsor.id)
+                      .update({'name': name, 'city': selectedCity});
+                  if (ctx.mounted) Navigator.pop(ctx);
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.sponsorUpdated)));
+                  }
+                },
+                child: Text(l10n.saveChanges),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
   Future<void> _deleteSponsor(String uid) async {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await _confirmDelete(context, l10n.confirmDeleteBody);
@@ -1569,10 +1731,19 @@ class _SponsorOrgManagerState extends State<SponsorOrgManager> {
                         Text(city,
                             style: const TextStyle(fontSize: 12)),
                       ]),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete_outline,
-                            color: Colors.red),
-                        onPressed: () => _deleteSponsor(sponsor.id),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.edit_outlined, color: _color),
+                            onPressed: () => _showEditSponsorDialog(sponsor),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline,
+                                color: Colors.red),
+                            onPressed: () => _deleteSponsor(sponsor.id),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -1625,11 +1796,12 @@ class _DonorManagerState extends State<_DonorManager> {
     }
   }
 
-  String _tierLabel(int pts) {
-    if (pts >= 2000) return 'Platinum';
-    if (pts >= 1000) return 'Gold';
-    if (pts >= 500) return 'Silver';
-    return 'Bronze';
+  String _tierLabel(BuildContext context, int pts) {
+    final l10n = AppLocalizations.of(context)!;
+    if (pts >= 2000) return l10n.tierPlatinum;
+    if (pts >= 1000) return l10n.tierGold;
+    if (pts >= 500) return l10n.tierSilver;
+    return l10n.tierBronze;
   }
 
   Color _tierColor(int pts) {
@@ -1805,7 +1977,7 @@ class _DonorManagerState extends State<_DonorManager> {
                   final city = donor['city'] ?? '—';
                   final bg = donor['bloodGroup'] ?? '?';
                   final pts = (donor['points'] ?? 0) as int;
-                  final tier = _tierLabel(pts);
+                  final tier = _tierLabel(context, pts);
                   final tierColor = _tierColor(pts);
 
                   return Card(
@@ -1984,11 +2156,17 @@ class _BloodRequestsAdminState extends State<_BloodRequestsAdmin> {
                     .collection('blood_requests')
                     .orderBy('createdAt', descending: true)
                     .snapshots()
-                : FirebaseFirestore.instance
-                    .collection('blood_requests')
-                    .where('status', isEqualTo: _filterStatus)
-                    .orderBy('createdAt', descending: true)
-                    .snapshots(),
+                : _filterStatus == 'done'
+                    ? FirebaseFirestore.instance
+                        .collection('blood_requests')
+                        .where('status', whereIn: ['done', 'completed'])
+                        .orderBy('createdAt', descending: true)
+                        .snapshots()
+                    : FirebaseFirestore.instance
+                        .collection('blood_requests')
+                        .where('status', isEqualTo: _filterStatus)
+                        .orderBy('createdAt', descending: true)
+                        .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
