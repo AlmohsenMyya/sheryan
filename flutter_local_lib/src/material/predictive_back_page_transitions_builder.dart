@@ -1,0 +1,1 @@
+/nix/store/sj7jiq922n1f5naklgb8bny74qrf1sa3-flutter-3.32.0-unwrapped/packages/flutter/lib/src/material/predictive_back_page_transitions_builder.dart

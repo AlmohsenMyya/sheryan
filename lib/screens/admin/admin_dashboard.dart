@@ -206,7 +206,7 @@ class _AdminSidebar extends StatelessWidget {
           // Logout
           Container(height: 1, color: Colors.grey.shade100),
           GestureDetector(
-            onTap: () => AuthService().signOut(),
+            onTap: () => AuthService().logoutUser(),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               child: isWide

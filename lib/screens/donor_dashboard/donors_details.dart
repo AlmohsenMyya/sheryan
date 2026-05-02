@@ -188,7 +188,6 @@ class _DonorDetailsState extends State<DonorDetails> {
                       ],
                     ),
                   ),
-                ),
     );
   }
 

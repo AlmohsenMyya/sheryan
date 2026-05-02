@@ -230,7 +230,6 @@ class _DonorDetailScreenState extends State<DonorDetailScreen> {
                       ],
                     ),
                   ),
-                ),
     );
   }
 
