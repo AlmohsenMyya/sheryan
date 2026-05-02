@@ -2629,6 +2629,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No announcements sent yet'**
   String get noAnnouncementsYet;
+
+  /// No description provided for @manageHospitalAdminsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign admins to hospitals'**
+  String get manageHospitalAdminsSubtitle;
+
+  /// No description provided for @assignedHospital.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital'**
+  String get assignedHospital;
+
+  /// No description provided for @editCity.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit City'**
+  String get editCity;
+
+  /// No description provided for @cityUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'City updated successfully'**
+  String get cityUpdated;
+
+  /// No description provided for @editSponsor.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Sponsor'**
+  String get editSponsor;
+
+  /// No description provided for @sponsorUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Sponsor updated successfully'**
+  String get sponsorUpdated;
 }
 
 class _AppLocalizationsDelegate

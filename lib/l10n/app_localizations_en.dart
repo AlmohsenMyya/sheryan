@@ -1366,4 +1366,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noAnnouncementsYet => 'No announcements sent yet';
+
+  @override
+  String get manageHospitalAdminsSubtitle => 'Assign admins to hospitals';
+
+  @override
+  String get assignedHospital => 'Hospital';
+
+  @override
+  String get editCity => 'Edit City';
+
+  @override
+  String get cityUpdated => 'City updated successfully';
+
+  @override
+  String get editSponsor => 'Edit Sponsor';
+
+  @override
+  String get sponsorUpdated => 'Sponsor updated successfully';
 }

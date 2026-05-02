@@ -592,5 +592,11 @@
   "requestDeletedSuccess": "تم حذف الطلب بنجاح",
   "allStatuses": "كل الحالات",
   "announcementHistory": "الإشعارات المرسلة",
-  "noAnnouncementsYet": "لا توجد إشعارات مرسلة بعد"
+  "noAnnouncementsYet": "لا توجد إشعارات مرسلة بعد",
+  "manageHospitalAdminsSubtitle": "تعيين المسؤولين للمستشفيات",
+  "assignedHospital": "المستشفى",
+  "editCity": "تعديل المدينة",
+  "cityUpdated": "تم تحديث المدينة بنجاح",
+  "editSponsor": "تعديل الجهة الراعية",
+  "sponsorUpdated": "تم تحديث الجهة الراعية بنجاح"
 }

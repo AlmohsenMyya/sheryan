@@ -561,5 +561,11 @@
   "requestDeletedSuccess": "Request deleted successfully",
   "allStatuses": "All Statuses",
   "announcementHistory": "Sent Announcements",
-  "noAnnouncementsYet": "No announcements sent yet"
+  "noAnnouncementsYet": "No announcements sent yet",
+  "manageHospitalAdminsSubtitle": "Assign admins to hospitals",
+  "assignedHospital": "Hospital",
+  "editCity": "Edit City",
+  "cityUpdated": "City updated successfully",
+  "editSponsor": "Edit Sponsor",
+  "sponsorUpdated": "Sponsor updated successfully"
 }

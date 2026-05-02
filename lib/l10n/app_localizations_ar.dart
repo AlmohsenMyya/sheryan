@@ -1356,4 +1356,22 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noAnnouncementsYet => 'لا توجد إشعارات مرسلة بعد';
+
+  @override
+  String get manageHospitalAdminsSubtitle => 'تعيين المسؤولين للمستشفيات';
+
+  @override
+  String get assignedHospital => 'المستشفى';
+
+  @override
+  String get editCity => 'تعديل المدينة';
+
+  @override
+  String get cityUpdated => 'تم تحديث المدينة بنجاح';
+
+  @override
+  String get editSponsor => 'تعديل الجهة الراعية';
+
+  @override
+  String get sponsorUpdated => 'تم تحديث الجهة الراعية بنجاح';
 }
