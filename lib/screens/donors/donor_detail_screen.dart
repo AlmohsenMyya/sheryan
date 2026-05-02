@@ -16,20 +16,14 @@ class DonorDetailScreen extends StatefulWidget {
   State<DonorDetailScreen> createState() => _DonorDetailScreenState();
 }
 
-class _DonorDetailScreenState extends State<DonorDetailScreen>
-    with SingleTickerProviderStateMixin {
+class _DonorDetailScreenState extends State<DonorDetailScreen> {
   Map<String, dynamic>? donor;
   Map<String, dynamic>? currentUserData;
   bool loading = true;
-  late AnimationController _controller;
-  late Animation<double> _fadeIn;
 
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 1));
-    _fadeIn = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _fetchData();
   }
 
@@ -56,7 +50,6 @@ class _DonorDetailScreenState extends State<DonorDetailScreen>
       debugPrint('Error fetching data: $e');
     }
     setState(() => loading = false);
-    _controller.forward();
   }
 
   bool get isAvailable {
@@ -89,12 +82,6 @@ class _DonorDetailScreenState extends State<DonorDetailScreen>
   }
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
@@ -113,9 +100,7 @@ class _DonorDetailScreenState extends State<DonorDetailScreen>
                     style: theme.textTheme.bodyMedium,
                   ),
                 )
-              : FadeTransition(
-                  opacity: _fadeIn,
-                  child: SingleChildScrollView(
+              : SingleChildScrollView(
                     padding: AppDesignConstants.edgeInsetsMedium,
                     child: Column(
                       children: [
@@ -245,7 +230,6 @@ class _DonorDetailScreenState extends State<DonorDetailScreen>
                       ],
                     ),
                   ),
-                ),
     );
   }
 

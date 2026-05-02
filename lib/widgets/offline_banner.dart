@@ -10,8 +10,7 @@ class OfflineBanner extends ConsumerStatefulWidget {
   ConsumerState<OfflineBanner> createState() => _OfflineBannerState();
 }
 
-class _OfflineBannerState extends ConsumerState<OfflineBanner>
-    with SingleTickerProviderStateMixin {
+class _OfflineBannerState extends ConsumerState<OfflineBanner> {
   bool _prevOnline = true;
   bool _showBackOnline = false;
 
@@ -31,8 +30,7 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner>
     if (isOnline && !_showBackOnline) return const SizedBox.shrink();
 
     if (_showBackOnline && isOnline) {
-      return AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+      return Container(
         width: double.infinity,
         color: Colors.green.shade700,
         padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 16),
@@ -53,8 +51,7 @@ class _OfflineBannerState extends ConsumerState<OfflineBanner>
       );
     }
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
+    return Container(
       width: double.infinity,
       color: Colors.orange.shade800,
       padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 16),

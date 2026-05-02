@@ -1282,4 +1282,88 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allCities => 'All Cities';
+
+  @override
+  String get superAdminLabel => 'Super Admin';
+
+  @override
+  String get adminOverview => 'Overview';
+
+  @override
+  String get totalDonors => 'Total Donors';
+
+  @override
+  String get totalHospitals => 'Hospitals';
+
+  @override
+  String get openRequests => 'Open Requests';
+
+  @override
+  String get totalDonations => 'Donations';
+
+  @override
+  String get manageDonors => 'Donors';
+
+  @override
+  String get allBloodRequests => 'Blood Requests';
+
+  @override
+  String get broadcastNotif => 'Broadcast';
+
+  @override
+  String get donorDeleted => 'Donor deleted successfully';
+
+  @override
+  String get confirmDeleteBody => 'This action cannot be undone. Are you sure?';
+
+  @override
+  String get notifTitleField => 'Notification Title';
+
+  @override
+  String get notifBodyField => 'Notification Message';
+
+  @override
+  String get targetAudience => 'Target Audience';
+
+  @override
+  String get targetAll => 'All Users';
+
+  @override
+  String get targetByCity => 'Specific City';
+
+  @override
+  String get targetByBloodGroup => 'Specific Blood Group';
+
+  @override
+  String get sendNotif => 'Send Notification';
+
+  @override
+  String get notifSent => 'Notification sent successfully';
+
+  @override
+  String get filterByBloodGroup => 'Filter by Blood Group';
+
+  @override
+  String get allBloodGroups => 'All Blood Groups';
+
+  @override
+  String get searchDonors => 'Search donors...';
+
+  @override
+  String get editHospital => 'Edit Hospital';
+
+  @override
+  String get hospitalUpdated => 'Hospital updated successfully';
+
+  @override
+  String get requestDeletedSuccess => 'Request deleted successfully';
+
+  @override
+  String get allStatuses => 'All Statuses';
+
+  @override
+  String get announcementHistory => 'Sent Announcements';
+
+  @override
+  String get noAnnouncementsYet => 'No announcements sent yet';
 }

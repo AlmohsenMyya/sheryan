@@ -37,6 +37,16 @@ bash run.sh
 - `shared_preferences` uses `^2.3.0` for Dart 3.8.0 compatibility
 - Fixed `BottomAppBarThemeData` → `BottomAppBarTheme` for Flutter 3.32 API
 
+## Critical Build Fix (Flutter 3.32 NixOS dart2js Bug)
+Flutter 3.32 on NixOS has a dart2js CFE (LateLowering) crash when compiling `@protected late final AnimationController controller` in `implicit_animations.dart`. The `LateLowering` pass tries to copy the `@protected` annotation to the synthesized backing field but crashes because `meta` constants are not evaluatable in this context.
+
+**Fix applied:**
+1. `flutter_local_lib/` — local writable copy of `packages/flutter/lib/` with `@protected` removed from `late final AnimationController controller` in `src/widgets/implicit_animations.dart`
+2. `flutter_local/lib` — symlink pointing to `flutter_local_lib/`
+3. `run.sh` — patches `.dart_tool/package_config.json` after `flutter pub get` to redirect only the `flutter` package to the local copy (using exact `packages/flutter"` match to avoid affecting `flutter_localizations`, `flutter_web_plugins`, etc.)
+
+**Build command used in run.sh:** `flutter build web --release --no-pub`
+
 ## Roles
 - `donor` — main blood donor experience with profile, points, rewards
 - `recipient` (or `user`) — request blood, view donors

@@ -14,19 +14,13 @@ class DonorDetails extends StatefulWidget {
   State<DonorDetails> createState() => _DonorDetailsState();
 }
 
-class _DonorDetailsState extends State<DonorDetails>
-    with SingleTickerProviderStateMixin {
+class _DonorDetailsState extends State<DonorDetails> {
   Map<String, dynamic>? donor;
   bool loading = true;
-  late AnimationController _controller;
-  late Animation<double> _fadeIn;
 
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 1));
-    _fadeIn = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _fetchDonor();
   }
 
@@ -43,7 +37,6 @@ class _DonorDetailsState extends State<DonorDetails>
       debugPrint('Error fetching donor: $e');
     }
     setState(() => loading = false);
-    _controller.forward();
   }
 
   bool get isAvailable {
@@ -77,12 +70,6 @@ class _DonorDetailsState extends State<DonorDetails>
 
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
@@ -101,9 +88,7 @@ class _DonorDetailsState extends State<DonorDetails>
                     style: theme.textTheme.bodyMedium,
                   ),
                 )
-              : FadeTransition(
-                  opacity: _fadeIn,
-                  child: SingleChildScrollView(
+              : SingleChildScrollView(
                     padding: AppDesignConstants.edgeInsetsMedium,
                     child: Column(
                       children: [
@@ -203,7 +188,6 @@ class _DonorDetailsState extends State<DonorDetails>
                       ],
                     ),
                   ),
-                ),
     );
   }
 

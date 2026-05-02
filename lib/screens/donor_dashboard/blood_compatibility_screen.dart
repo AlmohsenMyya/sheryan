@@ -12,22 +12,7 @@ class BloodCompatibilityScreen extends StatefulWidget {
       _BloodCompatibilityScreenState();
 }
 
-class _BloodCompatibilityScreenState extends State<BloodCompatibilityScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+class _BloodCompatibilityScreenState extends State<BloodCompatibilityScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -35,11 +20,12 @@ class _BloodCompatibilityScreenState extends State<BloodCompatibilityScreen>
     final canDonateTo = BloodLogic.getCompatibleRecipients(bg);
     final canReceiveFrom = BloodLogic.getCompatibleDonors(bg);
 
-    return Scaffold(
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
       appBar: AppBar(
         title: Text(l10n.bloodCompatibilityTitle),
         bottom: TabBar(
-          controller: _tabController,
           indicatorColor: AppColors.primaryRed,
           labelColor: AppColors.primaryRed,
           unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
@@ -54,7 +40,6 @@ class _BloodCompatibilityScreenState extends State<BloodCompatibilityScreen>
           _buildDonorBadge(bg, l10n),
           Expanded(
             child: TabBarView(
-              controller: _tabController,
               children: [
                 _buildCompatGrid(
                   context: context,
@@ -80,6 +65,7 @@ class _BloodCompatibilityScreenState extends State<BloodCompatibilityScreen>
           _buildCompatibilityTable(bg, canDonateTo, canReceiveFrom, l10n),
         ],
       ),
+    ),
     );
   }
 
@@ -238,8 +224,7 @@ class _BloodCompatibilityScreenState extends State<BloodCompatibilityScreen>
         final isMatch = compatible.contains(type);
         final isSelf = type == widget.donorBloodGroup;
 
-        return AnimatedContainer(
-          duration: Duration(milliseconds: 200 + i * 30),
+        return Container(
           decoration: BoxDecoration(
             color: isMatch
                 ? color.withOpacity(0.15)

@@ -8,7 +8,6 @@ FCM_PRIVATE_KEY_ID="${FCM_PRIVATE_KEY_ID:-79d0154416c328a467722005838eba0b53141c
 FCM_CLIENT_EMAIL="${FCM_CLIENT_EMAIL:-firebase-adminsdk-fbsvc@blood-f5990.iam.gserviceaccount.com}"
 FCM_CLIENT_ID="${FCM_CLIENT_ID:-101530494291222997393}"
 
-# Use the env var if set, otherwise use the default key (already public in GitHub repo)
 if [ -z "$FCM_PRIVATE_KEY" ]; then
   FCM_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----
 MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDAgd6TWHtUN3hO
@@ -50,8 +49,18 @@ fi
 
 echo "Generated .env successfully"
 
-echo "Building Flutter web app..."
-flutter build web --release
+# ── Patch package_config.json to use local patched flutter lib ──────────────
+FLUTTER_NIX_QUOTED='file:///nix/store/i07crp4mg1rimd97s1byrq4gasg7dsk5-flutter-wrapped-3.32.0-sdk-links/packages/flutter"'
+FLUTTER_LOCAL_QUOTED='file:///home/runner/workspace/flutter_local"'
+PKG_CFG=".dart_tool/package_config.json"
 
-echo "Serving Flutter web app on port 5000 (with /__mockup proxy to :23636)..."
+if [ -f "$PKG_CFG" ]; then
+  sed -i "s|$FLUTTER_NIX_QUOTED|$FLUTTER_LOCAL_QUOTED|g" "$PKG_CFG"
+  echo "Patched package_config.json → flutter → local copy"
+fi
+
+echo "Building Flutter web app..."
+flutter build web --release --no-pub 2>&1 | tail -30
+
+echo "Starting proxy server on port 5000..."
 node proxy-server.js

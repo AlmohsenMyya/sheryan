@@ -17,28 +17,18 @@ class RewardsScreen extends ConsumerStatefulWidget {
   ConsumerState<RewardsScreen> createState() => _RewardsScreenState();
 }
 
-class _RewardsScreenState extends ConsumerState<RewardsScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabs;
+class _RewardsScreenState extends ConsumerState<RewardsScreen> {
   String _selectedCity = '';
 
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 2, vsync: this);
-
     ref.listenManual(userProfileProvider, (_, next) {
       final city = next.asData?.value?['city'] as String?;
       if (city != null && _selectedCity.isEmpty) {
         setState(() => _selectedCity = city);
       }
     }, fireImmediately: true);
-  }
-
-  @override
-  void dispose() {
-    _tabs.dispose();
-    super.dispose();
   }
 
   String _tierLabel(String tier, AppLocalizations l10n) {
@@ -93,11 +83,12 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen>
     final points = pointsData['points'] as int;
     final tier = pointsData['tier'] as String;
 
-    return Scaffold(
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
       appBar: AppBar(
         title: Text(l10n.myPoints),
         bottom: TabBar(
-          controller: _tabs,
           indicatorColor: AppColors.primaryRed,
           tabs: [
             Tab(text: l10n.availableRewards, icon: const Icon(Icons.card_giftcard)),
@@ -110,7 +101,6 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen>
           _buildPointsHeader(context, points, tier, uid, userName, l10n, theme),
           Expanded(
             child: TabBarView(
-              controller: _tabs,
               children: [
                 _buildRewardsTab(context, points, l10n, theme),
                 _buildHistoryTab(context, l10n, theme),
@@ -119,6 +109,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen>
           ),
         ],
       ),
+    ),
     );
   }
 
