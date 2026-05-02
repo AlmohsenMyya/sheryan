@@ -53,3 +53,9 @@ id = "RCEYol5SBVdI9vMCmfCMC"
 uri = "file://docs/hospital_admin_phase1_implementation.md"
 type = "text"
 title = "Hospital Admin Phase 1 — Implementation Docs"
+
+[[outputs]]
+id = "jFA6jWITU_HagDfKL1KhZ"
+uri = "file://docs/sheryan_complete_project_documentation.md"
+type = "text"
+title = "شريان — Complete Project Documentation"
