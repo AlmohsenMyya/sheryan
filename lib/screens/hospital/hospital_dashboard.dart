@@ -1,6 +1,8 @@
 import 'package:sheryan/events/app_event.dart';
 import 'package:sheryan/events/notification_engine.dart';
-import 'package:sheryan/services/points_service.dart';
+import 'package:sheryan/services/donation_service.dart';
+import 'package:sheryan/services/request_service.dart';
+import 'package:sheryan/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -105,15 +107,10 @@ class _StatsBar extends StatelessWidget {
   final String hospitalId;
   const _StatsBar({required this.hospitalId});
 
-  Stream<int> _count(Query q) => q.snapshots().map((s) => s.docs.length);
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final fs = FirebaseFirestore.instance;
-    final base = fs
-        .collection('blood_requests')
-        .where('hospitalId', isEqualTo: hospitalId);
+    final svc = RequestService();
 
     return Container(
       color: Theme.of(context).colorScheme.surface,
@@ -124,26 +121,25 @@ class _StatsBar extends StatelessWidget {
             icon: Icons.assignment_outlined,
             color: const Color(0xFF1565C0),
             label: l10n.totalRequests,
-            stream: _count(base),
+            stream: svc.watchHospitalTotal(hospitalId),
           ),
           _HospitalStatCard(
             icon: Icons.pending_actions_outlined,
             color: Colors.orange,
             label: l10n.openRequests,
-            stream: _count(base.where('status', isEqualTo: 'pending')),
+            stream: svc.watchHospitalOpen(hospitalId),
           ),
           _HospitalStatCard(
             icon: Icons.verified_outlined,
             color: Colors.blue,
             label: l10n.verifiedLabel,
-            stream: _count(base.where('isVerified', isEqualTo: true)),
+            stream: svc.watchHospitalVerified(hospitalId),
           ),
           _HospitalStatCard(
             icon: Icons.check_circle_outline,
             color: AppColors.success,
             label: l10n.fulfilledLabel,
-            stream: _count(
-                base.where('status', whereIn: ['done', 'completed'])),
+            stream: svc.watchHospitalFulfilled(hospitalId),
           ),
         ],
       ),
@@ -266,17 +262,13 @@ class _RequestsTab extends StatelessWidget {
         const SizedBox(height: 8),
         Container(height: 1, color: Colors.grey.shade200),
         Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('blood_requests')
-                .where('hospitalId', isEqualTo: hospitalId)
-                .orderBy('createdAt', descending: true)
-                .snapshots(),
+          child: StreamBuilder<List<Map<String, dynamic>>>(
+            stream: RequestService().watchByHospital(hospitalId),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final docs = snapshot.data!.docs;
+              final docs = snapshot.data!;
               if (docs.isEmpty) {
                 return Center(
                   child: Column(
@@ -296,7 +288,7 @@ class _RequestsTab extends StatelessWidget {
                 padding: const EdgeInsets.all(12),
                 itemCount: docs.length,
                 itemBuilder: (context, i) {
-                  final data = docs[i].data() as Map<String, dynamic>;
+                  final data = docs[i];
                   final isDone = data['status'] == 'done' ||
                       data['status'] == 'completed';
                   final isVerified =
@@ -360,7 +352,7 @@ class _ActionBtn extends StatelessWidget {
 // ─── Request Card ─────────────────────────────────────────────────────────────
 
 class _RequestCard extends StatelessWidget {
-  final DocumentSnapshot doc;
+  final Map<String, dynamic> doc;
   final bool isDone;
   final bool isVerified;
   final bool isUrgent;
@@ -381,7 +373,7 @@ class _RequestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final data = doc.data() as Map<String, dynamic>;
+    final data = doc;
     final patientName = data['patientName'] ?? '—';
     final bloodGroup = data['bloodGroup'] ?? '?';
     final units = data['units']?.toString() ?? '1';
@@ -522,7 +514,7 @@ class _RequestCard extends StatelessWidget {
 // ─── Request Detail Sheet ─────────────────────────────────────────────────────
 
 class _RequestDetailSheet extends ConsumerStatefulWidget {
-  final DocumentSnapshot doc;
+  final Map<String, dynamic> doc;
   final bool isDone;
   final bool isVerified;
   final String hospitalName;
@@ -551,12 +543,13 @@ class _RequestDetailSheetState
     final l10n = AppLocalizations.of(context)!;
     setState(() => _loading = true);
     try {
-      final data = widget.doc.data() as Map<String, dynamic>;
-      await widget.doc.reference.update({'isVerified': true});
+      final data = widget.doc;
+      final requestId = data['id'] as String;
+      await RequestService().markVerified(requestId);
 
       final requesterId = data['userId'] as String?;
       NotificationEngine().dispatch(BloodRequestVerifiedEvent(
-        requestId: widget.doc.id,
+        requestId: requestId,
         requesterId: requesterId,
         city: data['city'] ?? '',
         bloodGroup: data['bloodGroup'] ?? '',
@@ -595,7 +588,7 @@ class _RequestDetailSheetState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final data = widget.doc.data() as Map<String, dynamic>;
+    final data = widget.doc;
 
     final patientName = data['patientName'] ?? '—';
     final bloodGroup = data['bloodGroup'] ?? '?';
@@ -861,7 +854,7 @@ class _StatusChip extends StatelessWidget {
 // ─── Manual Fulfill Dialog ────────────────────────────────────────────────────
 
 class _ManualFulfillDialog extends StatefulWidget {
-  final DocumentSnapshot requestDoc;
+  final Map<String, dynamic> requestDoc;
   final String hospitalName;
   final String adminUid;
   final String hospitalId;
@@ -898,13 +891,9 @@ class _ManualFulfillDialogState extends State<_ManualFulfillDialog> {
     if (uid.isEmpty) return;
     setState(() => _loading = true);
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .get();
-      if (!doc.exists) throw Exception(l10n.donorNotFound);
-      setState(
-          () => _donorName = doc.data()?['name'] as String? ?? uid);
+      final doc = await UserService().getById(uid);
+      if (doc == null) throw Exception(l10n.donorNotFound);
+      setState(() => _donorName = doc['name'] as String? ?? uid);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -946,50 +935,18 @@ class _ManualFulfillDialogState extends State<_ManualFulfillDialog> {
     setState(() => _loading = true);
     try {
       final donorId = _donorIdCtrl.text.trim();
-      final requestId = widget.requestDoc.id;
-      final requestData =
-          widget.requestDoc.data() as Map<String, dynamic>;
+      final requestId = widget.requestDoc['id'] as String;
 
-      final batch = FirebaseFirestore.instance.batch();
-
-      batch.update(widget.requestDoc.reference, {'status': 'done'});
-
-      final donorRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(donorId);
-      batch.update(donorRef,
-          {'lastDonated': DateTime.now().toIso8601String()});
-
-      final donationRef =
-          FirebaseFirestore.instance.collection('donations').doc();
-      batch.set(donationRef, {
-        'donorId': donorId,
-        'requestId': requestId,
-        'hospitalId': widget.hospitalId,
-        'hospitalName': widget.hospitalName,
-        'timestamp': FieldValue.serverTimestamp(),
-        'verifiedBy': widget.adminUid,
-        'manualOverride': true,
-      });
-
-      await batch.commit();
-
-      final donorDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(donorId)
-          .get();
-      final donorBloodGroup =
-          donorDoc.data()?['bloodGroup'] as String? ?? '';
-      final isUrgent = requestData['isUrgent'] == true;
-
-      await PointsService().awardDonationPoints(
-        donorId,
-        widget.hospitalName,
-        isEmergency: isUrgent,
-        donorBloodGroup: donorBloodGroup,
+      final result = await DonationService().registerDonation(
+        donorId: donorId,
+        requestId: requestId,
+        hospitalId: widget.hospitalId,
+        hospitalName: widget.hospitalName,
+        adminUid: widget.adminUid,
+        manualOverride: true,
       );
 
-      final recipientUid = requestData['userId'] as String?;
+      final recipientUid = result.requestData?['userId'] as String?;
       NotificationEngine().dispatch(DonationRegisteredEvent(
         donorId: donorId,
         requestId: requestId,
@@ -1127,17 +1084,13 @@ class _DonationHistoryTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('donations')
-          .where('hospitalId', isEqualTo: hospitalId)
-          .orderBy('timestamp', descending: true)
-          .snapshots(),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: DonationService().watchByHospital(hospitalId),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
-        final docs = snapshot.data!.docs;
+        final docs = snapshot.data!;
         if (docs.isEmpty) {
           return Center(
             child: Column(
@@ -1157,7 +1110,7 @@ class _DonationHistoryTab extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           itemCount: docs.length,
           itemBuilder: (context, i) {
-            final data = docs[i].data() as Map<String, dynamic>;
+            final data = docs[i];
             final donorId = data['donorId'] as String?;
             final requestId = data['requestId'] as String?;
             final ts = data['timestamp'] as Timestamp?;
@@ -1194,22 +1147,16 @@ class _DonationHistoryTab extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (donorId != null)
-                            FutureBuilder<DocumentSnapshot>(
-                              future: FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(donorId)
-                                  .get(),
+                            FutureBuilder<Map<String, dynamic>?>(
+                              future: UserService().getById(donorId),
                               builder: (_, snap) {
-                                final name = snap.data
-                                        ?.get('name') as String? ??
+                                final name = snap.data?['name'] as String? ??
                                     (snap.connectionState ==
                                             ConnectionState.done
                                         ? donorId
                                         : '…');
-                                final bg = snap.data
-                                        ?.get('bloodGroup')
-                                    as String? ??
-                                    '';
+                                final bg =
+                                    snap.data?['bloodGroup'] as String? ?? '';
                                 return Row(children: [
                                   Expanded(
                                     child: Text(name,
@@ -1238,16 +1185,11 @@ class _DonationHistoryTab extends StatelessWidget {
                               },
                             ),
                           if (requestId != null)
-                            FutureBuilder<DocumentSnapshot>(
-                              future: FirebaseFirestore.instance
-                                  .collection('blood_requests')
-                                  .doc(requestId)
-                                  .get(),
+                            FutureBuilder<Map<String, dynamic>?>(
+                              future: RequestService().getById(requestId),
                               builder: (_, snap) {
-                                final patient = snap.data
-                                        ?.get('patientName')
-                                    as String? ??
-                                    '';
+                                final patient =
+                                    snap.data?['patientName'] as String? ?? '';
                                 if (patient.isEmpty) {
                                   return const SizedBox.shrink();
                                 }
@@ -1352,19 +1294,15 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     final myHospitalId = adminProfile?['hospitalId'];
 
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('blood_requests')
-          .doc(id)
-          .get();
-      if (!doc.exists) throw Exception(l10n.invalidQr);
+      final requestData = await RequestService().getById(id);
+      if (requestData == null) throw Exception(l10n.invalidQr);
 
-      if (doc.data()?['hospitalId'] != myHospitalId) {
+      if (requestData['hospitalId'] != myHospitalId) {
         throw Exception(l10n.invalidHospital);
       }
 
-      await doc.reference.update({'isVerified': true});
+      await RequestService().markVerified(id);
 
-      final requestData = doc.data() as Map<String, dynamic>;
       final requesterId = requestData['userId'] as String?;
       NotificationEngine().dispatch(BloodRequestVerifiedEvent(
         requestId: id,
@@ -1386,19 +1324,16 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
   Future<void> _handleDonorScan(String id) async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(id)
-          .get();
-      if (!doc.exists) throw Exception(l10n.invalidQr);
+      final doc = await UserService().getById(id);
+      if (doc == null) throw Exception(l10n.invalidQr);
 
       setState(() {
         donorId = id;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(l10n
-                .donorDetected(doc.data()?['name'] ?? l10n.unknown))),
+            content:
+                Text(l10n.donorDetected(doc['name'] ?? l10n.unknown))),
       );
     } catch (e) {
       _showError(e.toString());
@@ -1411,13 +1346,10 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     final myHospitalId = adminProfile?['hospitalId'];
 
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('blood_requests')
-          .doc(id)
-          .get();
-      if (!doc.exists) throw Exception(l10n.invalidQr);
+      final requestData = await RequestService().getById(id);
+      if (requestData == null) throw Exception(l10n.invalidQr);
 
-      if (doc.data()?['hospitalId'] != myHospitalId) {
+      if (requestData['hospitalId'] != myHospitalId) {
         throw Exception(l10n.invalidHospital);
       }
 
@@ -1454,59 +1386,20 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     final adminProfile = ref.read(userProfileProvider).value;
 
     try {
-      final batch = FirebaseFirestore.instance.batch();
-
-      final requestRef = FirebaseFirestore.instance
-          .collection('blood_requests')
-          .doc(requestId);
-      batch.update(requestRef, {'status': 'done'});
-
-      final donorRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(donorId);
-      batch.update(donorRef,
-          {'lastDonated': DateTime.now().toIso8601String()});
-
-      final donationRef =
-          FirebaseFirestore.instance.collection('donations').doc();
-      batch.set(donationRef, {
-        'donorId': donorId,
-        'requestId': requestId,
-        'hospitalId': adminProfile?['hospitalId'],
-        'hospitalName': adminProfile?['name'],
-        'timestamp': FieldValue.serverTimestamp(),
-        'verifiedBy': adminProfile?['uid'],
-      });
-
-      await batch.commit();
-
-      final donorDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(donorId)
-          .get();
-      final donorBloodGroup =
-          donorDoc.data()?['bloodGroup'] as String? ?? '';
-      final hospitalName = adminProfile?['name'] as String? ?? '';
-
-      final requestDoc = await FirebaseFirestore.instance
-          .collection('blood_requests')
-          .doc(requestId)
-          .get();
-      final recipientUid = requestDoc.data()?['userId'];
-      final isUrgent = requestDoc.data()?['isUrgent'] == true;
-
-      await PointsService().awardDonationPoints(
-        donorId!,
-        hospitalName,
-        isEmergency: isUrgent,
-        donorBloodGroup: donorBloodGroup,
+      final result = await DonationService().registerDonation(
+        donorId: donorId!,
+        requestId: requestId!,
+        hospitalId: adminProfile?['hospitalId'] as String? ?? '',
+        hospitalName: adminProfile?['name'] as String? ?? '',
+        adminUid: adminProfile?['uid'] as String? ?? '',
       );
 
+      final recipientUid = result.requestData?['userId'] as String?;
       if (donorId != null) {
         NotificationEngine().dispatch(DonationRegisteredEvent(
           donorId: donorId!,
           requestId: requestId!,
-          requesterId: recipientUid as String?,
+          requesterId: recipientUid,
         ));
       }
 
@@ -1601,14 +1494,10 @@ class _BloodGroupVerificationScreenState
     setState(() => _isProcessing = true);
 
     try {
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(code)
-          .get();
+      final data = await UserService().getById(code);
 
-      if (!doc.exists) throw Exception('Invalid QR code');
+      if (data == null) throw Exception('Invalid QR code');
 
-      final data = doc.data()!;
       if (data['role'] != 'donor') {
         throw Exception('This QR does not belong to a donor');
       }
@@ -1701,21 +1590,7 @@ class _BloodGroupVerificationScreenState
   Future<void> _verify(Map<String, dynamic> donor) async {
     final l10n = AppLocalizations.of(context)!;
     try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_scannedDonorId)
-          .update({'bloodGroupVerified': true});
-
-      final updatedSnap = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_scannedDonorId)
-          .get();
-      if (updatedSnap.exists) {
-        await PointsService().checkAndAwardProfileMilestones(
-          _scannedDonorId!,
-          updatedSnap.data()!,
-        );
-      }
+      await UserService().markBloodGroupVerified(_scannedDonorId!);
 
       NotificationEngine().dispatch(BloodGroupVerifiedEvent(
         donorId: _scannedDonorId!,
