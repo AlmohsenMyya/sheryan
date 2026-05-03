@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:sheryan/core/theme/app_colors.dart';
 import 'package:sheryan/core/theme/app_design_constants.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
-import 'package:sheryan/services/notification_service.dart';
+import 'package:sheryan/events/app_event.dart';
+import 'package:sheryan/events/notification_engine.dart';
 import 'package:sheryan/services/pending_actions_service.dart';
 import 'package:intl/intl.dart';
 
@@ -148,16 +149,13 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
         'isVerified': false,
       });
 
-      NotificationService().sendToHospitalAdmins(
+      NotificationEngine().dispatch(BloodRequestCreatedEvent(
         hospitalId: _selectedHospitalId!,
-        titleEn: "🩸 New Blood Request",
-        titleAr: "🩸 طلب دم جديد",
-        bodyEn:
-            "New request: ${_patientName.text.trim()} needs $_selectedGroup blood at ${_selectedHospitalName ?? ''}. Please verify.",
-        bodyAr:
-            "طلب جديد: ${_patientName.text.trim()} يحتاج دم فصيلة $_selectedGroup في ${_selectedHospitalName ?? ''}. يرجى التوثيق.",
+        hospitalName: _selectedHospitalName ?? '',
+        patientName: _patientName.text.trim(),
+        bloodGroup: _selectedGroup,
         requestId: docRef.id,
-      );
+      ));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

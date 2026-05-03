@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sheryan/core/theme/app_colors.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
 import 'package:sheryan/services/auth_service.dart';
-import 'package:sheryan/services/notification_service.dart';
+import 'package:sheryan/events/app_event.dart';
+import 'package:sheryan/events/notification_engine.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN DASHBOARD
@@ -2343,17 +2344,17 @@ class _BroadcastNotifState extends State<_BroadcastNotif> {
 
       // Attempt push delivery via NotificationService
       if (_target == 'city' && _targetCity != null) {
-        await NotificationService().sendEmergencyNotification(
+        await NotificationEngine().dispatch(AdminBroadcastEvent(
           city: _targetCity!,
           bloodGroup: _targetBloodGroup ?? '',
-          requestId: 'broadcast_${DateTime.now().millisecondsSinceEpoch}',
-        );
+          broadcastId: 'broadcast_${DateTime.now().millisecondsSinceEpoch}',
+        ));
       } else if (_target == 'bloodGroup' && _targetBloodGroup != null) {
-        await NotificationService().sendEmergencyNotification(
+        await NotificationEngine().dispatch(AdminBroadcastEvent(
           city: '',
           bloodGroup: _targetBloodGroup!,
-          requestId: 'broadcast_${DateTime.now().millisecondsSinceEpoch}',
-        );
+          broadcastId: 'broadcast_${DateTime.now().millisecondsSinceEpoch}',
+        ));
       }
 
       if (mounted) {

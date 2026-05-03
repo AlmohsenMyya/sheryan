@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sheryan/services/notification_service.dart';
+import 'package:sheryan/events/app_event.dart';
+import 'package:sheryan/events/notification_engine.dart';
 
 const _kPendingRequestsKey = 'sheryan_pending_blood_requests';
 
@@ -68,16 +69,13 @@ class PendingActionsService {
           '_syncedFromOffline': true,
         });
 
-        NotificationService().sendToHospitalAdmins(
+        NotificationEngine().dispatch(BloodRequestCreatedEvent(
           hospitalId: data['hospitalId'] ?? '',
-          titleEn: "🩸 New Blood Request",
-          titleAr: "🩸 طلب دم جديد",
-          bodyEn:
-              "New request: ${data['patientName']} needs ${data['bloodGroup']} blood at ${data['hospital'] ?? ''}.",
-          bodyAr:
-              "طلب جديد: ${data['patientName']} يحتاج دم فصيلة ${data['bloodGroup']} في ${data['hospital'] ?? ''}.",
+          hospitalName: data['hospital'] ?? '',
+          patientName: data['patientName'] ?? '',
+          bloodGroup: data['bloodGroup'] ?? '',
           requestId: docRef.id,
-        );
+        ));
 
         synced++;
       } catch (_) {

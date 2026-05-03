@@ -1,5 +1,5 @@
-import 'package:sheryan/services/notification_service.dart';
-import 'package:sheryan/core/models/app_notification.dart';
+import 'package:sheryan/events/app_event.dart';
+import 'package:sheryan/events/notification_engine.dart';
 import 'package:sheryan/services/points_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -555,23 +555,12 @@ class _RequestDetailSheetState
       await widget.doc.reference.update({'isVerified': true});
 
       final requesterId = data['userId'] as String?;
-      if (requesterId != null) {
-        NotificationService().sendDirectNotification(
-          targetUid: requesterId,
-          titleEn: 'Request Verified!',
-          titleAr: 'تم توثيق طلبك!',
-          bodyEn:
-              'Your blood request has been verified and broadcasted to donors. 🏥',
-          bodyAr:
-              'تم توثيق طلب الدم الخاص بك وتعميمه على المتبرعين. 🏥',
-        );
-      }
-
-      NotificationService().sendEmergencyNotification(
+      NotificationEngine().dispatch(BloodRequestVerifiedEvent(
+        requestId: widget.doc.id,
+        requesterId: requesterId,
         city: data['city'] ?? '',
         bloodGroup: data['bloodGroup'] ?? '',
-        requestId: widget.doc.id,
-      );
+      ));
 
       if (mounted) {
         Navigator.pop(context);
@@ -1000,27 +989,12 @@ class _ManualFulfillDialogState extends State<_ManualFulfillDialog> {
         donorBloodGroup: donorBloodGroup,
       );
 
-      NotificationService().sendDirectNotification(
-        targetUid: donorId,
-        titleEn: 'Donation Successful!',
-        titleAr: 'تم التبرع بنجاح!',
-        bodyEn:
-            'Thank you for your generous donation. You saved a life today! 🩸',
-        bodyAr: 'شكراً لعطائك. لقد ساهمت في إنقاذ حياة اليوم! 🩸',
-      );
-
       final recipientUid = requestData['userId'] as String?;
-      if (recipientUid != null) {
-        NotificationService().sendDirectNotification(
-          targetUid: recipientUid,
-          titleEn: 'Request Fulfilled!',
-          titleAr: 'تم تلبية طلبك!',
-          bodyEn:
-              'Good news! A successful donation has been registered for your request.',
-          bodyAr:
-              'بشرى سارة! تم تسجيل عملية تبرع ناجحة لطلبك.',
-        );
-      }
+      NotificationEngine().dispatch(DonationRegisteredEvent(
+        donorId: donorId,
+        requestId: requestId,
+        requesterId: recipientUid,
+      ));
 
       if (mounted) {
         Navigator.pop(context);
@@ -1391,25 +1365,13 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
       await doc.reference.update({'isVerified': true});
 
       final requestData = doc.data() as Map<String, dynamic>;
-      final requesterId = requestData['userId'];
-
-      if (requesterId != null) {
-        NotificationService().sendDirectNotification(
-          targetUid: requesterId,
-          titleEn: 'Request Verified!',
-          titleAr: 'تم توثيق طلبك!',
-          bodyEn:
-              'Your blood request has been verified and broadcasted to donors. 🏥',
-          bodyAr:
-              'تم توثيق طلب الدم الخاص بك وتعميمه على المتبرعين. 🏥',
-        );
-      }
-
-      NotificationService().sendEmergencyNotification(
+      final requesterId = requestData['userId'] as String?;
+      NotificationEngine().dispatch(BloodRequestVerifiedEvent(
+        requestId: id,
+        requesterId: requesterId,
         city: requestData['city'] ?? '',
         bloodGroup: requestData['bloodGroup'] ?? '',
-        requestId: id,
-      );
+      ));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1541,27 +1503,11 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
       );
 
       if (donorId != null) {
-        NotificationService().sendDirectNotification(
-          targetUid: donorId!,
-          titleEn: 'Donation Successful!',
-          titleAr: 'تم التبرع بنجاح!',
-          bodyEn:
-              'Thank you for your generous donation. You saved a life today! 🩸',
-          bodyAr:
-              'شكراً لعطائك. لقد ساهمت في إنقاذ حياة اليوم! 🩸',
-        );
-      }
-
-      if (recipientUid != null) {
-        NotificationService().sendDirectNotification(
-          targetUid: recipientUid,
-          titleEn: 'Request Fulfilled!',
-          titleAr: 'تم تلبية طلبك!',
-          bodyEn:
-              'Good news! A successful donation has been registered for your request.',
-          bodyAr:
-              'بشرى سارة! تم تسجيل عملية تبرع ناجحة لطلبك.',
-        );
+        NotificationEngine().dispatch(DonationRegisteredEvent(
+          donorId: donorId!,
+          requestId: requestId!,
+          requesterId: recipientUid as String?,
+        ));
       }
 
       if (mounted) {
@@ -1771,16 +1717,10 @@ class _BloodGroupVerificationScreenState
         );
       }
 
-      NotificationService().sendDirectNotification(
-        targetUid: _scannedDonorId!,
-        titleEn: 'Blood Group Verified ✅',
-        titleAr: 'تم توثيق زمرة دمك ✅',
-        bodyEn:
-            'Your blood group (${donor['bloodGroup']}) has been medically verified. Your profile completion increased!',
-        bodyAr:
-            'تم توثيق زمرة دمك (${donor['bloodGroup']}) طبياً من قِبل المستشفى. اكتمال ملفك ازداد!',
-        type: NotificationType.verification,
-      );
+      NotificationEngine().dispatch(BloodGroupVerifiedEvent(
+        donorId: _scannedDonorId!,
+        bloodGroup: donor['bloodGroup'] as String? ?? '',
+      ));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,5 +1,6 @@
 import 'package:sheryan/core/utils/qr_dialog.dart';
-import 'package:sheryan/services/notification_service.dart';
+import 'package:sheryan/events/app_event.dart';
+import 'package:sheryan/events/notification_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -68,7 +69,7 @@ class _RequestsScreenState extends State<RequestsListScreen> {
 
     // 2. Notify the matched donor (if donation was registered by hospital)
     //    This runs in the background — doesn't block the UI
-    NotificationService().sendRequestClosedNotification(requestId: docId);
+    NotificationEngine().dispatch(BloodRequestClosedEvent(requestId: docId));
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
