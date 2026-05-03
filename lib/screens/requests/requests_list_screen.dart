@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:sheryan/core/theme/app_colors.dart';
 import 'package:sheryan/core/theme/app_design_constants.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
+import 'package:sheryan/services/request_service.dart';
 import 'package:intl/intl.dart';
 
 class RequestsListScreen extends StatefulWidget {
@@ -17,25 +18,21 @@ class RequestsListScreen extends StatefulWidget {
 }
 
 class _RequestsScreenState extends State<RequestsListScreen> {
-  late final Stream<QuerySnapshot> _requestsStream;
+  late final Stream<List<Map<String, dynamic>>> _requestsStream;
 
   @override
   void initState() {
     super.initState();
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      _requestsStream = FirebaseFirestore.instance
-          .collection('blood_requests')
-          .where('userId', isEqualTo: user.uid)
-          .orderBy('createdAt', descending: true)
-          .snapshots();
+      _requestsStream = RequestService().watchByUser(user.uid);
     } else {
       _requestsStream = const Stream.empty();
     }
   }
 
-  /// Marks the request as done in Firestore, then notifies the matched donor
-  /// (if a donation record exists) that the request has been closed.
+  /// Marks the request as done via [RequestService], then notifies the matched
+  /// donor (if a donation record exists) that the request has been closed.
   Future<void> _markAsDone(String docId, Map<String, dynamic> data) async {
     final l10n = AppLocalizations.of(context)!;
 
@@ -61,14 +58,8 @@ class _RequestsScreenState extends State<RequestsListScreen> {
 
     if (confirm != true) return;
 
-    // 1. Update Firestore status
-    await FirebaseFirestore.instance
-        .collection('blood_requests')
-        .doc(docId)
-        .update({'status': 'done'});
+    await RequestService().markDone(docId);
 
-    // 2. Notify the matched donor (if donation was registered by hospital)
-    //    This runs in the background — doesn't block the UI
     NotificationEngine().dispatch(BloodRequestClosedEvent(requestId: docId));
 
     if (mounted) {
@@ -86,7 +77,7 @@ class _RequestsScreenState extends State<RequestsListScreen> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.myBloodRequests)),
       body: SafeArea(
-        child: StreamBuilder<QuerySnapshot>(
+        child: StreamBuilder<List<Map<String, dynamic>>>(
           stream: _requestsStream,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -97,21 +88,21 @@ class _RequestsScreenState extends State<RequestsListScreen> {
                   child: Text(
                       l10n.genericError(snapshot.error.toString())));
             }
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return Center(
                 child: Text(l10n.noBloodRequestsFound,
                     style: theme.textTheme.bodyMedium),
               );
             }
 
-            final requests = snapshot.data!.docs;
+            final requests = snapshot.data!;
 
             return ListView.builder(
               padding: AppDesignConstants.edgeInsetsMedium,
               itemCount: requests.length,
               itemBuilder: (context, index) {
-                final doc = requests[index];
-                final data = doc.data() as Map<String, dynamic>;
+                final data = requests[index];
+                final docId = data['id'] as String;
                 final isDone = data['status'] == 'done';
                 final isVerified = data['isVerified'] ?? false;
 
@@ -179,7 +170,7 @@ class _RequestsScreenState extends State<RequestsListScreen> {
                               TextButton.icon(
                                 onPressed: () => QrDialog.show(
                                   context,
-                                  data: doc.id,
+                                  data: docId,
                                   label: data['patientName'] ??
                                       l10n.unknownPatient,
                                   idLabel: l10n.requestId,
@@ -193,7 +184,7 @@ class _RequestsScreenState extends State<RequestsListScreen> {
                               const SizedBox(width: 8),
                               ElevatedButton.icon(
                                 onPressed: () =>
-                                    _markAsDone(doc.id, data),
+                                    _markAsDone(docId, data),
                                 icon: const Icon(Icons.check),
                                 label: Text(l10n.markAsDone),
                               ),

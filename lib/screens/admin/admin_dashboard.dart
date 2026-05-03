@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sheryan/core/theme/app_colors.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
+import 'package:sheryan/services/announcement_service.dart';
 import 'package:sheryan/services/auth_service.dart';
+import 'package:sheryan/services/donation_service.dart';
+import 'package:sheryan/services/hospital_service.dart';
+import 'package:sheryan/services/request_service.dart';
+import 'package:sheryan/services/user_service.dart';
 import 'package:sheryan/events/app_event.dart';
 import 'package:sheryan/events/notification_engine.dart';
 
@@ -408,13 +413,9 @@ Future<bool?> _confirmDelete(BuildContext context, String body) {
 class _AdminOverview extends StatelessWidget {
   const _AdminOverview();
 
-  Stream<int> _count(Query q) =>
-      q.snapshots().map((s) => s.docs.length);
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final fs = FirebaseFirestore.instance;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -447,29 +448,27 @@ class _AdminOverview extends StatelessWidget {
                         icon: Icons.people,
                         color: AppColors.primaryRed,
                         label: l10n.totalDonors,
-                        countStream: _count(fs
-                            .collection('users')
-                            .where('role', isEqualTo: 'donor')),
+                        countStream: UserService()
+                            .watchByRole('donor')
+                            .map((l) => l.length),
                       ),
                       _StatCard(
                         icon: Icons.local_hospital,
                         color: const Color(0xFF00838F),
                         label: l10n.totalHospitals,
-                        countStream: _count(fs.collection('hospitals')),
+                        countStream: HospitalService().watchHospitalCount(),
                       ),
                       _StatCard(
                         icon: Icons.bloodtype,
                         color: const Color(0xFF6A1B9A),
                         label: l10n.openRequests,
-                        countStream: _count(fs
-                            .collection('blood_requests')
-                            .where('status', isEqualTo: 'pending')),
+                        countStream: RequestService().watchOpenCount(),
                       ),
                       _StatCard(
                         icon: Icons.favorite,
                         color: const Color(0xFF2E7D32),
                         label: l10n.totalDonations,
-                        countStream: _count(fs.collection('donations')),
+                        countStream: DonationService().watchTotalCount(),
                       ),
                     ],
                   );
@@ -481,17 +480,13 @@ class _AdminOverview extends StatelessWidget {
                         .titleSmall
                         ?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
-                StreamBuilder<QuerySnapshot>(
-                  stream: fs
-                      .collection('announcements')
-                      .orderBy('createdAt', descending: true)
-                      .limit(5)
-                      .snapshots(),
+                StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: AnnouncementService().watchRecent(limit: 5),
                   builder: (context, snap) {
                     if (!snap.hasData) {
                       return const Center(child: CircularProgressIndicator());
                     }
-                    final docs = snap.data!.docs;
+                    final docs = snap.data!;
                     if (docs.isEmpty) {
                       return _EmptyState(
                           icon: Icons.campaign_outlined,
@@ -669,16 +664,13 @@ class _HospitalAdminManagerState extends State<HospitalAdminManager> {
                             (v == null || v.length < 6) ? l10n.passwordMinLength : null,
                       ),
                       const SizedBox(height: 12),
-                      StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection('hospitals')
-                            .orderBy('name')
-                            .snapshots(),
+                      StreamBuilder<List<Map<String, dynamic>>>(
+                        stream: HospitalService().watchHospitals(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
                             return const LinearProgressIndicator();
                           }
-                          final hospitals = snapshot.data!.docs;
+                          final hospitals = snapshot.data!;
                           return DropdownButtonFormField<String>(
                             value: selectedHospitalId,
                             decoration: InputDecoration(
@@ -687,7 +679,8 @@ class _HospitalAdminManagerState extends State<HospitalAdminManager> {
                                     const Icon(Icons.local_hospital_outlined)),
                             items: hospitals
                                 .map((h) => DropdownMenuItem(
-                                    value: h.id, child: Text(h['name'])))
+                                    value: h['id'] as String,
+                                    child: Text(h['name'])))
                                 .toList(),
                             onChanged: (v) =>
                                 setS(() => selectedHospitalId = v),
@@ -754,9 +747,10 @@ class _HospitalAdminManagerState extends State<HospitalAdminManager> {
     );
   }
 
-  void _showEditDialog(DocumentSnapshot admin) {
-    final nameCtrl = TextEditingController(text: admin['name']);
-    String? hospitalId = admin['hospitalId'];
+  void _showEditDialog(Map<String, dynamic> admin) {
+    final nameCtrl =
+        TextEditingController(text: admin['name'] as String? ?? '');
+    String? hospitalId = admin['hospitalId'] as String?;
 
     showDialog(
       context: context,
@@ -777,23 +771,21 @@ class _HospitalAdminManagerState extends State<HospitalAdminManager> {
                         InputDecoration(labelText: l10n.fullName),
                   ),
                   const SizedBox(height: 12),
-                  StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('hospitals')
-                        .orderBy('name')
-                        .snapshots(),
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: HospitalService().watchHospitals(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const LinearProgressIndicator();
                       }
-                      final hospitals = snapshot.data!.docs;
+                      final hospitals = snapshot.data!;
                       return DropdownButtonFormField<String>(
                         value: hospitalId,
                         decoration: InputDecoration(
                             labelText: l10n.hospitalName),
                         items: hospitals
                             .map((h) => DropdownMenuItem(
-                                value: h.id, child: Text(h['name'])))
+                                value: h['id'] as String,
+                                child: Text(h['name'])))
                             .toList(),
                         onChanged: (v) => setS(() => hospitalId = v),
                       );
@@ -808,10 +800,7 @@ class _HospitalAdminManagerState extends State<HospitalAdminManager> {
                   child: Text(l10n.cancel)),
               FilledButton(
                 onPressed: () async {
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(admin.id)
-                      .update({
+                  await UserService().updateFields(admin['id'] as String, {
                     'name': nameCtrl.text.trim(),
                     'hospitalId': hospitalId,
                   });
@@ -834,7 +823,7 @@ class _HospitalAdminManagerState extends State<HospitalAdminManager> {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await _confirmDelete(context, l10n.confirmDeleteBody);
     if (confirmed != true) return;
-    await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+    await UserService().deleteById(uid);
     if (mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.adminDeleted)));
@@ -859,16 +848,13 @@ class _HospitalAdminManagerState extends State<HospitalAdminManager> {
           ),
         ),
         Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('users')
-                .where('role', isEqualTo: 'hospitalAdmin')
-                .snapshots(),
+          child: StreamBuilder<List<Map<String, dynamic>>>(
+            stream: UserService().watchByRole('hospitalAdmin'),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final docs = snapshot.data!.docs;
+              final docs = snapshot.data!;
               if (docs.isEmpty) {
                 return _EmptyState(
                     icon: Icons.admin_panel_settings_outlined,
@@ -909,14 +895,12 @@ class _HospitalAdminManagerState extends State<HospitalAdminManager> {
                               style: TextStyle(
                                   fontSize: 12, color: Colors.grey[600])),
                           if (hospitalId != null && hospitalId.isNotEmpty)
-                            FutureBuilder<DocumentSnapshot>(
-                              future: FirebaseFirestore.instance
-                                  .collection('hospitals')
-                                  .doc(hospitalId)
-                                  .get(),
+                            FutureBuilder<Map<String, dynamic>?>(
+                              future:
+                                  HospitalService().getHospitalById(hospitalId),
                               builder: (_, snap) {
                                 final hName =
-                                    snap.data?.get('name') as String? ?? '…';
+                                    snap.data?['name'] as String? ?? '…';
                                 return Row(children: [
                                   Icon(Icons.local_hospital_outlined,
                                       size: 11,
@@ -942,7 +926,7 @@ class _HospitalAdminManagerState extends State<HospitalAdminManager> {
                           IconButton(
                             icon: const Icon(Icons.delete_outline,
                                 color: Colors.red),
-                            onPressed: () => _deleteAdmin(admin.id),
+                            onPressed: () => _deleteAdmin(admin['id'] as String),
                           ),
                         ],
                       ),
@@ -971,7 +955,6 @@ class HospitalManager extends StatefulWidget {
 
 class _HospitalManagerState extends State<HospitalManager> {
   static const _color = Color(0xFF00838F);
-  final FirebaseFirestore _fs = FirebaseFirestore.instance;
 
   void _showAddDialog() {
     final nameCtrl = TextEditingController();
@@ -997,16 +980,13 @@ class _HospitalManagerState extends State<HospitalManager> {
                         prefixIcon: const Icon(Icons.local_hospital_outlined)),
                   ),
                   const SizedBox(height: 12),
-                  StreamBuilder<QuerySnapshot>(
-                    stream: _fs
-                        .collection('cities')
-                        .orderBy('name')
-                        .snapshots(),
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: HospitalService().watchCities(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const LinearProgressIndicator();
                       }
-                      final cities = snapshot.data!.docs;
+                      final cities = snapshot.data!;
                       return DropdownButtonFormField<String>(
                         value: selectedCity,
                         hint: Text(l10n.selectCity),
@@ -1034,11 +1014,8 @@ class _HospitalManagerState extends State<HospitalManager> {
                 onPressed: () async {
                   final name = nameCtrl.text.trim();
                   if (name.isEmpty || selectedCity == null) return;
-                  await _fs.collection('hospitals').add({
-                    'name': name,
-                    'city': selectedCity,
-                    'createdAt': FieldValue.serverTimestamp(),
-                  });
+                  await HospitalService()
+                      .addHospital(name: name, city: selectedCity!);
                   if (ctx.mounted) Navigator.pop(ctx);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -1054,8 +1031,9 @@ class _HospitalManagerState extends State<HospitalManager> {
     );
   }
 
-  void _showEditDialog(DocumentSnapshot hospital) {
-    final nameCtrl = TextEditingController(text: hospital['name']);
+  void _showEditDialog(Map<String, dynamic> hospital) {
+    final nameCtrl =
+        TextEditingController(text: hospital['name'] as String? ?? '');
     String? selectedCity = hospital['city'] as String?;
 
     showDialog(
@@ -1077,16 +1055,13 @@ class _HospitalManagerState extends State<HospitalManager> {
                         InputDecoration(labelText: l10n.hospitalName),
                   ),
                   const SizedBox(height: 12),
-                  StreamBuilder<QuerySnapshot>(
-                    stream: _fs
-                        .collection('cities')
-                        .orderBy('name')
-                        .snapshots(),
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: HospitalService().watchCities(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const LinearProgressIndicator();
                       }
-                      final cities = snapshot.data!.docs;
+                      final cities = snapshot.data!;
                       return DropdownButtonFormField<String>(
                         value: selectedCity,
                         items: cities
@@ -1107,13 +1082,12 @@ class _HospitalManagerState extends State<HospitalManager> {
                   child: Text(l10n.cancel)),
               FilledButton(
                 onPressed: () async {
-                  await _fs
-                      .collection('hospitals')
-                      .doc(hospital.id)
-                      .update({
-                    'name': nameCtrl.text.trim(),
-                    'city': selectedCity,
-                  });
+                  if (selectedCity == null) return;
+                  await HospitalService().updateHospital(
+                    hospital['id'] as String,
+                    name: nameCtrl.text.trim(),
+                    city: selectedCity!,
+                  );
                   if (ctx.mounted) Navigator.pop(ctx);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -1133,7 +1107,7 @@ class _HospitalManagerState extends State<HospitalManager> {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await _confirmDelete(context, l10n.confirmDeleteBody);
     if (confirmed != true) return;
-    await _fs.collection('hospitals').doc(id).delete();
+    await HospitalService().deleteHospital(id);
     if (mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.hospitalDeleted)));
@@ -1158,13 +1132,13 @@ class _HospitalManagerState extends State<HospitalManager> {
           ),
         ),
         Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: _fs.collection('hospitals').orderBy('name').snapshots(),
+          child: StreamBuilder<List<Map<String, dynamic>>>(
+            stream: HospitalService().watchHospitals(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final docs = snapshot.data!.docs;
+              final docs = snapshot.data!;
               if (docs.isEmpty) {
                 return _EmptyState(
                     icon: Icons.local_hospital_outlined,
@@ -1209,7 +1183,7 @@ class _HospitalManagerState extends State<HospitalManager> {
                           IconButton(
                             icon: const Icon(Icons.delete_outline,
                                 color: Colors.red),
-                            onPressed: () => _deleteHospital(h.id),
+                            onPressed: () => _deleteHospital(h['id'] as String),
                           ),
                         ],
                       ),
@@ -1238,7 +1212,6 @@ class CityManager extends StatefulWidget {
 
 class _CityManagerState extends State<CityManager> {
   static const _color = Color(0xFF2E7D32);
-  final FirebaseFirestore _fs = FirebaseFirestore.instance;
 
   void _showAddDialog() {
     final nameCtrl = TextEditingController();
@@ -1265,7 +1238,7 @@ class _CityManagerState extends State<CityManager> {
               onPressed: () async {
                 final name = nameCtrl.text.trim();
                 if (name.isEmpty) return;
-                await _fs.collection('cities').add({'name': name});
+                await HospitalService().addCity(name);
                 if (ctx.mounted) Navigator.pop(ctx);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -1280,8 +1253,9 @@ class _CityManagerState extends State<CityManager> {
     );
   }
 
-  void _showEditCityDialog(DocumentSnapshot city) {
-    final nameCtrl = TextEditingController(text: city['name'] as String?);
+  void _showEditCityDialog(Map<String, dynamic> city) {
+    final nameCtrl =
+        TextEditingController(text: city['name'] as String? ?? '');
 
     showDialog(
       context: context,
@@ -1306,10 +1280,7 @@ class _CityManagerState extends State<CityManager> {
               onPressed: () async {
                 final name = nameCtrl.text.trim();
                 if (name.isEmpty) return;
-                await _fs
-                    .collection('cities')
-                    .doc(city.id)
-                    .update({'name': name});
+                await HospitalService().updateCity(city['id'] as String, name);
                 if (ctx.mounted) Navigator.pop(ctx);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -1328,7 +1299,7 @@ class _CityManagerState extends State<CityManager> {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await _confirmDelete(context, l10n.confirmDeleteBody);
     if (confirmed != true) return;
-    await _fs.collection('cities').doc(id).delete();
+    await HospitalService().deleteCity(id);
     if (mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.cityDeleted)));
@@ -1353,13 +1324,13 @@ class _CityManagerState extends State<CityManager> {
           ),
         ),
         Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: _fs.collection('cities').orderBy('name').snapshots(),
+          child: StreamBuilder<List<Map<String, dynamic>>>(
+            stream: HospitalService().watchCities(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final docs = snapshot.data!.docs;
+              final docs = snapshot.data!;
               if (docs.isEmpty) {
                 return _EmptyState(
                     icon: Icons.location_city_outlined,
@@ -1395,7 +1366,7 @@ class _CityManagerState extends State<CityManager> {
                           IconButton(
                             icon: const Icon(Icons.delete_outline,
                                 color: Colors.red),
-                            onPressed: () => _deleteCity(city.id),
+                            onPressed: () => _deleteCity(city['id'] as String),
                           ),
                         ],
                       ),
@@ -1488,16 +1459,13 @@ class _SponsorOrgManagerState extends State<SponsorOrgManager> {
                             (v == null || v.isEmpty) ? l10n.requiredField : null,
                       ),
                       const SizedBox(height: 12),
-                      StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance
-                            .collection('cities')
-                            .orderBy('name')
-                            .snapshots(),
+                      StreamBuilder<List<Map<String, dynamic>>>(
+                        stream: HospitalService().watchCities(),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
                             return const LinearProgressIndicator();
                           }
-                          final cities = snapshot.data!.docs;
+                          final cities = snapshot.data!;
                           return DropdownButtonFormField<String>(
                             value: selectedCity,
                             hint: Text(l10n.selectCity),
@@ -1573,7 +1541,7 @@ class _SponsorOrgManagerState extends State<SponsorOrgManager> {
     );
   }
 
-  void _showEditSponsorDialog(DocumentSnapshot sponsor) {
+  void _showEditSponsorDialog(Map<String, dynamic> sponsor) {
     final nameCtrl =
         TextEditingController(text: sponsor['name'] as String? ?? '');
     String? selectedCity = sponsor['city'] as String?;
@@ -1599,16 +1567,13 @@ class _SponsorOrgManagerState extends State<SponsorOrgManager> {
                         prefixIcon: const Icon(Icons.store_outlined)),
                   ),
                   const SizedBox(height: 12),
-                  StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('cities')
-                        .orderBy('name')
-                        .snapshots(),
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: HospitalService().watchCities(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return const LinearProgressIndicator();
                       }
-                      final cities = snapshot.data!.docs;
+                      final cities = snapshot.data!;
                       return DropdownButtonFormField<String>(
                         value: selectedCity,
                         decoration: InputDecoration(
@@ -1635,10 +1600,10 @@ class _SponsorOrgManagerState extends State<SponsorOrgManager> {
                 onPressed: () async {
                   final name = nameCtrl.text.trim();
                   if (name.isEmpty) return;
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(sponsor.id)
-                      .update({'name': name, 'city': selectedCity});
+                  await UserService().updateFields(
+                    sponsor['id'] as String,
+                    {'name': name, 'city': selectedCity},
+                  );
                   if (ctx.mounted) Navigator.pop(ctx);
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -1658,7 +1623,7 @@ class _SponsorOrgManagerState extends State<SponsorOrgManager> {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await _confirmDelete(context, l10n.confirmDeleteBody);
     if (confirmed != true) return;
-    await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+    await UserService().deleteById(uid);
     if (mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.sponsorDeleted)));
@@ -1683,16 +1648,13 @@ class _SponsorOrgManagerState extends State<SponsorOrgManager> {
           ),
         ),
         Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('users')
-                .where('role', isEqualTo: 'sponsorOrg')
-                .snapshots(),
+          child: StreamBuilder<List<Map<String, dynamic>>>(
+            stream: UserService().watchByRole('sponsorOrg'),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final docs = snapshot.data!.docs;
+              final docs = snapshot.data!;
               if (docs.isEmpty) {
                 return _EmptyState(
                     icon: Icons.store_outlined,
@@ -1742,7 +1704,8 @@ class _SponsorOrgManagerState extends State<SponsorOrgManager> {
                           IconButton(
                             icon: const Icon(Icons.delete_outline,
                                 color: Colors.red),
-                            onPressed: () => _deleteSponsor(sponsor.id),
+                            onPressed: () =>
+                                _deleteSponsor(sponsor['id'] as String),
                           ),
                         ],
                       ),
@@ -1790,7 +1753,7 @@ class _DonorManagerState extends State<_DonorManager> {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await _confirmDelete(context, l10n.confirmDeleteBody);
     if (confirmed != true) return;
-    await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+    await UserService().deleteById(uid);
     if (mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.donorDeleted)));
@@ -1851,13 +1814,10 @@ class _DonorManagerState extends State<_DonorManager> {
               const SizedBox(width: 8),
               Expanded(
                 flex: 2,
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('cities')
-                      .orderBy('name')
-                      .snapshots(),
+                child: StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: HospitalService().watchCities(),
                   builder: (context, snap) {
-                    final cities = snap.data?.docs ?? [];
+                    final cities = snap.data ?? [];
                     return DropdownButtonFormField<String>(
                       value: _filterCity.isEmpty ? null : _filterCity,
                       decoration: InputDecoration(
@@ -1923,16 +1883,13 @@ class _DonorManagerState extends State<_DonorManager> {
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('users')
-                .where('role', isEqualTo: 'donor')
-                .snapshots(),
+          child: StreamBuilder<List<Map<String, dynamic>>>(
+            stream: UserService().watchByRole('donor'),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              var docs = snapshot.data!.docs;
+              var docs = snapshot.data!;
 
               // Client-side filters
               if (_filterCity.isNotEmpty) {
@@ -2057,7 +2014,7 @@ class _DonorManagerState extends State<_DonorManager> {
                           IconButton(
                             icon: const Icon(Icons.delete_outline,
                                 color: Colors.red),
-                            onPressed: () => _deleteDonor(donor.id),
+                            onPressed: () => _deleteDonor(donor['id'] as String),
                           ),
                         ],
                       ),
@@ -2092,10 +2049,7 @@ class _BloodRequestsAdminState extends State<_BloodRequestsAdmin> {
     final l10n = AppLocalizations.of(context)!;
     final confirmed = await _confirmDelete(context, l10n.confirmDeleteBody);
     if (confirmed != true) return;
-    await FirebaseFirestore.instance
-        .collection('blood_requests')
-        .doc(id)
-        .delete();
+    await RequestService().deleteById(id);
     if (mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.requestDeletedSuccess)));
@@ -2151,28 +2105,14 @@ class _BloodRequestsAdminState extends State<_BloodRequestsAdmin> {
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: _filterStatus.isEmpty
-                ? FirebaseFirestore.instance
-                    .collection('blood_requests')
-                    .orderBy('createdAt', descending: true)
-                    .snapshots()
-                : _filterStatus == 'done'
-                    ? FirebaseFirestore.instance
-                        .collection('blood_requests')
-                        .where('status', whereIn: ['done', 'completed'])
-                        .orderBy('createdAt', descending: true)
-                        .snapshots()
-                    : FirebaseFirestore.instance
-                        .collection('blood_requests')
-                        .where('status', isEqualTo: _filterStatus)
-                        .orderBy('createdAt', descending: true)
-                        .snapshots(),
+          child: StreamBuilder<List<Map<String, dynamic>>>(
+            stream: RequestService().watchAll(
+                status: _filterStatus.isEmpty ? null : _filterStatus),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final docs = snapshot.data!.docs;
+              final docs = snapshot.data!;
               if (docs.isEmpty) {
                 return _EmptyState(
                     icon: Icons.bloodtype_outlined,
@@ -2241,7 +2181,7 @@ class _BloodRequestsAdminState extends State<_BloodRequestsAdmin> {
                           IconButton(
                             icon: const Icon(Icons.delete_outline,
                                 color: Colors.red),
-                            onPressed: () => _deleteRequest(req.id),
+                            onPressed: () => _deleteRequest(req['id'] as String),
                           ),
                         ],
                       ),
@@ -2332,15 +2272,14 @@ class _BroadcastNotifState extends State<_BroadcastNotif> {
     final l10n = AppLocalizations.of(context)!;
 
     try {
-      // Save to Firestore announcements collection
-      await FirebaseFirestore.instance.collection('announcements').add({
-        'title': _titleCtrl.text.trim(),
-        'body': _bodyCtrl.text.trim(),
-        'target': _target,
-        'targetCity': _targetCity,
-        'targetBloodGroup': _targetBloodGroup,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+      // Save via AnnouncementService
+      await AnnouncementService().create(
+        title: _titleCtrl.text.trim(),
+        body: _bodyCtrl.text.trim(),
+        target: _target,
+        targetCity: _targetCity,
+        targetBloodGroup: _targetBloodGroup,
+      );
 
       // Attempt push delivery via NotificationService
       if (_target == 'city' && _targetCity != null) {
@@ -2486,13 +2425,10 @@ class _BroadcastNotifState extends State<_BroadcastNotif> {
                           ),
                           if (_target == 'city') ...[
                             const SizedBox(height: 12),
-                            StreamBuilder<QuerySnapshot>(
-                              stream: FirebaseFirestore.instance
-                                  .collection('cities')
-                                  .orderBy('name')
-                                  .snapshots(),
+                            StreamBuilder<List<Map<String, dynamic>>>(
+                              stream: HospitalService().watchCities(),
                               builder: (context, snap) {
-                                final cities = snap.data?.docs ?? [];
+                                final cities = snap.data ?? [];
                                 return DropdownButtonFormField<String>(
                                   value: _targetCity,
                                   hint: Text(l10n.selectCity),
@@ -2567,17 +2503,13 @@ class _BroadcastNotifState extends State<_BroadcastNotif> {
                         .titleSmall
                         ?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
-                StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('announcements')
-                      .orderBy('createdAt', descending: true)
-                      .limit(20)
-                      .snapshots(),
+                StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: AnnouncementService().watchRecent(limit: 20),
                   builder: (context, snap) {
                     if (!snap.hasData) {
                       return const Center(child: CircularProgressIndicator());
                     }
-                    final docs = snap.data!.docs;
+                    final docs = snap.data!;
                     if (docs.isEmpty) {
                       return _EmptyState(
                           icon: Icons.campaign_outlined,

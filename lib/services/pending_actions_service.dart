@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sheryan/events/app_event.dart';
 import 'package:sheryan/events/notification_engine.dart';
+import 'package:sheryan/services/request_service.dart';
 
 const _kPendingRequestsKey = 'sheryan_pending_blood_requests';
 
@@ -59,13 +59,9 @@ class PendingActionsService {
           continue;
         }
 
-        final docRef =
-            await FirebaseFirestore.instance.collection('blood_requests').add({
+        final requestId = await RequestService().create({
           ...data,
           'userId': uid,
-          'createdAt': FieldValue.serverTimestamp(),
-          'status': 'pending',
-          'isVerified': false,
           '_syncedFromOffline': true,
         });
 
@@ -74,7 +70,7 @@ class PendingActionsService {
           hospitalName: data['hospital'] ?? '',
           patientName: data['patientName'] ?? '',
           bloodGroup: data['bloodGroup'] ?? '',
-          requestId: docRef.id,
+          requestId: requestId,
         ));
 
         synced++;

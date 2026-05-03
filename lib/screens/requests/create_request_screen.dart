@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +6,9 @@ import 'package:sheryan/core/theme/app_design_constants.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
 import 'package:sheryan/events/app_event.dart';
 import 'package:sheryan/events/notification_engine.dart';
+import 'package:sheryan/services/hospital_service.dart';
 import 'package:sheryan/services/pending_actions_service.dart';
+import 'package:sheryan/services/request_service.dart';
 import 'package:intl/intl.dart';
 
 class RequestBloodScreen extends StatefulWidget {
@@ -133,8 +134,7 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
     try {
       final uid = FirebaseAuth.instance.currentUser!.uid;
 
-      final docRef =
-          await FirebaseFirestore.instance.collection('blood_requests').add({
+      final requestId = await RequestService().create({
         'userId': uid,
         'patientName': _patientName.text.trim(),
         'hospitalId': _selectedHospitalId,
@@ -144,9 +144,6 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
         'units': _units.text.trim(),
         'phone': _phone.text.trim(),
         'neededAt': neededAtFormatted,
-        'createdAt': FieldValue.serverTimestamp(),
-        'status': 'pending',
-        'isVerified': false,
       });
 
       NotificationEngine().dispatch(BloodRequestCreatedEvent(
@@ -154,7 +151,7 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
         hospitalName: _selectedHospitalName ?? '',
         patientName: _patientName.text.trim(),
         bloodGroup: _selectedGroup,
-        requestId: docRef.id,
+        requestId: requestId,
       ));
 
       if (mounted) {
@@ -202,14 +199,11 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
                 const SizedBox(height: 12),
 
                 // City Dropdown
-                StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('cities')
-                      .orderBy('name')
-                      .snapshots(),
+                StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: HospitalService().watchCities(),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) return const LinearProgressIndicator();
-                    final cities = snapshot.data!.docs;
+                    final cities = snapshot.data!;
                     return DropdownButtonFormField<String>(
                       value: _selectedCity,
                       decoration: InputDecoration(labelText: l10n.city),
@@ -236,14 +230,11 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
 
                 // Hospital Dropdown (filtered by city)
                 if (_selectedCity != null)
-                  StreamBuilder<QuerySnapshot>(
-                    stream: FirebaseFirestore.instance
-                        .collection('hospitals')
-                        .where('city', isEqualTo: _selectedCity)
-                        .snapshots(),
+                  StreamBuilder<List<Map<String, dynamic>>>(
+                    stream: HospitalService().watchHospitalsByCity(_selectedCity!),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) return const LinearProgressIndicator();
-                      final hospitals = snapshot.data!.docs;
+                      final hospitals = snapshot.data!;
                       return DropdownButtonFormField<String>(
                         value: _selectedHospitalId,
                         decoration:
@@ -251,13 +242,13 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
                         hint: Text(l10n.hospitalName),
                         items: hospitals
                             .map((h) => DropdownMenuItem(
-                                  value: h.id,
+                                  value: h['id'] as String,
                                   child: Text(h['name']),
                                 ))
                             .toList(),
                         onChanged: (v) {
-                          final selected = hospitals
-                              .firstWhere((h) => h.id == v);
+                          final selected =
+                              hospitals.firstWhere((h) => h['id'] == v);
                           setState(() {
                             _selectedHospitalId = v;
                             _selectedHospitalName =

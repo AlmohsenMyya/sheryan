@@ -1,0 +1,177 @@
+You are a senior Flutter architect working on a production-level blood donation system.
+
+Your task is to refactor the project to achieve:
+
+1. Centralized Business Logic
+2. Backend Abstraction (to support future migration from Firebase to Laravel API)
+
+---
+
+## 🎯 GOALS
+
+* Move all business logic into Services
+* Remove direct Firebase usage from UI and Providers
+* Introduce Repository Layer (abstraction)
+* Ensure future backend replacement requires changes ONLY in repositories
+
+---
+
+## ⚠️ CRITICAL RULES
+
+1. ❌ DO NOT change UI behavior
+
+2. ❌ DO NOT change Firestore schema
+
+3. ❌ DO NOT remove any feature
+
+4. ❌ DO NOT break existing flows
+
+5. ❌ DO NOT tightly couple services with Firebase
+
+6. ✅ ONLY refactor structure and responsibilities
+
+7. ✅ Keep everything working after each step
+
+8. ✅ Make minimal safe changes
+
+---
+
+## 🧱 TARGET ARCHITECTURE
+
+UI → Provider → Service → Repository → Data Source
+
+---
+
+## 🧩 STEP 1: Create Repository Interfaces
+
+Create abstract classes:
+
+* RequestRepository
+* DonationRepository
+* UserRepository
+
+Example:
+
+```dart
+abstract class RequestRepository {
+  Future<void> verifyRequest(String requestId);
+  Future<void> createRequest(RequestModel request);
+}
+```
+
+---
+
+## 🧩 STEP 2: Firebase Implementations
+
+Create implementations:
+
+* FirebaseRequestRepository
+* FirebaseDonationRepository
+
+These should contain ALL Firestore logic.
+
+---
+
+## 🧩 STEP 3: Refactor Services
+
+Services must:
+
+* Contain ALL business logic
+* Call repositories instead of Firebase
+
+Example:
+
+```dart
+class RequestService {
+  final RequestRepository repository;
+
+  Future<void> verifyRequest(String id) async {
+    await repository.verifyRequest(id);
+
+    await notificationEngine.handle(
+      AppEvent.requestVerified,
+      {...},
+    );
+  }
+}
+```
+
+---
+
+## 🧩 STEP 4: Clean Providers
+
+Providers should:
+
+* Manage state ONLY
+* Call services
+* NOT access Firebase
+
+---
+
+## 🧩 STEP 5: UI Layer
+
+UI must:
+
+* Call Providers ONLY
+* Never call services or Firebase directly
+
+---
+
+## 🧩 STEP 6: Notification Integration
+
+* Services trigger NotificationEngine
+* NotificationEngine handles all notification logic
+
+---
+
+## 🧩 STEP 7: Dependency Injection
+
+Inject repositories into services:
+
+* Allow easy switching later
+* Do NOT hardcode Firebase inside services
+
+---
+
+## 🧪 VALIDATION
+
+Ensure:
+
+* Request creation works
+* Request verification works
+* Donation completion works
+* Notifications still trigger
+* Points system works
+
+---
+
+## 🚀 FUTURE GOAL
+
+After refactor:
+
+You must be able to:
+
+Replace:
+FirebaseRequestRepository
+
+With:
+LaravelRequestRepository (API-based)
+
+WITHOUT changing:
+
+* Services
+* Providers
+* UI
+
+---
+
+## 🔥 IMPORTANT
+
+If unsure about any logic:
+
+* DO NOT rewrite it
+* Only move it to correct layer
+
+---
+
+Proceed step-by-step safely.
