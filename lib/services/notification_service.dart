@@ -21,14 +21,14 @@ class NotificationService {
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
 
   final FlutterLocalNotificationsPlugin _localNotifications =
-      FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin();
 
   static const String _prefKeyPermissionRequested =
       "notification_permission_requested";
   static const String _prefKeyEnabled = "notification_enabled";
 
   static const AndroidNotificationChannel _channel =
-      AndroidNotificationChannel(
+  AndroidNotificationChannel(
     'high_importance_channel',
     'High Importance Notifications',
     description: 'This channel is used for important notifications.',
@@ -39,21 +39,21 @@ class NotificationService {
   // ─── FCM Service Account ────────────────────────────────────────────────────
 
   Map<String, dynamic> get _serviceAccount => {
-        "type": "service_account",
-        "project_id": dotenv.env['FCM_PROJECT_ID'],
-        "private_key_id": dotenv.env['FCM_PRIVATE_KEY_ID'],
-        "private_key":
-            dotenv.env['FCM_PRIVATE_KEY']?.replaceAll('\\n', '\n'),
-        "client_email": dotenv.env['FCM_CLIENT_EMAIL'],
-        "client_id": dotenv.env['FCM_CLIENT_ID'],
-        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-        "token_uri": "https://oauth2.googleapis.com/token",
-        "auth_provider_x509_cert_url":
-            "https://www.googleapis.com/oauth2/v1/certs",
-        "client_x509_cert_url":
-            "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40blood-f5990.iam.gserviceaccount.com",
-        "universe_domain": "googleapis.com"
-      };
+    "type": "service_account",
+    "project_id": dotenv.env['FCM_PROJECT_ID'],
+    "private_key_id": dotenv.env['FCM_PRIVATE_KEY_ID'],
+    "private_key":
+    dotenv.env['FCM_PRIVATE_KEY']?.replaceAll('\\n', '\n'),
+    "client_email": dotenv.env['FCM_CLIENT_EMAIL'],
+    "client_id": dotenv.env['FCM_CLIENT_ID'],
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url":
+    "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url":
+    "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40blood-f5990.iam.gserviceaccount.com",
+    "universe_domain": "googleapis.com"
+  };
 
   Future<String?> _getAccessToken() async {
     try {
@@ -131,15 +131,15 @@ class NotificationService {
 
   Future<void> _setupLocalNotifications() async {
     const androidInit =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+    AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosInit = DarwinInitializationSettings();
     await _localNotifications.initialize(
       settings:
-          InitializationSettings(android: androidInit, iOS: iosInit),
+      InitializationSettings(android: androidInit, iOS: iosInit),
     );
     await _localNotifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+        AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(_channel);
   }
 
@@ -284,7 +284,7 @@ class NotificationService {
             "notification": {
               "title": "🆘 طلب دم طارئ ($bloodGroup)",
               "body":
-                  "نداء استغاثة لفصيلة $bloodGroup في مدينة $city. ساهم في الإنقاذ!"
+              "نداء استغاثة لفصيلة $bloodGroup في مدينة $city. ساهم في الإنقاذ!"
             },
             "data": {
               "requestId": requestId,
@@ -362,7 +362,7 @@ class NotificationService {
       if (donationsSnap.docs.isEmpty) return;
 
       final donorId =
-          donationsSnap.docs.first.data()['donorId'] as String?;
+      donationsSnap.docs.first.data()['donorId'] as String?;
       if (donorId == null) return;
 
       await sendDirectNotification(
@@ -370,9 +370,9 @@ class NotificationService {
         titleEn: "Request Confirmed Closed ✅",
         titleAr: "تم تأكيد إغلاق الطلب ✅",
         bodyEn:
-            "The recipient confirmed the blood request has been fulfilled. Thank you for your contribution! 🙏",
+        "The recipient confirmed the blood request has been fulfilled. Thank you for your contribution! 🙏",
         bodyAr:
-            "أكد صاحب الطلب اكتمال التبرع. شكراً جزيلاً لمساهمتك في إنقاذ حياة! 🙏",
+        "أكد صاحب الطلب اكتمال التبرع. شكراً جزيلاً لمساهمتك في إنقاذ حياة! 🙏",
         type: NotificationType.requestClosed,
         requestId: requestId,
       );
@@ -425,24 +425,24 @@ class NotificationService {
         .doc(targetUid)
         .collection('notifications')
         .add(AppNotification(
-          id: '',
-          titleAr: titleAr,
-          titleEn: titleEn,
-          bodyAr: bodyAr,
-          bodyEn: bodyEn,
-          timestamp: DateTime.now(),
-          type: type,
-          requestId: requestId,
-        ).toMap());
+      id: '',
+      titleAr: titleAr,
+      titleEn: titleEn,
+      bodyAr: bodyAr,
+      bodyEn: bodyEn,
+      timestamp: DateTime.now(),
+      type: type,
+      requestId: requestId,
+    ).toMap());
   }
 
   // ─── FCM HTTP v1 ─────────────────────────────────────────────────────────────
 
   Future<void> _sendV1NotificationWithToken(
-    Map<String, dynamic> message,
-    String accessToken,
-    String projectId,
-  ) async {
+      Map<String, dynamic> message,
+      String accessToken,
+      String projectId,
+      ) async {
     try {
       final response = await http.post(
         Uri.parse(
@@ -462,17 +462,6 @@ class NotificationService {
     } catch (e) {
       debugPrint("⚠️ [FCM] Exception sending push: $e");
     }
-    await batch.commit();
-  }
-
-  Stream<int> getUnreadCountStream(String userId) {
-    return _fs
-        .collection('users')
-        .doc(userId)
-        .collection('notifications')
-        .where('isRead', isEqualTo: false)
-        .snapshots()
-        .map((snap) => snap.docs.length);
   }
 
   // ─── Inbox Streams & Actions ─────────────────────────────────────────────────

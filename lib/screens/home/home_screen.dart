@@ -575,7 +575,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     // ── 7. Route to the appropriate dashboard ────────────────────────────────
     final l10n = AppLocalizations.of(context)!;
-
+print("83735672 $role");
     if (role == UserRole.hospitalAdmin) {
       return Scaffold(
         appBar: PreferredSize(

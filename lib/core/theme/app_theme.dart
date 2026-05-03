@@ -200,7 +200,7 @@ class AppTheme {
       ),
 
       // ── Bottom App Bar ─────────────────────────────────────────────────────
-      bottomAppBarTheme: BottomAppBarTheme(color: bottomNavBg),
+      bottomAppBarTheme: BottomAppBarThemeData(color: bottomNavBg),
 
       // ── ListTile ──────────────────────────────────────────────────────────
       listTileTheme: ListTileThemeData(
