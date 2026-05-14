@@ -85,11 +85,19 @@ class BloodGroupVerifiedEvent extends AppEvent {
 /// Fired when the SuperAdmin sends a broadcast notification.
 /// [city] and [bloodGroup] may be empty strings to indicate "all".
 class AdminBroadcastEvent extends AppEvent {
+  final String titleAr;
+  final String titleEn;
+  final String bodyAr;
+  final String bodyEn;
   final String city;
   final String bloodGroup;
   final String broadcastId;
 
   const AdminBroadcastEvent({
+    required this.titleAr,
+    required this.titleEn,
+    required this.bodyAr,
+    required this.bodyEn,
     required this.city,
     required this.bloodGroup,
     required this.broadcastId,

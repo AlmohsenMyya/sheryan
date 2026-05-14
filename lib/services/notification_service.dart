@@ -220,28 +220,41 @@ class NotificationService {
 
   // ─── Public Notification Methods ────────────────────────────────────────────
 
-  /// [1] Emergency broadcast: sent when a hospital admin verifies a request.
-  /// Replaces topic-based FCM with targeted per-donor Direct FCM calls.
+  /// [1] Emergency broadcast: sent when a hospital admin verifies a request
+  /// OR when SuperAdmin sends a filtered broadcast.
+  ///
+  /// If [city] is empty, it targets all cities.
+  /// If [bloodGroup] is empty, it targets all blood groups.
+  /// If both are empty, it targets ALL donors.
   Future<void> sendEmergencyNotification({
     required String city,
     required String bloodGroup,
     required String requestId,
+    String? titleAr,
+    String? titleEn,
+    String? bodyAr,
+    String? bodyEn,
   }) async {
     debugPrint(
-        "🔍 [FCM] Emergency broadcast for $bloodGroup in $city...");
+        "🔍 [FCM] Emergency broadcast for \"$bloodGroup\" in \"$city\"...");
 
-    final compatibleTypes = BloodLogic.getCompatibleDonors(bloodGroup);
+    Query query = _fs.collection('users').where('role', isEqualTo: 'donor');
 
-    // Fetch compatible donors in the same city from Firestore
-    final donorsSnap = await _fs
-        .collection('users')
-        .where('role', isEqualTo: 'donor')
-        .where('city', isEqualTo: city)
-        .where('bloodGroup', whereIn: compatibleTypes)
-        .get();
+    // 1. Apply City filter if provided
+    if (city.isNotEmpty) {
+      query = query.where('city', isEqualTo: city);
+    }
+
+    // 2. Apply Blood Group filter if provided (uses compatible types logic)
+    if (bloodGroup.isNotEmpty) {
+      final compatibleTypes = BloodLogic.getCompatibleDonors(bloodGroup);
+      query = query.where('bloodGroup', whereIn: compatibleTypes);
+    }
+
+    final donorsSnap = await query.get();
 
     if (donorsSnap.docs.isEmpty) {
-      debugPrint("⚠️ [FCM] No compatible donors found in $city");
+      debugPrint("⚠️ [FCM] No compatible donors found for filters");
       return;
     }
 
@@ -251,12 +264,24 @@ class NotificationService {
     final accessToken = await _getAccessToken();
     final projectId = dotenv.env['FCM_PROJECT_ID'];
 
+    // If custom strings are missing, fall back to default emergency template
+    final finalTitleAr = titleAr ?? "🆘 طلب دم طارئ";
+    final finalTitleEn = titleEn ?? "🆘 Emergency Blood Request";
+    final finalBodyAr = bodyAr ??
+        (bloodGroup.isNotEmpty && city.isNotEmpty
+            ? "نداء عاجل! فصيلة $bloodGroup مطلوبة في $city. ساهم في الإنقاذ!"
+            : "نداء عاجل للمساعدة في إنقاذ حياة. تفقد التفاصيل الآن!");
+    final finalBodyEn = bodyEn ??
+        (bloodGroup.isNotEmpty && city.isNotEmpty
+            ? "Urgent! $bloodGroup blood needed in $city. Help save a life!"
+            : "Urgent call for help. Check details now and help save a life!");
+
     final notificationData = AppNotification(
       id: '',
-      titleAr: "🆘 طلب دم طارئ",
-      titleEn: "🆘 Emergency Blood Request",
-      bodyAr: "نداء عاجل! فصيلة $bloodGroup مطلوبة في $city. ساهم في الإنقاذ!",
-      bodyEn: "Urgent! $bloodGroup blood needed in $city. Help save a life!",
+      titleAr: finalTitleAr,
+      titleEn: finalTitleEn,
+      bodyAr: finalBodyAr,
+      bodyEn: finalBodyEn,
       timestamp: DateTime.now(),
       type: NotificationType.emergency,
       requestId: requestId,
@@ -275,16 +300,20 @@ class NotificationService {
           .doc();
       firestoreBatch.set(notifRef, notificationData.toMap());
 
-      // 2. Direct FCM push (fire and forget per donor)
-      final fcmToken = donor.data()['fcmToken'] as String?;
+      // 2. Direct FCM push
+      // Cast the data to a Map to allow subscript access []
+      final data = donor.data() as Map<String, dynamic>?;
+
+      // Use the null-aware operator ?. to get the token
+      final fcmToken = data?['fcmToken'] as String?;
+
       if (fcmToken != null && accessToken != null) {
         final message = {
           "message": {
             "token": fcmToken,
             "notification": {
-              "title": "🆘 طلب دم طارئ ($bloodGroup)",
-              "body":
-              "نداء استغاثة لفصيلة $bloodGroup في مدينة $city. ساهم في الإنقاذ!"
+              "title": finalTitleEn,
+              "body": finalBodyEn
             },
             "data": {
               "requestId": requestId,
@@ -298,8 +327,6 @@ class NotificationService {
             message, accessToken, projectId!));
       }
     }
-
-    // Commit Firestore batch + all FCM pushes simultaneously
     await Future.wait([
       firestoreBatch.commit(),
       ...fcmFutures,

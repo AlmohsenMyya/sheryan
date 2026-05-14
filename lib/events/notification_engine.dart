@@ -91,6 +91,7 @@ class NotificationEngine {
         city: e.city,
         bloodGroup: e.bloodGroup,
         requestId: e.requestId,
+        // No custom strings passed here -> uses defaults in NotificationService
       ),
     );
 
@@ -165,6 +166,10 @@ class NotificationEngine {
       city: e.city,
       bloodGroup: e.bloodGroup,
       requestId: e.broadcastId,
+      titleAr: e.titleAr,
+      titleEn: e.titleEn,
+      bodyAr: e.bodyAr,
+      bodyEn: e.bodyEn,
     );
   }
 }

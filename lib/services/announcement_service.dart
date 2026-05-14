@@ -18,15 +18,19 @@ class AnnouncementService {
       _repo.watchRecent(limit: limit);
 
   Future<void> create({
-    required String title,
-    required String body,
+    required String titleAr,
+    required String titleEn,
+    required String bodyAr,
+    required String bodyEn,
     required String target,
     String? targetCity,
     String? targetBloodGroup,
   }) =>
       _repo.create({
-        'title': title,
-        'body': body,
+        'titleAr': titleAr,
+        'titleEn': titleEn,
+        'bodyAr': bodyAr,
+        'bodyEn': bodyEn,
         'target': target,
         'targetCity': targetCity,
         'targetBloodGroup': targetBloodGroup,

@@ -1,0 +1,63 @@
+name: Build & Release APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: "Version name (e.g. v0.2.0)"
+        required: true
+        default: "v0.2.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Java
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      # 3️⃣ Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # 4️⃣ Dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 5️⃣ Build split APKs 🔥
+      - name: Build APK (split per ABI)
+        run: flutter build apk --release --split-per-abi
+
+      # 6️⃣ Rename APKs 🔥
+      - name: Rename APKs
+        run: |
+          mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk d-chat-${{ github.event.inputs.version_name }}-arm64.apk
+          mv build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk d-chat-${{ github.event.inputs.version_name }}-armv7.apk
+          mv build/app/outputs/flutter-apk/app-x86_64-release.apk d-chat-${{ github.event.inputs.version_name }}-x86_64.apk
+
+      # 7️⃣ Create Release + Upload 🔥
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version_name }}
+          name: D-Chat ${{ github.event.inputs.version_name }}
+          files: |
+            d-chat-${{ github.event.inputs.version_name }}-arm64.apk
+        #            d-chat-${{ github.event.inputs.version_name }}-armv7.apk
+        #            d-chat-${{ github.event.inputs.version_name }}-x86_64.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

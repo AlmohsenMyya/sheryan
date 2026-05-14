@@ -2237,7 +2237,6 @@ class _FilterChip extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTION 7 — BROADCAST NOTIFICATIONS (NEW)
 // ─────────────────────────────────────────────────────────────────────────────
-
 class _BroadcastNotif extends StatefulWidget {
   const _BroadcastNotif();
 
@@ -2248,9 +2247,14 @@ class _BroadcastNotif extends StatefulWidget {
 class _BroadcastNotifState extends State<_BroadcastNotif> {
   static const _color = Color(0xFFF57F17);
   final _formKey = GlobalKey<FormState>();
-  final _titleCtrl = TextEditingController();
-  final _bodyCtrl = TextEditingController();
-  String _target = 'all';
+  final _titleArCtrl = TextEditingController();
+  final _titleEnCtrl = TextEditingController();
+  final _bodyArCtrl = TextEditingController();
+  final _bodyEnCtrl = TextEditingController();
+
+  bool _filterByCity = false;
+  bool _filterByBloodGroup = false;
+
   String? _targetCity;
   String? _targetBloodGroup;
   bool _sending = false;
@@ -2261,8 +2265,10 @@ class _BroadcastNotifState extends State<_BroadcastNotif> {
 
   @override
   void dispose() {
-    _titleCtrl.dispose();
-    _bodyCtrl.dispose();
+    _titleArCtrl.dispose();
+    _titleEnCtrl.dispose();
+    _bodyArCtrl.dispose();
+    _bodyEnCtrl.dispose();
     super.dispose();
   }
 
@@ -2272,35 +2278,48 @@ class _BroadcastNotifState extends State<_BroadcastNotif> {
     final l10n = AppLocalizations.of(context)!;
 
     try {
-      // Save via AnnouncementService
-      await AnnouncementService().create(
-        title: _titleCtrl.text.trim(),
-        body: _bodyCtrl.text.trim(),
-        target: _target,
-        targetCity: _targetCity,
-        targetBloodGroup: _targetBloodGroup,
-      );
+      final titleAr = _titleArCtrl.text.trim();
+      final titleEn = _titleEnCtrl.text.trim();
+      final bodyAr = _bodyArCtrl.text.trim();
+      final bodyEn = _bodyEnCtrl.text.trim();
 
-      // Attempt push delivery via NotificationService
-      if (_target == 'city' && _targetCity != null) {
-        await NotificationEngine().dispatch(AdminBroadcastEvent(
-          city: _targetCity!,
-          bloodGroup: _targetBloodGroup ?? '',
-          broadcastId: 'broadcast_${DateTime.now().millisecondsSinceEpoch}',
-        ));
-      } else if (_target == 'bloodGroup' && _targetBloodGroup != null) {
-        await NotificationEngine().dispatch(AdminBroadcastEvent(
-          city: '',
-          bloodGroup: _targetBloodGroup!,
-          broadcastId: 'broadcast_${DateTime.now().millisecondsSinceEpoch}',
-        ));
+      String target = 'all';
+      if (_filterByCity && _filterByBloodGroup) {
+        target = 'both';
+      } else if (_filterByCity) {
+        target = 'city';
+      } else if (_filterByBloodGroup) {
+        target = 'bloodGroup';
       }
 
+      await AnnouncementService().create(
+        titleAr: titleAr,
+        titleEn: titleEn,
+        bodyAr: bodyAr,
+        bodyEn: bodyEn,
+        target: target,
+        targetCity: _filterByCity ? _targetCity : null,
+        targetBloodGroup: _filterByBloodGroup ? _targetBloodGroup : null,
+      );
+
+      await NotificationEngine().dispatch(AdminBroadcastEvent(
+        titleAr: titleAr,
+        titleEn: titleEn,
+        bodyAr: bodyAr,
+        bodyEn: bodyEn,
+        city: _filterByCity ? (_targetCity ?? '') : '',
+        bloodGroup: _filterByBloodGroup ? (_targetBloodGroup ?? '') : '',
+        broadcastId: 'broadcast_${DateTime.now().millisecondsSinceEpoch}',
+      ));
+
       if (mounted) {
-        _titleCtrl.clear();
-        _bodyCtrl.clear();
+        _titleArCtrl.clear();
+        _titleEnCtrl.clear();
+        _bodyArCtrl.clear();
+        _bodyEnCtrl.clear();
         setState(() {
-          _target = 'all';
+          _filterByCity = false;
+          _filterByBloodGroup = false;
           _targetCity = null;
           _targetBloodGroup = null;
         });
@@ -2324,6 +2343,7 @@ class _BroadcastNotifState extends State<_BroadcastNotif> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final lang = Localizations.localeOf(context).languageCode;
 
     return Column(
       children: [
@@ -2339,7 +2359,6 @@ class _BroadcastNotifState extends State<_BroadcastNotif> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Compose form
                 Card(
                   elevation: 0,
                   shape: RoundedRectangleBorder(
@@ -2359,72 +2378,99 @@ class _BroadcastNotifState extends State<_BroadcastNotif> {
                                   .titleSmall
                                   ?.copyWith(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 16),
+                          const Text("Arabic Content (المحتوى العربي)",
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                          const SizedBox(height: 8),
                           TextFormField(
-                            controller: _titleCtrl,
+                            controller: _titleArCtrl,
                             decoration: InputDecoration(
-                              labelText: l10n.notifTitleField,
-                              prefixIcon:
-                                  const Icon(Icons.title_outlined),
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10)),
+                              labelText: "${l10n.notifTitleField} (Arabic)",
+                              prefixIcon: const Icon(Icons.title_outlined),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                             ),
-                            validator: (v) =>
-                                (v == null || v.isEmpty)
-                                    ? l10n.requiredField
-                                    : null,
+                            validator: (v) => (v == null || v.isEmpty) ? l10n.requiredField : null,
                           ),
                           const SizedBox(height: 12),
                           TextFormField(
-                            controller: _bodyCtrl,
-                            maxLines: 3,
+                            controller: _bodyArCtrl,
+                            maxLines: 2,
                             decoration: InputDecoration(
-                              labelText: l10n.notifBodyField,
-                              prefixIcon:
-                                  const Icon(Icons.message_outlined),
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10)),
+                              labelText: "${l10n.notifBodyField} (Arabic)",
+                              prefixIcon: const Icon(Icons.message_outlined),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                             ),
-                            validator: (v) =>
-                                (v == null || v.isEmpty)
-                                    ? l10n.requiredField
-                                    : null,
+                            validator: (v) => (v == null || v.isEmpty) ? l10n.requiredField : null,
                           ),
-                          const SizedBox(height: 16),
-                          Text(l10n.targetAudience,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13)),
+                          const SizedBox(height: 20),
+                          const Divider(),
+                          const SizedBox(height: 12),
+                          const Text("English Content",
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
                           const SizedBox(height: 8),
-                          // Target selector
+                          TextFormField(
+                            controller: _titleEnCtrl,
+                            decoration: InputDecoration(
+                              labelText: "${l10n.notifTitleField} (English)",
+                              prefixIcon: const Icon(Icons.title_outlined),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            validator: (v) => (v == null || v.isEmpty) ? l10n.requiredField : null,
+                          ),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _bodyEnCtrl,
+                            maxLines: 2,
+                            decoration: InputDecoration(
+                              labelText: "${l10n.notifBodyField} (English)",
+                              prefixIcon: const Icon(Icons.message_outlined),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            validator: (v) => (v == null || v.isEmpty) ? l10n.requiredField : null,
+                          ),
+                          const SizedBox(height: 24),
+                          Text(l10n.targetAudience,
+                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                          const SizedBox(height: 8),
                           Wrap(
                             spacing: 8,
                             runSpacing: 8,
                             children: [
-                              _FilterChip(
-                                label: l10n.targetAll,
-                                selected: _target == 'all',
-                                color: _color,
-                                onTap: () =>
-                                    setState(() => _target = 'all'),
+                              FilterChip(
+                                label: Text(l10n.targetAll),
+                                selected: !_filterByCity && !_filterByBloodGroup,
+                                onSelected: (val) {
+                                  if (val) {
+                                    setState(() {
+                                      _filterByCity = false;
+                                      _filterByBloodGroup = false;
+                                    });
+                                  }
+                                },
+                                selectedColor: _color.withOpacity(0.2),
+                                checkmarkColor: _color,
                               ),
-                              _FilterChip(
-                                label: l10n.targetByCity,
-                                selected: _target == 'city',
-                                color: _color,
-                                onTap: () =>
-                                    setState(() => _target = 'city'),
+                              FilterChip(
+                                label: Text(l10n.targetByCity),
+                                selected: _filterByCity,
+                                onSelected: (val) {
+                                  setState(() => _filterByCity = val);
+                                },
+                                selectedColor: _color.withOpacity(0.2),
+                                checkmarkColor: _color,
                               ),
-                              _FilterChip(
-                                label: l10n.targetByBloodGroup,
-                                selected: _target == 'bloodGroup',
-                                color: _color,
-                                onTap: () =>
-                                    setState(() => _target = 'bloodGroup'),
+                              FilterChip(
+                                label: Text(l10n.targetByBloodGroup),
+                                selected: _filterByBloodGroup,
+                                onSelected: (val) {
+                                  setState(() => _filterByBloodGroup = val);
+                                },
+                                selectedColor: _color.withOpacity(0.2),
+                                checkmarkColor: _color,
                               ),
                             ],
                           ),
-                          if (_target == 'city') ...[
-                            const SizedBox(height: 12),
+                          if (_filterByCity) ...[
+                            const SizedBox(height: 16),
                             StreamBuilder<List<Map<String, dynamic>>>(
                               stream: HospitalService().watchCities(),
                               builder: (context, snap) {
@@ -2434,60 +2480,38 @@ class _BroadcastNotifState extends State<_BroadcastNotif> {
                                   hint: Text(l10n.selectCity),
                                   decoration: InputDecoration(
                                     labelText: l10n.city,
-                                    border: OutlineInputBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10)),
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                                   ),
-                                  items: cities
-                                      .map((c) => DropdownMenuItem(
-                                          value: c['name'] as String,
-                                          child: Text(c['name'])))
-                                      .toList(),
-                                  onChanged: (v) =>
-                                      setState(() => _targetCity = v),
-                                  validator: (v) =>
-                                      v == null ? l10n.requiredField : null,
+                                  items: cities.map((c) => DropdownMenuItem(value: c['name'] as String, child: Text(c['name']))).toList(),
+                                  onChanged: (v) => setState(() => _targetCity = v),
+                                  validator: (v) => v == null ? l10n.requiredField : null,
                                 );
                               },
                             ),
                           ],
-                          if (_target == 'bloodGroup') ...[
-                            const SizedBox(height: 12),
+                          if (_filterByBloodGroup) ...[
+                            const SizedBox(height: 16),
                             DropdownButtonFormField<String>(
                               value: _targetBloodGroup,
                               hint: Text(l10n.allBloodGroups),
                               decoration: InputDecoration(
                                 labelText: l10n.bloodGroup,
-                                border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(10)),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                               ),
-                              items: _bloodGroups
-                                  .map((bg) => DropdownMenuItem(
-                                      value: bg, child: Text(bg)))
-                                  .toList(),
-                              onChanged: (v) =>
-                                  setState(() => _targetBloodGroup = v),
-                              validator: (v) =>
-                                  v == null ? l10n.requiredField : null,
+                              items: _bloodGroups.map((bg) => DropdownMenuItem(value: bg, child: Text(bg))).toList(),
+                              onChanged: (v) => setState(() => _targetBloodGroup = v),
+                              validator: (v) => v == null ? l10n.requiredField : null,
                             ),
                           ],
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 24),
                           FilledButton.icon(
                             style: FilledButton.styleFrom(
-                                backgroundColor: _color,
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14)),
+                                backgroundColor: _color, padding: const EdgeInsets.symmetric(vertical: 14)),
                             onPressed: _sending ? null : _sendNotification,
                             icon: _sending
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                        color: Colors.white, strokeWidth: 2))
+                                ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                                 : const Icon(Icons.send_rounded),
-                            label: Text(l10n.sendNotif,
-                                style: const TextStyle(fontSize: 15)),
+                            label: Text(l10n.sendNotif, style: const TextStyle(fontSize: 15)),
                           ),
                         ],
                       ),
@@ -2495,79 +2519,54 @@ class _BroadcastNotifState extends State<_BroadcastNotif> {
                   ),
                 ),
                 const SizedBox(height: 24),
-
-                // History
                 Text(l10n.announcementHistory,
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
-                        ?.copyWith(fontWeight: FontWeight.bold)),
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 StreamBuilder<List<Map<String, dynamic>>>(
                   stream: AnnouncementService().watchRecent(limit: 20),
                   builder: (context, snap) {
-                    if (!snap.hasData) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+                    if (!snap.hasData) return const Center(child: CircularProgressIndicator());
                     final docs = snap.data!;
-                    if (docs.isEmpty) {
-                      return _EmptyState(
-                          icon: Icons.campaign_outlined,
-                          message: l10n.noAnnouncementsYet);
-                    }
+                    if (docs.isEmpty) return _EmptyState(icon: Icons.campaign_outlined, message: l10n.noAnnouncementsYet);
                     return Column(
                       children: docs.map((d) {
                         final ts = d['createdAt'] as Timestamp?;
-                        final date = ts != null
-                            ? '${ts.toDate().day}/${ts.toDate().month}/${ts.toDate().year} ${ts.toDate().hour}:${ts.toDate().minute.toString().padLeft(2, '0')}'
-                            : '—';
+                        final date = ts != null ? '${ts.toDate().day}/${ts.toDate().month}/${ts.toDate().year} ${ts.toDate().hour}:${ts.toDate().minute.toString().padLeft(2, '0')}' : '—';
                         final target = d['target'] ?? 'all';
                         final targetCity = d['targetCity'] ?? '';
                         final targetBg = d['targetBloodGroup'] ?? '';
+                        
                         String targetLabel = l10n.targetAll;
-                        if (target == 'city' && targetCity.isNotEmpty) {
+                        if (target == 'both') {
+                          targetLabel = '${l10n.city}: $targetCity, ${l10n.bloodGroup}: $targetBg';
+                        } else if (target == 'city') {
                           targetLabel = '${l10n.city}: $targetCity';
-                        } else if (target == 'bloodGroup' &&
-                            targetBg.isNotEmpty) {
+                        } else if (target == 'bloodGroup') {
                           targetLabel = '${l10n.bloodGroup}: $targetBg';
                         }
+
+                        final title = (lang == 'ar') ? (d['titleAr'] ?? d['title'] ?? '—') : (d['titleEn'] ?? d['title'] ?? '—');
+                        final body = (lang == 'ar') ? (d['bodyAr'] ?? d['body'] ?? '') : (d['bodyEn'] ?? d['body'] ?? '');
 
                         return Card(
                           margin: const EdgeInsets.only(bottom: 8),
                           elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(color: Colors.grey.shade200),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade200)),
                           child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: _color.withOpacity(0.12),
-                              child:
-                                  Icon(Icons.campaign, color: _color),
-                            ),
-                            title: Text(d['title'] ?? '—',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w600)),
+                            leading: CircleAvatar(backgroundColor: _color.withOpacity(0.12), child: Icon(Icons.campaign, color: _color)),
+                            title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
                             subtitle: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(d['body'] ?? ''),
+                                Text(body),
                                 Row(children: [
-                                  Icon(Icons.people_outline,
-                                      size: 12,
-                                      color: _color.withOpacity(0.7)),
+                                  Icon(Icons.people_outline, size: 12, color: _color.withOpacity(0.7)),
                                   const SizedBox(width: 4),
-                                  Text(targetLabel,
-                                      style: TextStyle(
-                                          fontSize: 11, color: _color)),
+                                  Text(targetLabel, style: TextStyle(fontSize: 11, color: _color)),
                                 ]),
                               ],
                             ),
-                            trailing: Text(date,
-                                style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey[500])),
+                            trailing: Text(date, style: TextStyle(fontSize: 10, color: Colors.grey[500])),
                           ),
                         );
                       }).toList(),
