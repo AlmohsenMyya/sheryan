@@ -2725,6 +2725,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sponsor updated successfully'**
   String get sponsorUpdated;
+
+  /// No description provided for @community.
+  ///
+  /// In en, this message translates to:
+  /// **'community'**
+  String get community;
+
+  /// No description provided for @needHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'needHelp'**
+  String get needHelp;
+
+  /// No description provided for @viewAllDonors.
+  ///
+  /// In en, this message translates to:
+  /// **'viewAllDonors'**
+  String get viewAllDonors;
+
+  /// No description provided for @quickActions.
+  ///
+  /// In en, this message translates to:
+  /// **'quickActions'**
+  String get quickActions;
 }
 
 class _AppLocalizationsDelegate

@@ -19,7 +19,7 @@
   "nearbyRequests": "الطلبات القريبة",
   "checkNearbyBloodRequests": "تحقق من طلبات الدم القريبة",
   "awareness": "التوعية",
-  "awarenessDonorSubtitle": "تبرع بثقة: نصائح وإرشادات أساسية",
+  "awarenessDonorSubtitle": "نصائح وإرشادات أساسية",
   "requestBlood": "طلب دم",
   "createNewBloodRequest": "إنشاء طلب دم جديد",
   "myRequests": "طلباتي",
@@ -243,14 +243,14 @@
   "noNearbyRequests": "لا توجد طلبات قريبة",
   "call": "اتصال",
   "whatsapp": "واتساب",
-  "whatsappDonorMessage": "السلام عليكم، تواصلت معك عبر تطبيق شريان بخصوص حالة المريض {patient}. أنا فصيلتي {bloodGroup} وجاهز للمساعدة، يرجى تزويدي بموقع المستشفى.",
+  "whatsappDonorMessage": "مرحبا، تواصلت معك عبر تطبيق شريان بخصوص حالة المريض {patient}. أنا فصيلتي {bloodGroup} وجاهز للمساعدة، يرجى تزويدي بموقع المستشفى.",
   "@whatsappDonorMessage": {
     "placeholders": {
       "patient": { "type": "String" },
       "bloodGroup": { "type": "String" }
     }
   },
-  "whatsappRecipientMessage": "السلام عليكم أخي {donor}، رأيت ملفك في تطبيق شريان. نحن بحاجة ماسة لمتبرع من فصيلة {bloodGroup} في مدينة {city}. هل يمكنك مساعدتنا؟",
+  "whatsappRecipientMessage": "مرحبا أخي {donor}، رأيت ملفك في تطبيق شريان. نحن بحاجة ماسة لمتبرع من فصيلة {bloodGroup} في مدينة {city}. هل يمكنك مساعدتنا؟",
   "@whatsappRecipientMessage": {
     "placeholders": {
       "donor": { "type": "String" },
@@ -609,5 +609,9 @@
   "editCity": "تعديل المدينة",
   "cityUpdated": "تم تحديث المدينة بنجاح",
   "editSponsor": "تعديل الجهة الراعية",
-  "sponsorUpdated": "تم تحديث الجهة الراعية بنجاح"
+  "sponsorUpdated": "تم تحديث الجهة الراعية بنجاح",
+  "community": "المجتمع",
+  "needHelp": "هل تحتاج إلى مساعدة؟",
+  "viewAllDonors":"عرض كل المتبرعين",
+  "quickActions":"اجراء سريع"
 }

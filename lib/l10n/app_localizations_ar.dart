@@ -66,7 +66,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get awareness => 'التوعية';
 
   @override
-  String get awarenessDonorSubtitle => 'تبرع بثقة: نصائح وإرشادات أساسية';
+  String get awarenessDonorSubtitle => 'نصائح وإرشادات أساسية';
 
   @override
   String get requestBlood => 'طلب دم';
@@ -495,7 +495,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String whatsappDonorMessage(String patient, String bloodGroup) {
-    return 'السلام عليكم، تواصلت معك عبر تطبيق شريان بخصوص حالة المريض $patient. أنا فصيلتي $bloodGroup وجاهز للمساعدة، يرجى تزويدي بموقع المستشفى.';
+    return 'مرحبا، تواصلت معك عبر تطبيق شريان بخصوص حالة المريض $patient. أنا فصيلتي $bloodGroup وجاهز للمساعدة، يرجى تزويدي بموقع المستشفى.';
   }
 
   @override
@@ -504,7 +504,7 @@ class AppLocalizationsAr extends AppLocalizations {
     String bloodGroup,
     String city,
   ) {
-    return 'السلام عليكم أخي $donor، رأيت ملفك في تطبيق شريان. نحن بحاجة ماسة لمتبرع من فصيلة $bloodGroup في مدينة $city. هل يمكنك مساعدتنا؟';
+    return 'مرحبا أخي $donor، رأيت ملفك في تطبيق شريان. نحن بحاجة ماسة لمتبرع من فصيلة $bloodGroup في مدينة $city. هل يمكنك مساعدتنا؟';
   }
 
   @override
@@ -1405,4 +1405,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get sponsorUpdated => 'تم تحديث الجهة الراعية بنجاح';
+
+  @override
+  String get community => 'المجتمع';
+
+  @override
+  String get needHelp => 'هل تحتاج إلى مساعدة؟';
+
+  @override
+  String get viewAllDonors => 'عرض كل المتبرعين';
+
+  @override
+  String get quickActions => 'اجراء سريع';
 }

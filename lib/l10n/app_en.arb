@@ -577,5 +577,10 @@
   "editCity": "Edit City",
   "cityUpdated": "City updated successfully",
   "editSponsor": "Edit Sponsor",
-  "sponsorUpdated": "Sponsor updated successfully"
+  "sponsorUpdated": "Sponsor updated successfully",
+  "community":"community",
+  "needHelp":"needHelp",
+  "viewAllDonors":"viewAllDonors",
+  "quickActions":"quickActions"
+
 }

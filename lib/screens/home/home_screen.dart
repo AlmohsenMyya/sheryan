@@ -172,16 +172,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isDark = themeMode == ThemeMode.dark;
 
     return AppBar(
+      elevation: 0,
+      centerTitle: false,
       title: Row(
         children: [
-          Image.asset('assets/logo.png', height: 28),
-          const SizedBox(width: 8),
-          Text(title),
+          Image.asset('assets/logo.png', height: 32),
+          const SizedBox(width: 10),
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         ],
       ),
       actions: [
         IconButton(
-          icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
+          icon: Icon(isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined, size: 22),
           onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
         ),
         if (userId != null)
@@ -190,9 +192,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             builder: (context, snapshot) {
               final count = snapshot.data ?? 0;
               return Stack(
+                alignment: Alignment.center,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.notifications_none),
+                    icon: const Icon(Icons.notifications_outlined, size: 22),
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(builder: (_) => const NotificationsScreen()),
@@ -200,20 +203,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   if (count > 0)
                     Positioned(
-                      right: 8,
-                      top: 8,
+                      right: 10,
+                      top: 10,
                       child: Container(
                         padding: const EdgeInsets.all(2),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryRed,
+                          color: AppColors.bloodRed,
                           borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Theme.of(context).colorScheme.surface, width: 1.5),
                         ),
                         constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                         child: Text(
                           '$count',
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 10,
+                            fontSize: 9,
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
@@ -226,11 +230,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         IconButton(
           tooltip: l10n.changeLanguage,
-          icon: const Icon(Icons.language),
+          icon: const Icon(Icons.translate_outlined, size: 22),
           onPressed: _showLanguageSheet,
         ),
         PopupMenuButton<String>(
-          icon: const Icon(Icons.settings),
+          offset: const Offset(0, 45),
+          shape: RoundedRectangleBorder(borderRadius: AppDesignConstants.borderRadiusMedium),
+          icon: const Icon(Icons.more_vert_outlined, size: 22),
           onSelected: (v) {
             if (v == 'settings') {
               Navigator.push(
@@ -251,8 +257,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 value: 'settings',
                 child: Row(
                   children: [
-                    const Icon(Icons.settings, color: Colors.black54),
-                    const SizedBox(width: 8),
+                    const Icon(Icons.settings_outlined, size: 20),
+                    const SizedBox(width: 12),
                     Text(l10n.settings),
                   ],
                 ),
@@ -261,35 +267,247 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               value: 'logout',
               child: Row(
                 children: [
-                  const Icon(Icons.logout, color: Colors.black54),
-                  const SizedBox(width: 8),
-                  Text(l10n.logout),
+                  const Icon(Icons.logout_outlined, color: AppColors.bloodRed, size: 20),
+                  const SizedBox(width: 12),
+                  Text(l10n.logout, style: const TextStyle(color: AppColors.bloodRed)),
                 ],
               ),
             ),
           ],
         ),
+        const SizedBox(width: 8),
       ],
     );
   }
 
-  Widget _statCard(String title, String value) {
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 12, top: 12),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(UserRole role) {
+    final l10n = AppLocalizations.of(context)!;
+    final name = userData?['name'] as String? ?? l10n.friend;
+    final bloodGroup = userData?['bloodGroup'] as String? ?? '-';
+    final city = userData?['city'] as String? ?? '-';
+    
+    final hour = DateTime.now().hour;
+    final greetingPrefix = hour < 12
+        ? l10n.goodMorning
+        : hour < 18
+            ? l10n.goodAfternoon
+            : l10n.goodEvening;
+
     return Container(
-      padding: AppDesignConstants.edgeInsetsMedium,
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: AppDesignConstants.borderRadiusMedium,
-        border: Border.all(color: Theme.of(context).colorScheme.outline),
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primary.withOpacity(0.8),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: AppDesignConstants.borderRadiusLarge,
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: Theme.of(context).textTheme.bodyMedium),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: AppColors.primaryRed,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$greetingPrefix,',
+                    style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.location_on_outlined, color: Colors.white, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      city,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+      Row(
+            children: [
+
+              _headerStatItem(l10n.bloodGroup, bloodGroup, Icons.bloodtype_outlined),
+              const SizedBox(width: 20),
+              _headerStatItem(
+                role == UserRole.donor ? l10n.myPoints : l10n.myRequests,
+                role == UserRole.donor ? '${userData?['points'] ?? 0}' : '${userData?['requestCount'] ?? 0}',
+                role == UserRole.donor ? Icons.stars_outlined : Icons.favorite_border,
+              ),
+              Spacer(),
+              Center(
+                child: Image.asset(
+                  'assets/logo.png',
+                  height: 120,
+                  fit: BoxFit.contain,
+                ),
+              ),
+
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _headerStatItem(String label, String value, IconData icon) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: Colors.white70, size: 14),
+            const SizedBox(width: 4),
+            Text(label, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: AppDesignConstants.borderRadiusMedium,
+          border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.5)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const Spacer(),
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6), fontSize: 11),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMotivationalBanner() {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.bloodRedLight.withOpacity(0.3),
+        borderRadius: AppDesignConstants.borderRadiusMedium,
+        border: Border.all(color: AppColors.bloodRed.withOpacity(0.1)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.format_quote, color: AppColors.bloodRed, size: 32),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.motivationTitle,
+                  style: const TextStyle(
+                    color: AppColors.bloodRed,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _currentQuote,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -297,205 +515,190 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _greeting() {
-    final l10n = AppLocalizations.of(context)!;
-    final name = userData?['name'] as String? ?? l10n.friend;
-    final hour = DateTime.now().hour;
-    final greeting = hour < 12
-        ? l10n.goodMorning
-        : hour < 18
-            ? l10n.goodAfternoon
-            : l10n.goodEvening;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('$greeting,', style: Theme.of(context).textTheme.bodyMedium),
-        const SizedBox(height: 4),
-        Text(
-          name,
-          style: Theme.of(context).textTheme.displayMedium?.copyWith(fontSize: 22),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMotivationalCard(String title, String subtitle) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListTile(
-        title: Text(
-          title,
-          style: Theme.of(context).textTheme.titleMedium,
-          textAlign: TextAlign.center,
-        ),
-        subtitle: Text(
-          subtitle,
-          style: Theme.of(context).textTheme.bodyMedium,
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCard(
-    IconData icon,
-    String title,
-    String subtitle, {
-    VoidCallback? onTap,
-  }) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-          child: Icon(
-            icon,
-            color: icon == Icons.bloodtype || icon == Icons.bloodtype_rounded
-                ? AppColors.bloodRed
-                : Theme.of(context).colorScheme.primary,
-          ),
-        ),
-        title: Text(title, style: Theme.of(context).textTheme.titleMedium),
-        subtitle: Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
-        trailing: const Icon(Icons.arrow_forward_ios, color: AppColors.textGrey, size: 16),
-        onTap: onTap,
-      ),
-    );
-  }
-
   Widget _buildBody(UserRole role) {
     final l10n = AppLocalizations.of(context)!;
-
-    // Refresh by invalidating the stream provider — it will re-subscribe and
-    // return the latest Firestore data (online) or cached data (offline).
     Future<void> onRefresh() async => ref.invalidate(userProfileProvider);
 
-    if (role == UserRole.donor) {
-      return RefreshIndicator(
-        onRefresh: onRefresh,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: AppDesignConstants.edgeInsetsMedium,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _greeting(),
-              const SizedBox(height: 10),
-              _buildMotivationalCard(l10n.motivationTitle, _currentQuote),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(child: _statCard(l10n.bloodGroup, userData?['bloodGroup'] as String? ?? '-')),
-                  const SizedBox(width: 12),
-                  Expanded(child: _statCard(l10n.city, userData?['city'] as String? ?? '-')),
-                ],
-              ),
-              const SizedBox(height: 18),
-              Card(
-                child: InkWell(
-                  borderRadius: AppDesignConstants.borderRadiusMedium,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const UsersRequestsScreen()),
-                  ),
-                  child: ListTile(
-                    leading: const Icon(Icons.bloodtype_rounded, color: AppColors.primaryRed),
-                    title: Text(l10n.usersBloodRequests, style: Theme.of(context).textTheme.bodyLarge),
-                    subtitle: Text(l10n.viewAllRequestsFromUsersAcross, style: Theme.of(context).textTheme.bodyMedium),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Card(
-                child: InkWell(
-                  borderRadius: AppDesignConstants.borderRadiusMedium,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const NearbyRequestsScreen()),
-                  ),
-                  child: ListTile(
-                    leading: const Icon(Icons.bloodtype, color: AppColors.primaryRed),
-                    title: Text(l10n.nearbyRequests, style: Theme.of(context).textTheme.bodyLarge),
-                    subtitle: Text(l10n.checkNearbyBloodRequests, style: Theme.of(context).textTheme.bodyMedium),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Card(
-                child: InkWell(
-                  borderRadius: AppDesignConstants.borderRadiusMedium,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const TipsScreen()),
-                  ),
-                  child: ListTile(
-                    leading: const Icon(Icons.tips_and_updates, color: AppColors.primaryRed),
-                    title: Text(l10n.awareness, style: Theme.of(context).textTheme.bodyLarge),
-                    subtitle: Text(l10n.awarenessDonorSubtitle, style: Theme.of(context).textTheme.bodyMedium),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // Recipient body
     return RefreshIndicator(
       onRefresh: onRefresh,
+      color: Theme.of(context).colorScheme.primary,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: AppDesignConstants.edgeInsetsMedium,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _greeting(),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(child: _statCard(l10n.bloodGroup, userData?['bloodGroup'] as String? ?? '-')),
-                const SizedBox(width: 12),
-                Expanded(child: _statCard(l10n.city, userData?['city'] as String? ?? '-')),
-              ],
+            _buildHeader(role),
+            const SizedBox(height: 24),
+            
+            if (role == UserRole.donor) ...[
+              _buildSectionHeader(l10n.quickActions),
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.4,
+                children: [
+                  _buildActionCard(
+                    title: l10n.usersBloodRequests,
+                    subtitle: l10n.viewAllRequestsFromUsersAcross,
+                    icon: Icons.bloodtype_rounded,
+                    color: AppColors.bloodRed,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const UsersRequestsScreen()),
+                    ),
+                  ),
+                  _buildActionCard(
+                    title: l10n.nearbyRequests,
+                    subtitle: l10n.checkNearbyBloodRequests,
+                    icon: Icons.near_me_outlined,
+                    color: AppColors.medicalBlue,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const NearbyRequestsScreen()),
+                    ),
+                  ),
+                  _buildActionCard(
+                    title: l10n.allDonorsTab,
+                    subtitle: l10n.viewAllDonors,
+                    icon: Icons.people_outline,
+                    color: Colors.orange,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const DonorsList()),
+                    ),
+                  ),
+                  _buildActionCard(
+                    title: l10n.awareness,
+                    subtitle: l10n.awarenessDonorSubtitle,
+                    icon: Icons.tips_and_updates_outlined,
+                    color: Colors.teal,
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const TipsScreen()),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _buildMotivationalBanner(),
+            ] else ...[
+              // Recipient body
+              _buildSectionHeader(l10n.needHelp),
+              _buildLongActionCard(
+                title: l10n.requestBlood,
+                subtitle: l10n.createNewBloodRequest,
+                icon: Icons.bloodtype,
+                color: AppColors.bloodRed,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RequestBloodScreen()),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildActionCard(
+                      title: l10n.myRequests,
+                      subtitle: l10n.trackPreviousRequests,
+                      icon: Icons.favorite_outline,
+                      color: AppColors.medicalBlue,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const RequestsListScreen()),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildActionCard(
+                      title: l10n.nearbyDonors,
+                      subtitle: l10n.trackNearbyDonors,
+                      icon: Icons.near_me,
+                      color: Colors.orange,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const NearbyDonorsScreen()),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _buildSectionHeader(l10n.community),
+              _buildLongActionCard(
+                title: l10n.awareness,
+                subtitle: l10n.awarenessUserSubtitle,
+                icon: Icons.tips_and_updates_outlined,
+                color: Colors.teal,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const TipsScreen()),
+                ),
+              ),
+            ],
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLongActionCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: AppDesignConstants.borderRadiusMedium,
+          border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.5)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
             ),
-            const SizedBox(height: 18),
-            _buildCard(
-              Icons.bloodtype,
-              l10n.requestBlood,
-              l10n.createNewBloodRequest,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const RequestBloodScreen()),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: color, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6), fontSize: 13),
+                  ),
+                ],
               ),
             ),
-            _buildCard(
-              Icons.favorite_outline,
-              l10n.myRequests,
-              l10n.trackPreviousRequests,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const RequestsListScreen()),
-              ),
-            ),
-            _buildCard(
-              Icons.near_me,
-              l10n.nearbyDonors,
-              l10n.trackNearbyDonors,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const NearbyDonorsScreen()),
-              ),
-            ),
-            _buildCard(
-              Icons.tips_and_updates,
-              l10n.awareness,
-              l10n.awarenessUserSubtitle,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const TipsScreen()),
-              ),
-            ),
+            Icon(Icons.arrow_forward_ios, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3), size: 16),
           ],
         ),
       ),

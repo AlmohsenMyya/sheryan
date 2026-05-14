@@ -1415,4 +1415,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sponsorUpdated => 'Sponsor updated successfully';
+
+  @override
+  String get community => 'community';
+
+  @override
+  String get needHelp => 'needHelp';
+
+  @override
+  String get viewAllDonors => 'viewAllDonors';
+
+  @override
+  String get quickActions => 'quickActions';
 }
