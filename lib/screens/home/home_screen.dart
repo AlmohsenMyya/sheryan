@@ -172,7 +172,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isDark = themeMode == ThemeMode.dark;
 
     return AppBar(
-      title: Text(title),
+      title: Row(
+        children: [
+          Image.asset('assets/logo.png', height: 28),
+          const SizedBox(width: 8),
+          Text(title),
+        ],
+      ),
       actions: [
         IconButton(
           icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),

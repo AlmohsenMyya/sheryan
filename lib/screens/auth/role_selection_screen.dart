@@ -35,7 +35,15 @@ class RoleSelectionScreen extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 28),
           child: Column(
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
+              Center(
+                child: Image.asset(
+                  'assets/logo.png',
+                  height: 80,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(height: 30),
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(

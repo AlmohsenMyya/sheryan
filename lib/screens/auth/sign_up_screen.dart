@@ -203,7 +203,15 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 22),
+                const SizedBox(height: 10),
+                Center(
+                  child: Image.asset(
+                    'assets/logo.png',
+                    height: 60,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(height: 20),
                 Text(
                   l10n.createAccountTitle,
                   style: theme.textTheme.displayMedium,

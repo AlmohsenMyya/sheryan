@@ -92,7 +92,15 @@ Future<void> _login() async {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 50),
+                const SizedBox(height: 40),
+                Center(
+                  child: Image.asset(
+                    'assets/logo.png',
+                    height: 100,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(height: 30),
                 Text(
                   l10n.welcomeBack,
                   style: theme.textTheme.displayMedium,

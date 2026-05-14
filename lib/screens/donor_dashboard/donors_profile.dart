@@ -266,10 +266,13 @@ class DonorProfileScreen extends ConsumerWidget {
           children: [
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 32,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.bloodtype, size: 36, color: AppColors.primaryRed),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.asset('assets/logo.png', fit: BoxFit.contain),
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
