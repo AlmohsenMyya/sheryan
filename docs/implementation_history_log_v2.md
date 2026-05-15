@@ -119,4 +119,23 @@ Extended the hospital dashboard to support non-request-based donations, facilita
 - **Modified Files:** `donation_service.dart`, `donation_repository.dart`, `hospital_dashboard.dart`, `points_service.dart`, and localization files.
 
 ---
+
+## 12. Major Architectural Refactoring & UX Standardization
+Conducted a full-scale refactor of the `HospitalDashboard` and standardized the global settings/navigation flow across all roles.
+- **Architectural Decoupling (SRP):**
+    - Broken the 850+ line `hospital_dashboard.dart` God Object into a modular folder structure (`/controllers`, `/requests`, `/history`, `/profile`, `/scanner`, `/widgets`).
+    - Extracted business logic and async state management into dedicated Riverpod Notifiers (e.g., `ScannerController`, `HospitalRequestsController`).
+    - Unified scanner logic to handle multiple scan contexts (Request, General Donation, Blood Group Verification) using a centralized state machine.
+- **UX Consistency & Centralized Settings:**
+    - Integrated the centralized `SettingsScreen` for the **Hospital Admin** role by adding a gear icon to their main AppBar.
+    - Updated `SettingsScreen` to be **role-aware**, dynamically hiding recipient-only actions (like "Reset Requests") when accessed by admins or donors.
+    - Standardized AppBars across all roles (Home, Donor, Recipient, Hospital Admin) to only show relevant action points (Notifications & Settings).
+- **Componentization:**
+    - Extracted `NotificationBadge` into a shared widget for consistent unread-count tracking.
+    - Modularized hospital statistics, request cards, and detail sheets for better maintainability.
+- **Technical Improvements:**
+    - Eliminated "Double AppBar" issues for Admin roles by allowing their dashboards to manage their own root Scaffolds.
+    - Maintained full offline resilience by integrating the `OfflineBanner` into the new modular dashboards.
+
+---
 *Log updated: May 2026*

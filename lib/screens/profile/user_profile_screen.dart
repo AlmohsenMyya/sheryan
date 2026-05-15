@@ -91,51 +91,51 @@ class ProfileScreen extends ConsumerWidget {
 
                   const SizedBox(height: 32),
 
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        QrDialog.show(
-                          context,
-                          data: uid,
-                          label: profile['name'] as String? ?? '',
-                          idLabel: l10n.donorId,
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: theme.colorScheme.secondary,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: AppDesignConstants.borderRadiusMedium,
-                          side: BorderSide(color: theme.colorScheme.secondary.withOpacity(0.3)),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.secondary.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(Icons.qr_code_scanner, color: theme.colorScheme.secondary, size: 24),
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            profile['role'] == 'donor' ? l10n.donorCard : l10n.myCard,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: theme.colorScheme.secondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.symmetric(vertical: 10),
+                  //   child: ElevatedButton(
+                  //     onPressed: () {
+                  //       QrDialog.show(
+                  //         context,
+                  //         data: uid,
+                  //         label: profile['name'] as String? ?? '',
+                  //         idLabel: l10n.donorId,
+                  //       );
+                  //     },
+                  //     style: ElevatedButton.styleFrom(
+                  //       backgroundColor: Colors.white,
+                  //       foregroundColor: theme.colorScheme.secondary,
+                  //       elevation: 0,
+                  //       padding: const EdgeInsets.symmetric(vertical: 12),
+                  //       shape: RoundedRectangleBorder(
+                  //         borderRadius: AppDesignConstants.borderRadiusMedium,
+                  //         side: BorderSide(color: theme.colorScheme.secondary.withOpacity(0.3)),
+                  //       ),
+                  //     ),
+                  //     child: Row(
+                  //       mainAxisAlignment: MainAxisAlignment.center,
+                  //       children: [
+                  //         Container(
+                  //           padding: const EdgeInsets.all(8),
+                  //           decoration: BoxDecoration(
+                  //             color: theme.colorScheme.secondary.withOpacity(0.1),
+                  //             borderRadius: BorderRadius.circular(10),
+                  //           ),
+                  //           child: Icon(Icons.qr_code_scanner, color: theme.colorScheme.secondary, size: 24),
+                  //         ),
+                  //         const SizedBox(width: 12),
+                  //         Text(
+                  //           profile['role'] == 'donor' ? l10n.donorCard : l10n.myCard,
+                  //           style: TextStyle(
+                  //             fontSize: 16,
+                  //             fontWeight: FontWeight.bold,
+                  //             color: theme.colorScheme.secondary,
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
+                  // ),
                   const SizedBox(height: 40),
                 ],
               ),

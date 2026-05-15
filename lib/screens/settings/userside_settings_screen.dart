@@ -1,3 +1,5 @@
+import 'package:sheryan/core/enums/user_role.dart';
+import 'package:sheryan/screens/home/providers/home_providers.dart';
 import 'package:sheryan/providers/locale/locale_provider.dart';
 import 'package:sheryan/providers/theme/theme_provider.dart';
 import 'package:sheryan/services/notification_service.dart';
@@ -19,6 +21,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final userRole = ref.watch(currentUserRoleProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.settings)),
@@ -36,12 +39,13 @@ class SettingsScreen extends ConsumerWidget {
                 );
               },
             ),
-            _buildCard(
-              context: context,
-              icon: Icons.history,
-              title: l10n.resetRequests,
-              onTap: () => _resetRequests(context),
-            ),
+            if (userRole == UserRole.recipient)
+              _buildCard(
+                context: context,
+                icon: Icons.history,
+                title: l10n.resetRequests,
+                onTap: () => _resetRequests(context),
+              ),
           ]),
 
           _buildSection(context, l10n.appPreferences, [
