@@ -10,6 +10,9 @@ import 'package:sheryan/providers/points/points_provider.dart';
 import 'package:sheryan/screens/sponsor/manage_reward_screen.dart';
 import 'package:sheryan/screens/sponsor/scan_redeem_screen.dart';
 
+import 'package:sheryan/widgets/notification_badge.dart';
+import 'package:sheryan/screens/settings/userside_settings_screen.dart';
+
 class SponsorDashboard extends ConsumerWidget {
   const SponsorDashboard({super.key});
 
@@ -33,15 +36,15 @@ class SponsorDashboard extends ConsumerWidget {
       appBar: AppBar(
         title: Text(l10n.sponsorDashboard),
         actions: [
+          if (uid.isNotEmpty) NotificationBadge(userId: uid),
           IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: l10n.addReward,
+            icon: const Icon(Icons.settings_outlined),
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (_) => const ManageRewardScreen()),
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
             ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: RefreshIndicator(

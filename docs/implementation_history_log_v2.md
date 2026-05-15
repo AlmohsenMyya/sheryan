@@ -138,4 +138,14 @@ Conducted a full-scale refactor of the `HospitalDashboard` and standardized the 
     - Maintained full offline resilience by integrating the `OfflineBanner` into the new modular dashboards.
 
 ---
+
+## 13. UX Standardization: Sponsor Dashboard & Centralized Settings
+Completed the global UX standardization by integrating the centralized settings flow for the **Sponsor Organization** role.
+- **Settings Integration:** Added the gear icon (`Icons.settings_outlined`) and `NotificationBadge` to the `SponsorDashboard` AppBar.
+- **Consistent Flow:** Sponsors can now access Theme toggles, Language selection, and Logout actions through the same centralized hub as other users.
+- **Clean UI:** Removed redundant "Add Reward" buttons from the AppBar to reduce clutter, relying on the existing prominent buttons within the dashboard body.
+- **Refined Permissions:** Ensured the `SettingsScreen` remains role-aware, hiding recipient-specific debug tools from Sponsor accounts.
+- **Modified Files:** `lib/screens/sponsor/sponsor_dashboard.dart`.
+
+---
 *Log updated: May 2026*
