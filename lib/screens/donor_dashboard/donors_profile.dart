@@ -92,38 +92,66 @@ class DonorProfileScreen extends ConsumerWidget {
               _buildPointsCard(context, points, tier, l10n, theme),
 
               const SizedBox(height: 8),
-
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  l10n.profileSections,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.5)),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                // 🌟 1. وضعنا الإطار والزخرفة على صندوق يحوي العنصر بالكامل
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainer, // لون الخلفية الداكن للبطاقات
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: theme.colorScheme.primary.withOpacity(0.3)), // إطار رقيق
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      )
+                    ],
+                  ),
+                  child: Theme(
+                    // 🌟 2. إخفاء خطوط الفواصل الافتراضية
+                    data: theme.copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      initiallyExpanded: false,
+                      // 🌟 3. لا نحتاج لأي متغيرات أو setState! فلاتر سيتكفل بتدوير السهم الافتراضي
+                      iconColor: theme.colorScheme.onSurface.withOpacity(0.5),
+                      collapsedIconColor: theme.colorScheme.onSurface.withOpacity(0.5),
+                      title: Text(
+                        l10n.profileSections,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                      tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                      childrenPadding: const EdgeInsets.only(bottom: 12, left: 12, right: 12),
+                      children: sections.asMap().entries.map((entry) {
+                        final i = entry.key;
+                        final s = entry.value;
+                        final title = isAr ? s.titleAr : s.titleEn;
+                        final subtitle = isAr ? s.subtitleAr : s.subtitleEn;
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: _buildSectionCard(
+                            context: context,
+                            index: i,
+                            title: title,
+                            subtitle: subtitle,
+                            weight: s.weight,
+                            isComplete: s.isComplete,
+                            requiresHospital: s.requiresHospital,
+                            l10n: l10n,
+                            theme: theme,
+                            onTap: s.requiresHospital
+                                ? null
+                                : () => navigateToSection(_screenForIndex(i, data)),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: 8),
-
-              ...sections.asMap().entries.map((entry) {
-                final i = entry.key;
-                final s = entry.value;
-                final title = isAr ? s.titleAr : s.titleEn;
-                final subtitle = isAr ? s.subtitleAr : s.subtitleEn;
-                return _buildSectionCard(
-                  context: context,
-                  index: i,
-                  title: title,
-                  subtitle: subtitle,
-                  weight: s.weight,
-                  isComplete: s.isComplete,
-                  requiresHospital: s.requiresHospital,
-                  l10n: l10n,
-                  theme: theme,
-                  onTap: s.requiresHospital
-                      ? null
-                      : () => navigateToSection(_screenForIndex(i, data)),
-                );
-              }),
-
               const SizedBox(height: 16),
               _buildRewardsCard(context, l10n, theme),
               const SizedBox(height: 5),

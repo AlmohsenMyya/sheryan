@@ -42,14 +42,14 @@ class _MotivationalBannerState extends ConsumerState<MotivationalBanner> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  l10n.motivationTitle,
-                  style: const TextStyle(
-                    color: AppColors.bloodRed,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
+                // Text(
+                //   l10n.motivationTitle,
+                //   style: const TextStyle(
+                //     color: AppColors.bloodRed,
+                //     fontWeight: FontWeight.bold,
+                //     fontSize: 14,
+                //   ),
+                // ),
                 const SizedBox(height: 4),
                 Text(
                   _currentQuote,

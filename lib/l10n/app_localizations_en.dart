@@ -414,25 +414,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unknown => 'Unknown';
 
   @override
-  String get quote1 => 'Your single act can save lives.';
+  String get quote1 =>
+      '\"The only way to connect human hearts is through that warm red path flowing in our veins.\" — One Piece';
 
   @override
-  String get quote2 => 'Be the reason someone survives today.';
+  String get quote2 =>
+      '\"When does a person die?... They die when others forget them! Your donation leaves an immortal mark.\" — Dr. Hiriluk';
 
   @override
-  String get quote3 => 'Every drop counts — donate blood.';
+  String get quote3 =>
+      '\"We simply cannot survive without the help of others... Donate blood and be someone\'s pillar.\" — Monkey D. Luffy';
 
   @override
-  String get quote4 => 'Giving blood is giving hope.';
+  String get quote4 =>
+      '\"As long as you are in pain and need help, it is my duty to lend you a hand.\" — Sanji';
 
   @override
-  String get quote5 => 'Heroes don\'t wear capes, they donate blood.';
+  String get quote5 =>
+      '\"There is no pain in this world that cannot be eased by standing together... Your drops plant hope.\" — Chopper';
 
   @override
-  String get quote6 => 'You can make a difference today.';
+  String get quote6 =>
+      '\"If someone remembers you in the future, let them remember you as the one who gave life with a smile.\" — Corazon';
 
   @override
-  String get quote7 => 'One call, one donation, one life saved.';
+  String get quote7 =>
+      '\"As long as we are alive, there is always hope! Donate and grant the miracle of life.\" — Brook';
 
   @override
   String get donorDetails => 'Donor Details';

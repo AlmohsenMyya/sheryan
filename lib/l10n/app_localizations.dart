@@ -845,43 +845,43 @@ abstract class AppLocalizations {
   /// No description provided for @quote1.
   ///
   /// In en, this message translates to:
-  /// **'Your single act can save lives.'**
+  /// **'\"The only way to connect human hearts is through that warm red path flowing in our veins.\" — One Piece'**
   String get quote1;
 
   /// No description provided for @quote2.
   ///
   /// In en, this message translates to:
-  /// **'Be the reason someone survives today.'**
+  /// **'\"When does a person die?... They die when others forget them! Your donation leaves an immortal mark.\" — Dr. Hiriluk'**
   String get quote2;
 
   /// No description provided for @quote3.
   ///
   /// In en, this message translates to:
-  /// **'Every drop counts — donate blood.'**
+  /// **'\"We simply cannot survive without the help of others... Donate blood and be someone\'s pillar.\" — Monkey D. Luffy'**
   String get quote3;
 
   /// No description provided for @quote4.
   ///
   /// In en, this message translates to:
-  /// **'Giving blood is giving hope.'**
+  /// **'\"As long as you are in pain and need help, it is my duty to lend you a hand.\" — Sanji'**
   String get quote4;
 
   /// No description provided for @quote5.
   ///
   /// In en, this message translates to:
-  /// **'Heroes don\'t wear capes, they donate blood.'**
+  /// **'\"There is no pain in this world that cannot be eased by standing together... Your drops plant hope.\" — Chopper'**
   String get quote5;
 
   /// No description provided for @quote6.
   ///
   /// In en, this message translates to:
-  /// **'You can make a difference today.'**
+  /// **'\"If someone remembers you in the future, let them remember you as the one who gave life with a smile.\" — Corazon'**
   String get quote6;
 
   /// No description provided for @quote7.
   ///
   /// In en, this message translates to:
-  /// **'One call, one donation, one life saved.'**
+  /// **'\"As long as we are alive, there is always hope! Donate and grant the miracle of life.\" — Brook'**
   String get quote7;
 
   /// No description provided for @donorDetails.

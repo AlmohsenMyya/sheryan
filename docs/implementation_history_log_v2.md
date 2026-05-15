@@ -80,4 +80,14 @@ The project is highly modular. When adding features:
 4.  **Branding:** Follow the blue gradient for recipients and red gradient for donors.
 
 ---
+
+## 9. UX: Collapsible Profile Completion (Donor Dashboard)
+Refactored the donor's profile completion tasks to reduce vertical clutter and improve navigation focus.
+- **UI Refactoring:** Replaced the static list of 5 completion cards (Basic Info, Health, Medical History, etc.) with a borderless `ExpansionTile`.
+- **UX Benefits:** 
+    - The section is now collapsed by default, allowing donors to quickly access their points history, rewards, and donation history without excessive scrolling.
+    - Maintains a cleaner interface while keeping high-priority tasks easily accessible upon expansion.
+- **Modified Files:** `lib/screens/donor_dashboard/donors_profile.dart`.
+
+---
 *Log updated: May 2026*
