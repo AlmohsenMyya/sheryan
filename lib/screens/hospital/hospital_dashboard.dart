@@ -39,11 +39,11 @@ class _HospitalDashboardState extends ConsumerState<HospitalDashboard>
     super.dispose();
   }
 
-  void _openScanner(BuildContext context, {required bool isVerifyOnly}) {
+  void _openScanner(BuildContext context, {required bool isVerifyOnly, bool isGeneral = false}) {
     Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (_) => ScannerScreen(isVerifyOnly: isVerifyOnly)),
+          builder: (_) => ScannerScreen(isVerifyOnly: isVerifyOnly, isGeneral: isGeneral)),
     );
   }
 
@@ -89,8 +89,8 @@ class _HospitalDashboardState extends ConsumerState<HospitalDashboard>
                         hospitalId: hospitalId,
                         hospitalName: hospitalName,
                         adminUid: adminUid,
-                        onOpenScanner: (isVerifyOnly) =>
-                            _openScanner(context, isVerifyOnly: isVerifyOnly),
+                        onOpenScanner: (isVerifyOnly, {isGeneral = false}) =>
+                            _openScanner(context, isVerifyOnly: isVerifyOnly, isGeneral: isGeneral),
                         onVerifyBloodGroup: () =>
                             _openBloodGroupVerification(context),
                       ),
@@ -212,7 +212,7 @@ class _RequestsTab extends StatelessWidget {
   final String hospitalId;
   final String hospitalName;
   final String adminUid;
-  final void Function(bool isVerifyOnly) onOpenScanner;
+  final void Function(bool isVerifyOnly, {bool isGeneral}) onOpenScanner;
   final VoidCallback onVerifyBloodGroup;
 
   const _RequestsTab({
@@ -232,33 +232,50 @@ class _RequestsTab extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-          child: Row(
+          child: Column(
             children: [
-              Expanded(
-                child: _ActionBtn(
-                  icon: Icons.verified_user,
-                  label: l10n.verifyRequest,
-                  color: Theme.of(context).colorScheme.primary,
-                  onTap: () => onOpenScanner(true),
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ActionBtn(
+                      icon: Icons.verified_user,
+                      label: l10n.verifyRequest,
+                      color: Theme.of(context).colorScheme.primary,
+                      onTap: () => onOpenScanner(true),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _ActionBtn(
+                      icon: Icons.handshake,
+                      label: l10n.registerDonation,
+                      color: AppColors.success,
+                      onTap: () => onOpenScanner(false),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _ActionBtn(
-                  icon: Icons.handshake,
-                  label: l10n.registerDonation,
-                  color: AppColors.success,
-                  onTap: () => onOpenScanner(false),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _ActionBtn(
-                  icon: Icons.bloodtype,
-                  label: l10n.verifyDonorBloodGroup,
-                  color: Colors.deepPurple,
-                  onTap: onVerifyBloodGroup,
-                ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ActionBtn(
+                      icon: Icons.bloodtype,
+                      label: l10n.verifyDonorBloodGroup,
+                      color: Colors.deepPurple,
+                      onTap: onVerifyBloodGroup,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _ActionBtn(
+                      icon: Icons.volunteer_activism,
+                      label: l10n.registerGeneralDonation,
+                      color: Colors.teal,
+                      onTap: () => onOpenScanner(false, isGeneral: true),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1204,6 +1221,14 @@ class _DonationHistoryTab extends StatelessWidget {
                                       color: Colors.grey[600]),
                                 );
                               },
+                            )
+                          else
+                            Text(
+                              l10n.bloodBankStock,
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.teal.shade700,
+                                  fontWeight: FontWeight.w500),
                             ),
                           const SizedBox(height: 4),
                           Row(children: [
@@ -1257,7 +1282,8 @@ class _DonationHistoryTab extends StatelessWidget {
 
 class ScannerScreen extends ConsumerStatefulWidget {
   final bool isVerifyOnly;
-  const ScannerScreen({super.key, required this.isVerifyOnly});
+  final bool isGeneral;
+  const ScannerScreen({super.key, required this.isVerifyOnly, this.isGeneral = false});
 
   @override
   ConsumerState<ScannerScreen> createState() => _ScannerScreenState();
@@ -1281,6 +1307,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
 
     if (widget.isVerifyOnly) {
       await _handleVerifyRequest(code);
+    } else if (widget.isGeneral) {
+      await _handleGeneralDonationScan(code);
     } else {
       if (donorId == null) {
         await _handleDonorScan(code);
@@ -1330,6 +1358,7 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     try {
       final doc = await UserService().getById(id);
       if (doc == null) throw Exception(l10n.invalidQr);
+      if (doc['role'] != 'donor') throw Exception('QR does not belong to a donor');
 
       setState(() {
         donorId = id;
@@ -1339,6 +1368,59 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
             content:
                 Text(l10n.donorDetected(doc['name'] ?? l10n.unknown))),
       );
+    } catch (e) {
+      _showError(e.toString().replaceAll('Exception: ', ''));
+    }
+  }
+
+  Future<void> _handleGeneralDonationScan(String id) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final doc = await UserService().getById(id);
+      if (doc == null) throw Exception(l10n.invalidQr);
+      if (doc['role'] != 'donor') throw Exception('QR does not belong to a donor');
+
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.confirmGeneralDonationTitle),
+          content: Text(l10n.confirmGeneralDonationBody),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(l10n.cancel)),
+            ElevatedButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(l10n.confirm)),
+          ],
+        ),
+      );
+
+      if (confirm == true) {
+        await _completeGeneralDonation(id);
+      }
+    } catch (e) {
+      _showError(e.toString().replaceAll('Exception: ', ''));
+    }
+  }
+
+  Future<void> _completeGeneralDonation(String id) async {
+    final l10n = AppLocalizations.of(context)!;
+    final adminProfile = ref.read(userProfileProvider).value;
+
+    try {
+      await DonationService().registerGeneralDonation(
+        donorId: id,
+        hospitalId: adminProfile?['hospitalId'] as String? ?? '',
+        hospitalName: adminProfile?['name'] as String? ?? '',
+        adminUid: adminProfile?['uid'] as String? ?? '',
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.generalDonationSuccess)));
+        Navigator.pop(context);
+      }
     } catch (e) {
       _showError(e.toString());
     }
@@ -1427,7 +1509,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     final l10n = AppLocalizations.of(context)!;
     final String title = widget.isVerifyOnly
         ? l10n.verifyRequest
-        : (donorId == null ? l10n.step1Of2 : l10n.step2Of2);
+        : (widget.isGeneral
+            ? l10n.registerGeneralDonation
+            : (donorId == null ? l10n.step1Of2 : l10n.step2Of2));
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),
@@ -1457,9 +1541,11 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
               child: Text(
                 widget.isVerifyOnly
                     ? l10n.scanRequestQr
-                    : (donorId == null
-                        ? l10n.waitingForDonor
-                        : l10n.waitingForRequest),
+                    : (widget.isGeneral
+                        ? l10n.scanDonorQr
+                        : (donorId == null
+                            ? l10n.waitingForDonor
+                            : l10n.waitingForRequest)),
                 textAlign: TextAlign.center,
                 style:
                     const TextStyle(color: Colors.white, fontSize: 16),

@@ -12,6 +12,7 @@ class PointsEvent {
   static const String consecutiveDonation = 'consecutive_donation_bonus';
   static const String bloodRarityBonus = 'blood_rarity_bonus';
   static const String emergencyDonationBonus = 'emergency_donation_bonus';
+  static const String generalDonation = 'general_donation';
 }
 
 class PointsValue {
@@ -23,6 +24,7 @@ class PointsValue {
   static const int bloodGroupVerified = 100;
   static const int profileComplete = 50;
   static const int donationRegistered = 200;
+  static const int generalDonation = 150;
   static const int consecutiveDonation = 50;
   static const int bloodRarityBonus = 100;
   static const int emergencyDonationBonus = 200;
@@ -185,6 +187,17 @@ class PointsService {
     }
 
     return totalAwarded;
+  }
+
+  /// Awards points for a general periodic donation (150 pts).
+  Future<void> awardGeneralDonationPoints(String uid, String hospitalName) async {
+    await awardPoints(
+      uid: uid,
+      event: PointsEvent.generalDonation,
+      points: PointsValue.generalDonation,
+      descriptionAr: 'تبرع دوري عام - $hospitalName',
+      descriptionEn: 'General periodic donation - $hospitalName',
+    );
   }
 
   /// Awards points for a verified donation.

@@ -58,6 +58,35 @@ class FirebaseDonationRepository implements DonationRepository {
   }
 
   @override
+  Future<void> registerGeneralDonationBatch({
+    required String donorId,
+    required String hospitalId,
+    required String hospitalName,
+    required String adminUid,
+  }) async {
+    final batch = _fs.batch();
+
+    batch.update(
+      _fs.collection('users').doc(donorId),
+      {'lastDonated': DateTime.now().toIso8601String()},
+    );
+
+    final donRef = _fs.collection('donations').doc();
+    final donData = <String, dynamic>{
+      'donorId': donorId,
+      'requestId': null, // Explicitly null for general donations
+      'hospitalId': hospitalId,
+      'hospitalName': hospitalName,
+      'timestamp': FieldValue.serverTimestamp(),
+      'verifiedBy': adminUid,
+      'type': 'general',
+    };
+    batch.set(donRef, donData);
+
+    await batch.commit();
+  }
+
+  @override
   Future<String?> getDonorIdForRequest(String requestId) async {
     final snap = await _fs
         .collection('donations')

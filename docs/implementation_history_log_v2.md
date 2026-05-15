@@ -103,4 +103,20 @@ Implemented a security layer to prevent "verification spoofing" and ensure fair 
 - **Modified Files:** `lib/screens/donor_dashboard/profile_sections/basic_info_screen.dart`.
 
 ---
+
+## 11. Feature: General & Periodic Donation Registration
+Extended the hospital dashboard to support non-request-based donations, facilitating blood bank inventory growth.
+- **Data Layer:** 
+    - Added `registerGeneralDonationBatch` to `DonationRepository` to atomically update donor's `lastDonated` and create a `general` type donation record.
+    - Updated `DonationService` to manage general donation flows.
+- **Point System:** Introduced `general_donation` event awarding **150 points** to encourage voluntary periodic donations.
+- **UI/UX Refactoring:** 
+    - Reorganized `HospitalDashboard` actions into a **2x2 Grid** for better accessibility.
+    - Added "General/Periodic Donation" action button.
+    - Enhanced `ScannerScreen` to be context-aware, supporting single-scan flows for general donations with a confirmation dialog.
+    - Improved `DonationHistoryTab` to distinguish between request-based and general blood bank donations.
+- **Bug Fix:** Fixed an issue where the `ScannerScreen` title and logic incorrectly expected a second scan (Request QR) during general donation registrations.
+- **Modified Files:** `donation_service.dart`, `donation_repository.dart`, `hospital_dashboard.dart`, `points_service.dart`, and localization files.
+
+---
 *Log updated: May 2026*

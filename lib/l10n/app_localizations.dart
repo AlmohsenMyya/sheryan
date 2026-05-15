@@ -1379,8 +1379,38 @@ abstract class AppLocalizations {
   /// No description provided for @registerDonation.
   ///
   /// In en, this message translates to:
-  /// **'Register Successful Donation'**
+  /// **'Register Request Donation'**
   String get registerDonation;
+
+  /// No description provided for @registerGeneralDonation.
+  ///
+  /// In en, this message translates to:
+  /// **'General/Periodic Donation'**
+  String get registerGeneralDonation;
+
+  /// No description provided for @confirmGeneralDonationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm General Donation'**
+  String get confirmGeneralDonationTitle;
+
+  /// No description provided for @confirmGeneralDonationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to register a general donation for this donor? This will update their last donation date and award 150 points.'**
+  String get confirmGeneralDonationBody;
+
+  /// No description provided for @generalDonationSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'General donation registered successfully!'**
+  String get generalDonationSuccess;
+
+  /// No description provided for @bloodBankStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood Bank Inventory'**
+  String get bloodBankStock;
 
   /// No description provided for @scanRequestQr.
   ///

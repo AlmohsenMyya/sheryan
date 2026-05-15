@@ -722,7 +722,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verifyRequest => 'Verify Request';
 
   @override
-  String get registerDonation => 'Register Successful Donation';
+  String get registerDonation => 'Register Request Donation';
+
+  @override
+  String get registerGeneralDonation => 'General/Periodic Donation';
+
+  @override
+  String get confirmGeneralDonationTitle => 'Confirm General Donation';
+
+  @override
+  String get confirmGeneralDonationBody =>
+      'Are you sure you want to register a general donation for this donor? This will update their last donation date and award 150 points.';
+
+  @override
+  String get generalDonationSuccess =>
+      'General donation registered successfully!';
+
+  @override
+  String get bloodBankStock => 'Blood Bank Inventory';
 
   @override
   String get scanRequestQr => 'Scan Request QR';

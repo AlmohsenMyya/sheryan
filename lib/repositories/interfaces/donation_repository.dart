@@ -23,6 +23,16 @@ abstract class DonationRepository {
     bool manualOverride,
   });
 
+  /// Atomically registers a general donation (not linked to a specific request):
+  ///   • updates the donor's lastDonated timestamp
+  ///   • writes the new donation record
+  Future<void> registerGeneralDonationBatch({
+    required String donorId,
+    required String hospitalId,
+    required String hospitalName,
+    required String adminUid,
+  });
+
   /// Returns the donorId for the first donation linked to [requestId],
   /// or null if none exists yet.
   Future<String?> getDonorIdForRequest(String requestId);

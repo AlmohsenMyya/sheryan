@@ -30,6 +30,26 @@ class DonationService {
 
   // ── Business logic ─────────────────────────────────────────────────────────
 
+  /// Registers a general donation not linked to a specific request.
+  Future<Map<String, dynamic>?> registerGeneralDonation({
+    required String donorId,
+    required String hospitalId,
+    required String hospitalName,
+    required String adminUid,
+  }) async {
+    await _repo.registerGeneralDonationBatch(
+      donorId: donorId,
+      hospitalId: hospitalId,
+      hospitalName: hospitalName,
+      adminUid: adminUid,
+    );
+
+    final donorData = await _userRepo.getById(donorId);
+    await _points.awardGeneralDonationPoints(donorId, hospitalName);
+
+    return donorData;
+  }
+
   /// Atomically registers a donation, then awards points to the donor.
   ///
   /// Returns a record with the updated [donorData] and [requestData] maps

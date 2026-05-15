@@ -713,7 +713,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String get verifyRequest => 'توثيق حالة';
 
   @override
-  String get registerDonation => 'تسجيل تبرع ناجح';
+  String get registerDonation => 'توثيق تبرع لحالة';
+
+  @override
+  String get registerGeneralDonation => 'تبرع عام / دوري';
+
+  @override
+  String get confirmGeneralDonationTitle => 'تأكيد تبرع عام';
+
+  @override
+  String get confirmGeneralDonationBody =>
+      'هل أنت متأكد من تسجيل تبرع عام لهذا المتبرع؟ سيتم تحديث تاريخ آخر تبرع ومنحه 150 نقطة.';
+
+  @override
+  String get generalDonationSuccess => 'تم تسجيل التبرع العام بنجاح!';
+
+  @override
+  String get bloodBankStock => 'مخزون بنك الدم';
 
   @override
   String get scanRequestQr => 'مسح رمز الطلب';
