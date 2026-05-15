@@ -38,6 +38,7 @@ class AuthService {
         'phone': phone,
         'lastDonated': lastDonated,
         'hospitalId': hospitalId, // ✅ For hospitalAdmin
+        'hasDonated': false, // ✅ New users haven't donated via app yet
         'fcmToken': token,
         'createdAt': FieldValue.serverTimestamp(),
       });

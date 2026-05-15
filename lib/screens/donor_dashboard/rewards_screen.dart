@@ -83,6 +83,9 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
     final points = pointsData['points'] as int;
     final tier = pointsData['tier'] as String;
 
+    final profile = ref.watch(userProfileProvider).asData?.value ?? {};
+    final hasDonated = (profile['hasDonated'] as bool?) ?? false;
+
     return DefaultTabController(
       length: 2,
       child: Scaffold(
@@ -98,11 +101,13 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
       ),
       body: Column(
         children: [
+          if (!hasDonated)
+            _buildDonationWarning(l10n, theme),
           _buildPointsHeader(context, points, tier, uid, userName, l10n, theme),
           Expanded(
             child: TabBarView(
               children: [
-                _buildRewardsTab(context, points, l10n, theme),
+                _buildRewardsTab(context, points, hasDonated, l10n, theme),
                 _buildHistoryTab(context, l10n, theme),
               ],
             ),
@@ -110,6 +115,30 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
         ],
       ),
     ),
+    );
+  }
+
+  Widget _buildDonationWarning(AppLocalizations l10n, ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      color: Colors.orange.shade50,
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, color: Colors.orange, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              l10n.redeemLockedMessage,
+              style: TextStyle(
+                color: Colors.orange.shade900,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -279,7 +308,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
   }
 
   Widget _buildRewardsTab(
-      BuildContext context, int points, AppLocalizations l10n, ThemeData theme) {
+      BuildContext context, int points, bool hasDonated, AppLocalizations l10n, ThemeData theme) {
     final rewardsAsync = ref.watch(cityRewardsProvider(_selectedCity));
 
     return Column(
@@ -350,7 +379,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                 padding: AppDesignConstants.edgeInsetsMedium,
                 itemCount: rewards.length,
                 itemBuilder: (ctx, i) =>
-                    _buildRewardCard(context, rewards[i], points, l10n, theme),
+                    _buildRewardCard(context, rewards[i], points, hasDonated, l10n, theme),
               );
             },
           ),
@@ -363,11 +392,13 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
     BuildContext context,
     Map<String, dynamic> reward,
     int points,
+    bool hasDonated,
     AppLocalizations l10n,
     ThemeData theme,
   ) {
     final required = (reward['pointsRequired'] as int?) ?? 0;
-    final canRedeem = points >= required;
+    final enoughPoints = points >= required;
+    final canRedeem = enoughPoints && hasDonated;
     final phone = reward['sponsorPhone'] as String? ?? '';
 
     return Card(
@@ -412,12 +443,12 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: canRedeem
+                    color: enoughPoints
                         ? AppColors.success.withOpacity(0.12)
                         : theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: canRedeem
+                      color: enoughPoints
                           ? AppColors.success.withOpacity(0.4)
                           : Colors.transparent,
                     ),
@@ -427,7 +458,7 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: canRedeem
+                      color: enoughPoints
                           ? AppColors.success
                           : theme.colorScheme.onSurface.withOpacity(0.5),
                     ),
@@ -455,10 +486,12 @@ class _RewardsScreenState extends ConsumerState<RewardsScreen> {
                     onPressed: canRedeem
                         ? () => _confirmRedeem(context, reward, l10n)
                         : null,
-                    icon: const Icon(Icons.redeem, size: 18),
-                    label: Text(canRedeem
-                        ? l10n.redeemReward
-                        : l10n.notEnoughPoints),
+                    icon: Icon(hasDonated ? Icons.redeem : Icons.lock_outline, size: 18),
+                    label: Text(
+                      !hasDonated 
+                        ? l10n.donationRequiredToRedeem
+                        : (!enoughPoints ? l10n.notEnoughPoints : l10n.redeemReward)
+                    ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
                           canRedeem ? AppColors.primaryRed : null,

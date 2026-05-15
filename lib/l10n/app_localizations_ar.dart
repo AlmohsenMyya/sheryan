@@ -1417,4 +1417,14 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get quickActions => 'اجراء سريع';
+
+  @override
+  String get redeemLockedMessage =>
+      'يجب إجراء عملية تبرع واحدة على الأقل لتتمكن من استبدال النقاط.';
+
+  @override
+  String get firstDonationRequired => 'مطلوب أول تبرع';
+
+  @override
+  String get donationRequiredToRedeem => 'التبرع مطلوب للاستبدال';
 }

@@ -581,6 +581,8 @@
   "community":"community",
   "needHelp":"needHelp",
   "viewAllDonors":"viewAllDonors",
-  "quickActions":"quickActions"
-
+  "quickActions":"quickActions",
+  "redeemLockedMessage": "At least one donation is required to redeem points.",
+  "firstDonationRequired": "First donation required",
+  "donationRequiredToRedeem": "Donation required to redeem"
 }

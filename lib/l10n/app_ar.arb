@@ -613,5 +613,8 @@
   "community": "المجتمع",
   "needHelp": "هل تحتاج إلى مساعدة؟",
   "viewAllDonors":"عرض كل المتبرعين",
-  "quickActions":"اجراء سريع"
+  "quickActions":"اجراء سريع",
+  "redeemLockedMessage": "يجب إجراء عملية تبرع واحدة على الأقل لتتمكن من استبدال النقاط.",
+  "firstDonationRequired": "مطلوب أول تبرع",
+  "donationRequiredToRedeem": "التبرع مطلوب للاستبدال"
 }

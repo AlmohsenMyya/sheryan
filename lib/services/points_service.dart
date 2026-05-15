@@ -61,7 +61,11 @@ class PointsService {
       final newTotal = current + points;
       final tier = tierForPoints(newTotal);
 
-      tx.update(userRef, {'points': newTotal, 'tier': tier});
+      tx.update(userRef, {
+        'points': newTotal, 
+        'tier': tier,
+        if (event == PointsEvent.donationRegistered) 'hasDonated': true,
+      });
       tx.set(historyRef, {
         'event': event,
         'points': points,
@@ -247,8 +251,11 @@ class PointsService {
     bool success = false;
     await _fs.runTransaction((tx) async {
       final snap = await tx.get(userRef);
-      final current = (snap.data()?['points'] as int?) ?? 0;
-      if (current < pointsRequired) {
+      final data = snap.data();
+      final current = (data?['points'] as int?) ?? 0;
+      final hasDonated = (data?['hasDonated'] as bool?) ?? false;
+
+      if (current < pointsRequired || !hasDonated) {
         success = false;
         return;
       }

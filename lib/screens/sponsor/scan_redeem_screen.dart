@@ -58,6 +58,18 @@ class _ScanRedeemScreenState extends State<ScanRedeemScreen> {
       }
 
       final donorName = userDoc.data()?['name'] as String? ?? donorUid;
+      final hasDonated = (userDoc.data()?['hasDonated'] as bool?) ?? false;
+
+      if (!hasDonated) {
+        setState(() {
+          _success = false;
+          _statusMsg = '${l10n.redeemLockedMessage}\n($donorName)';
+          _done = true;
+          _processing = false;
+        });
+        return;
+      }
+
       final ok = await _pts.deductPoints(
         donorUid: donorUid,
         sponsorUid: sponsorUid,

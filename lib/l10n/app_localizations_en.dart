@@ -1427,4 +1427,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quickActions => 'quickActions';
+
+  @override
+  String get redeemLockedMessage =>
+      'At least one donation is required to redeem points.';
+
+  @override
+  String get firstDonationRequired => 'First donation required';
+
+  @override
+  String get donationRequiredToRedeem => 'Donation required to redeem';
 }

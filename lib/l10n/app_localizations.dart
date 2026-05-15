@@ -2749,6 +2749,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'quickActions'**
   String get quickActions;
+
+  /// No description provided for @redeemLockedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'At least one donation is required to redeem points.'**
+  String get redeemLockedMessage;
+
+  /// No description provided for @firstDonationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'First donation required'**
+  String get firstDonationRequired;
+
+  /// No description provided for @donationRequiredToRedeem.
+  ///
+  /// In en, this message translates to:
+  /// **'Donation required to redeem'**
+  String get donationRequiredToRedeem;
 }
 
 class _AppLocalizationsDelegate
