@@ -8,7 +8,7 @@ on:
         required: true
         default: "v0.2.0"
       target_commit:
-        description: "Commit SHA or Branch (اتركه فارغاً لبناء آخر كوميت)"
+        description: "Commit SHA or Branch (leave blank for latest commit)"
         required: false
         type: string
         default: ""
@@ -27,25 +27,29 @@ jobs:
         with:
           ref: ${{ github.event.inputs.target_commit }}
 
-      # 2️⃣ Java
+      # 2️⃣ Setup Java
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: "temurin"
           java-version: "17"
 
-      # 3️⃣ Flutter
+      # 🌟 Safe Gradle Cache to speed up builds 🌟
+      - name: Setup Gradle Cache
+        uses: gradle/actions/setup-gradle@v3
+
+      # 3️⃣ Setup Flutter
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          cache: true
+          cache: true # Caches pub dependencies
 
-      # 4️⃣ Dependencies
+      # 4️⃣ Install Dependencies
       - name: Install dependencies
         run: flutter pub get
 
-      # 5️⃣ استخراج ملف الـ .env السرّي من إعدادات المستودع 🔥
+      # 5️⃣ Extract secure .env file from GitHub Secrets 🔥
       - name: Create .env file from GitHub Secrets
         run: |
           echo "${{ secrets.ENV_FILE }}" > .env
@@ -61,7 +65,7 @@ jobs:
           mv build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk Shreyan-${{ github.event.inputs.version_name }}-armv7.apk
           mv build/app/outputs/flutter-apk/app-x86_64-release.apk Shreyan-${{ github.event.inputs.version_name }}-x86_64.apk
 
-      # 8️⃣ استخراج معلومات الكوميت للمسة الاحترافية 🌟
+      # 8️⃣ Extract Commit Info for Release Notes 🌟
       - name: Get Commit Info
         id: commit_info
         run: |
@@ -75,11 +79,11 @@ jobs:
           tag_name: ${{ github.event.inputs.version_name }}
           name: Shreyan ${{ github.event.inputs.version_name }}
           body: |
-            🚀 **إصدار جديد Shreyan: ${{ github.event.inputs.version_name }}**
+            🚀 **New Shreyan Release: ${{ github.event.inputs.version_name }}**
             
-            **معلومات البناء (Build Info):**
-            - 📌 **رمز الكوميت (Commit):** `${{ steps.commit_info.outputs.sha }}`
-            - 📝 **رسالة الكوميت:** ${{ steps.commit_info.outputs.msg }}
+            **Build Information:**
+            - 📌 **Commit SHA:** `${{ steps.commit_info.outputs.sha }}`
+            - 📝 **Commit Message:** ${{ steps.commit_info.outputs.msg }}
           files: |
             Shreyan-${{ github.event.inputs.version_name }}-arm64.apk
             Shreyan-${{ github.event.inputs.version_name }}-armv7.apk
