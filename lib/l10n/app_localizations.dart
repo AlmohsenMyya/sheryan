@@ -1367,7 +1367,7 @@ abstract class AppLocalizations {
   /// No description provided for @hospitalAdminDashboard.
   ///
   /// In en, this message translates to:
-  /// **'Hospital Admin Dashboard'**
+  /// **'Sheryan'**
   String get hospitalAdminDashboard;
 
   /// No description provided for @verifyRequest.
@@ -2749,6 +2749,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'quickActions'**
   String get quickActions;
+
+  /// No description provided for @nearbyHospitals.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby Blood Banks'**
+  String get nearbyHospitals;
+
+  /// No description provided for @trackNearbyHospitals.
+  ///
+  /// In en, this message translates to:
+  /// **'Find blood banks near you'**
+  String get trackNearbyHospitals;
+
+  /// No description provided for @noHospitalsFoundInCity.
+  ///
+  /// In en, this message translates to:
+  /// **'No hospitals found in {city}'**
+  String noHospitalsFoundInCity(String city);
+
+  /// No description provided for @callHospital.
+  ///
+  /// In en, this message translates to:
+  /// **'Call Hospital'**
+  String get callHospital;
+
+  /// No description provided for @hospitalProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital Profile'**
+  String get hospitalProfile;
+
+  /// No description provided for @inquiryPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Inquiry Phone'**
+  String get inquiryPhone;
+
+  /// No description provided for @fullAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Address'**
+  String get fullAddress;
+
+  /// No description provided for @updateHospitalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Hospital Information'**
+  String get updateHospitalInfo;
+
+  /// No description provided for @hospitalInfoUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Hospital information updated successfully'**
+  String get hospitalInfoUpdated;
 
   /// No description provided for @redeemLockedMessage.
   ///

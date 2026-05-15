@@ -12,6 +12,8 @@ import 'package:sheryan/core/theme/app_design_constants.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
 import 'package:sheryan/providers/auth/auth_provider.dart';
 
+import '../../services/hospital_service.dart';
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 class HospitalDashboard extends ConsumerStatefulWidget {
@@ -28,7 +30,7 @@ class _HospitalDashboardState extends ConsumerState<HospitalDashboard>
   @override
   void initState() {
     super.initState();
-    _tab = TabController(length: 2, vsync: this);
+    _tab = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -69,6 +71,7 @@ class _HospitalDashboardState extends ConsumerState<HospitalDashboard>
           tabs: [
             Tab(icon: const Icon(Icons.list_alt), text: l10n.incomingRequests),
             Tab(icon: const Icon(Icons.history), text: l10n.donationHistory),
+            Tab(icon: const Icon(Icons.settings), text: l10n.hospitalProfile),
           ],
         ),
       ),
@@ -92,6 +95,7 @@ class _HospitalDashboardState extends ConsumerState<HospitalDashboard>
                             _openBloodGroupVerification(context),
                       ),
                       _DonationHistoryTab(hospitalId: hospitalId),
+                      _HospitalProfileTab(hospitalId: hospitalId),
                     ],
                   ),
                 ),
@@ -1683,6 +1687,152 @@ class _BloodGroupVerificationScreenState
             const Center(child: CircularProgressIndicator()),
         ],
       ),
+    );
+  }
+}
+
+// ─── Hospital Profile Tab ─────────────────────────────────────────────────────
+
+class _HospitalProfileTab extends ConsumerStatefulWidget {
+  final String hospitalId;
+  const _HospitalProfileTab({required this.hospitalId});
+
+  @override
+  ConsumerState<_HospitalProfileTab> createState() => _HospitalProfileTabState();
+}
+
+class _HospitalProfileTabState extends ConsumerState<_HospitalProfileTab> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _cityController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _addressController = TextEditingController();
+  bool _loading = false;
+  bool _initialized = false;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _cityController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _updateProfile() async {
+    if (!_formKey.currentState!.validate()) return;
+    final l10n = AppLocalizations.of(context)!;
+
+    setState(() => _loading = true);
+    try {
+      await HospitalService().updateHospital(
+        widget.hospitalId,
+        name: _nameController.text.trim(),
+        city: _cityController.text.trim(),
+        phone: _phoneController.text.trim(),
+        address: _addressController.text.trim(),
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.hospitalInfoUpdated)),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: HospitalService().getHospitalById(widget.hospitalId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final data = snapshot.data!;
+        if (!_initialized) {
+          _nameController.text = data['name'] ?? '';
+          _cityController.text = data['city'] ?? '';
+          _phoneController.text = data['phone'] ?? '';
+          _addressController.text = data['address'] ?? '';
+          _initialized = true;
+        }
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.updateHospitalInfo,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 24),
+                TextFormField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    labelText: l10n.hospitalName,
+                    prefixIcon: const Icon(Icons.business),
+                  ),
+                  validator: (v) => (v == null || v.isEmpty) ? l10n.requiredField : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _cityController,
+                  enabled: false, // City is usually managed by Super Admin
+                  decoration: InputDecoration(
+                    labelText: l10n.city,
+                    prefixIcon: const Icon(Icons.location_city),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    labelText: l10n.inquiryPhone,
+                    prefixIcon: const Icon(Icons.phone_in_talk),
+                    hintText: 'e.g., +963...',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _addressController,
+                  maxLines: 2,
+                  decoration: InputDecoration(
+                    labelText: l10n.fullAddress,
+                    prefixIcon: const Icon(Icons.place),
+                    hintText: 'Street, Building, Near...',
+                  ),
+                ),
+                const SizedBox(height: 32),
+                FilledButton.icon(
+                  onPressed: _loading ? null : _updateProfile,
+                  icon: _loading
+                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                      : const Icon(Icons.save),
+                  label: Text(l10n.saveChanges),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

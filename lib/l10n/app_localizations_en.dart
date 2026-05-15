@@ -709,7 +709,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get close => 'Close';
 
   @override
-  String get hospitalAdminDashboard => 'Hospital Admin Dashboard';
+  String get hospitalAdminDashboard => 'Sheryan';
 
   @override
   String get verifyRequest => 'Verify Request';
@@ -1427,6 +1427,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get quickActions => 'quickActions';
+
+  @override
+  String get nearbyHospitals => 'Nearby Blood Banks';
+
+  @override
+  String get trackNearbyHospitals => 'Find blood banks near you';
+
+  @override
+  String noHospitalsFoundInCity(String city) {
+    return 'No hospitals found in $city';
+  }
+
+  @override
+  String get callHospital => 'Call Hospital';
+
+  @override
+  String get hospitalProfile => 'Hospital Profile';
+
+  @override
+  String get inquiryPhone => 'Inquiry Phone';
+
+  @override
+  String get fullAddress => 'Full Address';
+
+  @override
+  String get updateHospitalInfo => 'Update Hospital Information';
+
+  @override
+  String get hospitalInfoUpdated => 'Hospital information updated successfully';
 
   @override
   String get redeemLockedMessage =>

@@ -700,7 +700,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get close => 'إغلاق';
 
   @override
-  String get hospitalAdminDashboard => 'لوحة مسؤول المستشفى';
+  String get hospitalAdminDashboard => 'شريان';
 
   @override
   String get verifyRequest => 'توثيق حالة';
@@ -1417,6 +1417,35 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get quickActions => 'اجراء سريع';
+
+  @override
+  String get nearbyHospitals => 'بنوك الدم القريبة';
+
+  @override
+  String get trackNearbyHospitals => 'ابحث عن بنوك الدم القريبة منك';
+
+  @override
+  String noHospitalsFoundInCity(String city) {
+    return 'لم يتم العثور على مستشفيات في $city';
+  }
+
+  @override
+  String get callHospital => 'اتصال بالمستشفى';
+
+  @override
+  String get hospitalProfile => 'ملف المستشفى';
+
+  @override
+  String get inquiryPhone => 'رقم الاستعلامات';
+
+  @override
+  String get fullAddress => 'العنوان التفصيلي';
+
+  @override
+  String get updateHospitalInfo => 'تحديث معلومات المستشفى';
+
+  @override
+  String get hospitalInfoUpdated => 'تم تحديث معلومات المستشفى بنجاح';
 
   @override
   String get redeemLockedMessage =>

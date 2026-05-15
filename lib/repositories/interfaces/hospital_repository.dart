@@ -16,8 +16,14 @@ abstract class HospitalRepository {
   /// Adds a new hospital with [name] and [city].
   Future<void> add({required String name, required String city});
 
-  /// Updates the [name] and [city] of an existing hospital.
-  Future<void> update(String id, {required String name, required String city});
+  /// Updates the details of an existing hospital.
+  Future<void> update(
+    String id, {
+    required String name,
+    required String city,
+    String? phone,
+    String? address,
+  });
 
   /// Permanently deletes the hospital document.
   Future<void> delete(String id);

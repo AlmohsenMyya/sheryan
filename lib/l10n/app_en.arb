@@ -304,7 +304,7 @@
   "requestId": "Request ID",
   "donorId": "Donor ID",
   "close": "Close",
-  "hospitalAdminDashboard": "Hospital Admin Dashboard",
+  "hospitalAdminDashboard": "Sheryan",
   "verifyRequest": "Verify Request",
   "registerDonation": "Register Successful Donation",
   "scanRequestQr": "Scan Request QR",
@@ -582,6 +582,20 @@
   "needHelp":"needHelp",
   "viewAllDonors":"viewAllDonors",
   "quickActions":"quickActions",
+  "nearbyHospitals": "Nearby Blood Banks",
+  "trackNearbyHospitals": "Find blood banks near you",
+  "noHospitalsFoundInCity": "No hospitals found in {city}",
+  "@noHospitalsFoundInCity": {
+    "placeholders": {
+      "city": { "type": "String" }
+    }
+  },
+  "callHospital": "Call Hospital",
+  "hospitalProfile": "Hospital Profile",
+  "inquiryPhone": "Inquiry Phone",
+  "fullAddress": "Full Address",
+  "updateHospitalInfo": "Update Hospital Information",
+  "hospitalInfoUpdated": "Hospital information updated successfully",
   "redeemLockedMessage": "At least one donation is required to redeem points.",
   "firstDonationRequired": "First donation required",
   "donationRequiredToRedeem": "Donation required to redeem"

@@ -19,6 +19,7 @@ abstract class UserRepository {
   Stream<List<Map<String, dynamic>>> watchByRole(
     String role, {
     String? hospitalId,
+    String? city,
   });
 
   /// Fetches a single user document, returns null when not found.

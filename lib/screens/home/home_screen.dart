@@ -20,6 +20,7 @@ import 'package:sheryan/screens/profile/user_profile_screen.dart';
 import 'package:sheryan/screens/requests/create_request_screen.dart';
 import 'package:sheryan/screens/requests/requests_list_screen.dart';
 import 'package:sheryan/screens/donors/nearby_donors_screen.dart';
+import 'package:sheryan/screens/hospitals/nearby_hospitals_screen.dart';
 import 'package:sheryan/screens/donor_dashboard/see_users_request.dart';
 import 'package:sheryan/screens/donor_dashboard/nearby_users_req.dart';
 import 'package:sheryan/screens/misc/awareness_screen.dart';
@@ -321,13 +322,13 @@ class _HomeBody extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ActionCard(
-                      title: l10n.nearbyDonors,
-                      subtitle: l10n.trackNearbyDonors,
-                      icon: Icons.near_me,
+                      title: l10n.nearbyHospitals,
+                      subtitle: l10n.trackNearbyHospitals,
+                      icon: Icons.local_hospital_outlined,
                       color: Colors.orange,
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const NearbyDonorsScreen()),
+                        MaterialPageRoute(builder: (_) => const NearbyHospitalsScreen()),
                       ),
                     ),
                   ),

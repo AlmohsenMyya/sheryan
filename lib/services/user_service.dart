@@ -32,8 +32,9 @@ class UserService {
   Stream<List<Map<String, dynamic>>> watchByRole(
     String role, {
     String? hospitalId,
+    String? city,
   }) =>
-      _repo.watchByRole(role, hospitalId: hospitalId);
+      _repo.watchByRole(role, hospitalId: hospitalId, city: city);
 
   // ── Reads ──────────────────────────────────────────────────────────────────
 

@@ -45,8 +45,14 @@ class FirebaseHospitalRepository implements HospitalRepository {
     String id, {
     required String name,
     required String city,
-  }) =>
-      _fs.collection('hospitals').doc(id).update({'name': name, 'city': city});
+    String? phone,
+    String? address,
+  }) {
+    final Map<String, dynamic> data = {'name': name, 'city': city};
+    if (phone != null) data['phone'] = phone;
+    if (address != null) data['address'] = address;
+    return _fs.collection('hospitals').doc(id).update(data);
+  }
 
   @override
   Future<void> delete(String id) =>

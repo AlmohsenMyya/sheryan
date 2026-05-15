@@ -336,7 +336,7 @@
   "requestId": "رقم الطلب",
   "donorId": "رقم المتبرع",
   "close": "إغلاق",
-  "hospitalAdminDashboard": "لوحة مسؤول المستشفى",
+  "hospitalAdminDashboard": "شريان",
   "verifyRequest": "توثيق حالة",
   "registerDonation": "تسجيل تبرع ناجح",
   "scanRequestQr": "مسح رمز الطلب",
@@ -614,6 +614,22 @@
   "needHelp": "هل تحتاج إلى مساعدة؟",
   "viewAllDonors":"عرض كل المتبرعين",
   "quickActions":"اجراء سريع",
+  "nearbyHospitals": "بنوك الدم القريبة",
+  "trackNearbyHospitals": "ابحث عن بنوك الدم القريبة منك",
+  "noHospitalsFoundInCity": "لم يتم العثور على مستشفيات في {city}",
+  "@noHospitalsFoundInCity": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "callHospital": "اتصال بالمستشفى",
+  "hospitalProfile": "ملف المستشفى",
+  "inquiryPhone": "رقم الاستعلامات",
+  "fullAddress": "العنوان التفصيلي",
+  "updateHospitalInfo": "تحديث معلومات المستشفى",
+  "hospitalInfoUpdated": "تم تحديث معلومات المستشفى بنجاح",
   "redeemLockedMessage": "يجب إجراء عملية تبرع واحدة على الأقل لتتمكن من استبدال النقاط.",
   "firstDonationRequired": "مطلوب أول تبرع",
   "donationRequiredToRedeem": "التبرع مطلوب للاستبدال"

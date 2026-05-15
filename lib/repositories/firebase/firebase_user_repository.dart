@@ -48,10 +48,14 @@ class FirebaseUserRepository implements UserRepository {
   Stream<List<Map<String, dynamic>>> watchByRole(
     String role, {
     String? hospitalId,
+    String? city,
   }) {
     Query q = _fs.collection('users').where('role', isEqualTo: role);
     if (hospitalId != null) {
       q = q.where('hospitalId', isEqualTo: hospitalId);
+    }
+    if (city != null) {
+      q = q.where('city', isEqualTo: city);
     }
     return q.snapshots().map(_fromSnap);
   }

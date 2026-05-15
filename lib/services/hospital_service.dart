@@ -35,8 +35,10 @@ class HospitalService {
     String id, {
     required String name,
     required String city,
+    String? phone,
+    String? address,
   }) =>
-      _hospitalRepo.update(id, name: name, city: city);
+      _hospitalRepo.update(id, name: name, city: city, phone: phone, address: address);
 
   Future<void> deleteHospital(String id) => _hospitalRepo.delete(id);
 
