@@ -27,9 +27,10 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.myProfile),
+        // 🌟 أفضل مكان في العالم لزر التعديل: شريط الإجراءات العلوي
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_outlined),
+            icon: const Icon(Icons.edit_square), // تغيير الأيقونة لتكون معبرة أكثر
             onPressed: () {
               profileAsync.whenData((profile) {
                 if (profile != null) {
@@ -38,6 +39,7 @@ class ProfileScreen extends ConsumerWidget {
               });
             },
           ),
+          const SizedBox(width: 8), // مسافة صغيرة للترتيب
         ],
       ),
       body: profileAsync.when(
@@ -61,11 +63,11 @@ class ProfileScreen extends ConsumerWidget {
                     email: profile['email'] as String? ?? '',
                   ),
                   const SizedBox(height: 24),
-                  
+
                   _buildStatsSection(uid),
-                  
-                  const SizedBox(height: 24),
-                  
+
+                  const SizedBox(height: 32), // مساحة تنفس نظيفة بعد حذف الزر القديم
+
                   ProfileInfoSection(
                     title: l10n.basicInfoTitle,
                     children: [
@@ -87,33 +89,52 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 32),
-                  
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      QrDialog.show(
-                        context,
-                        data: uid,
-                        label: profile['name'] as String? ?? '',
-                        idLabel: l10n.donorId,
-                      );
-                    },
-                    icon: const Icon(Icons.qr_code),
-                    label: Text(l10n.donorCard),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.secondary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () => _showEditSheet(context, profile),
-                    icon: const Icon(Icons.edit),
-                    label: Text(l10n.saveChanges),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        QrDialog.show(
+                          context,
+                          data: uid,
+                          label: profile['name'] as String? ?? '',
+                          idLabel: l10n.donorId,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: theme.colorScheme.secondary,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppDesignConstants.borderRadiusMedium,
+                          side: BorderSide(color: theme.colorScheme.secondary.withOpacity(0.3)),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.secondary.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(Icons.qr_code_scanner, color: theme.colorScheme.secondary, size: 24),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            l10n.donorCard,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.secondary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 40),
