@@ -1448,6 +1448,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get hospitalInfoUpdated => 'تم تحديث معلومات المستشفى بنجاح';
 
   @override
+  String get myCard => 'بطاقتي';
+
+  @override
+  String get theme => 'المظهر';
+
+  @override
+  String get language => 'اللغة';
+
+  @override
   String get redeemLockedMessage =>
       'يجب إجراء عملية تبرع واحدة على الأقل لتتمكن من استبدال النقاط.';
 

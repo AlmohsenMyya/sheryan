@@ -596,6 +596,9 @@
   "fullAddress": "Full Address",
   "updateHospitalInfo": "Update Hospital Information",
   "hospitalInfoUpdated": "Hospital information updated successfully",
+  "myCard": "My Card",
+  "theme": "Theme",
+  "language": "Language",
   "redeemLockedMessage": "At least one donation is required to redeem points.",
   "firstDonationRequired": "First donation required",
   "donationRequiredToRedeem": "Donation required to redeem"

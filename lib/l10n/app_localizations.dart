@@ -2804,6 +2804,24 @@ abstract class AppLocalizations {
   /// **'Hospital information updated successfully'**
   String get hospitalInfoUpdated;
 
+  /// No description provided for @myCard.
+  ///
+  /// In en, this message translates to:
+  /// **'My Card'**
+  String get myCard;
+
+  /// No description provided for @theme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
   /// No description provided for @redeemLockedMessage.
   ///
   /// In en, this message translates to:

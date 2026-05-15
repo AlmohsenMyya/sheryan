@@ -147,13 +147,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildRoleDashboard(UserRole role, Map<String, dynamic> profile) {
     if (role == UserRole.hospitalAdmin) {
-      return _DashboardWrapper(role: role, onLanguageTap: _showLanguageSheet, child: const HospitalDashboard());
+      return _DashboardWrapper(role: role, child: const HospitalDashboard());
     }
     if (role == UserRole.superAdmin) {
-      return _DashboardWrapper(role: role, onLanguageTap: _showLanguageSheet, child: const AdminDashboard());
+      return _DashboardWrapper(role: role, child: const AdminDashboard());
     }
     if (role == UserRole.sponsorOrg) {
-      return _DashboardWrapper(role: role, onLanguageTap: _showLanguageSheet, child: const SponsorDashboard());
+      return _DashboardWrapper(role: role, child: const SponsorDashboard());
     }
 
     // Donor / Recipient
@@ -181,7 +181,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final safeTab = _selectedTab.clamp(0, tabs.length - 1);
 
     return Scaffold(
-      appBar: HomeAppBar(role: role, onLanguageTap: _showLanguageSheet),
+      appBar: HomeAppBar(role: role, onLanguageTap: () {}),
       body: Column(
         children: [
           const OfflineBanner(),
@@ -200,13 +200,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 class _DashboardWrapper extends StatelessWidget {
   final UserRole role;
   final Widget child;
-  final VoidCallback onLanguageTap;
-  const _DashboardWrapper({required this.role, required this.child, required this.onLanguageTap});
+  const _DashboardWrapper({required this.role, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: HomeAppBar(role: role, onLanguageTap: onLanguageTap),
+      appBar: HomeAppBar(role: role, onLanguageTap: () {}),
       body: Column(
         children: [
           const OfflineBanner(),

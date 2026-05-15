@@ -43,17 +43,7 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
         ],
       ),
       actions: [
-        IconButton(
-          icon: Icon(isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined, size: 22),
-          onPressed: () => ref.read(themeModeProvider.notifier).toggle(),
-        ),
         if (userId != null) _NotificationBadge(userId: userId),
-        IconButton(
-          tooltip: l10n.changeLanguage,
-          icon: const Icon(Icons.translate_outlined, size: 22),
-          onPressed: onLanguageTap,
-        ),
-        _MenuButton(role: role),
         const SizedBox(width: 8),
       ],
     );

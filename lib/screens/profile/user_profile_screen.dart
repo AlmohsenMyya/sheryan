@@ -9,6 +9,7 @@ import 'package:sheryan/providers/auth/auth_provider.dart';
 import 'package:sheryan/services/request_service.dart';
 import 'package:sheryan/core/utils/qr_dialog.dart';
 
+import '../settings/userside_settings_screen.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/profile_stats.dart';
 import 'widgets/profile_info_section.dart';
@@ -27,19 +28,17 @@ class ProfileScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.myProfile),
-        // 🌟 أفضل مكان في العالم لزر التعديل: شريط الإجراءات العلوي
         actions: [
           IconButton(
-            icon: const Icon(Icons.edit_square), // تغيير الأيقونة لتكون معبرة أكثر
+            icon: const Icon(Icons.settings_outlined),
             onPressed: () {
-              profileAsync.whenData((profile) {
-                if (profile != null) {
-                  _showEditSheet(context, profile);
-                }
-              });
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => SettingsScreen()),
+              );
             },
           ),
-          const SizedBox(width: 8), // مسافة صغيرة للترتيب
+          const SizedBox(width: 8),
         ],
       ),
       body: profileAsync.when(
@@ -126,7 +125,7 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            l10n.donorCard,
+                            profile['role'] == 'donor' ? l10n.donorCard : l10n.myCard,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,

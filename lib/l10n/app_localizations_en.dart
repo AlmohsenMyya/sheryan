@@ -1458,6 +1458,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hospitalInfoUpdated => 'Hospital information updated successfully';
 
   @override
+  String get myCard => 'My Card';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
+  String get language => 'Language';
+
+  @override
   String get redeemLockedMessage =>
       'At least one donation is required to redeem points.';
 

@@ -630,6 +630,9 @@
   "fullAddress": "العنوان التفصيلي",
   "updateHospitalInfo": "تحديث معلومات المستشفى",
   "hospitalInfoUpdated": "تم تحديث معلومات المستشفى بنجاح",
+  "myCard": "بطاقتي",
+  "theme": "المظهر",
+  "language": "اللغة",
   "redeemLockedMessage": "يجب إجراء عملية تبرع واحدة على الأقل لتتمكن من استبدال النقاط.",
   "firstDonationRequired": "مطلوب أول تبرع",
   "donationRequiredToRedeem": "التبرع مطلوب للاستبدال"

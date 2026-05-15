@@ -1,7 +1,10 @@
+import 'package:sheryan/providers/locale/locale_provider.dart';
+import 'package:sheryan/providers/theme/theme_provider.dart';
 import 'package:sheryan/services/notification_service.dart';
 import 'package:sheryan/core/theme/app_colors.dart';
 import 'package:sheryan/core/theme/app_design_constants.dart';
 import 'package:sheryan/screens/auth/sign_in_screen.dart';
+import 'package:sheryan/screens/home/controllers/home_controller.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +27,7 @@ class SettingsScreen extends ConsumerWidget {
           _buildSection(context, l10n.account, [
             _buildCard(
               context: context,
-              icon: Icons.account_circle,
+              icon: Icons.account_circle_outlined,
               title: l10n.account,
               onTap: () {
                 Navigator.push(
@@ -33,22 +36,24 @@ class SettingsScreen extends ConsumerWidget {
                 );
               },
             ),
-          ]),
-
-          _buildSection(context, l10n.appPreferences, [
-            _NotificationToggle(),
             _buildCard(
               context: context,
-              icon: Icons.refresh,
+              icon: Icons.history,
               title: l10n.resetRequests,
               onTap: () => _resetRequests(context),
             ),
           ]),
 
+          _buildSection(context, l10n.appPreferences, [
+            _ThemeToggle(),
+            _LanguageTile(),
+            _NotificationToggle(),
+          ]),
+
           _buildSection(context, l10n.helpSupport, [
             _buildCard(
               context: context,
-              icon: Icons.support_agent,
+              icon: Icons.support_agent_outlined,
               title: l10n.contactSupport,
               onTap: () => _contactSupport(context),
             ),
@@ -57,7 +62,7 @@ class SettingsScreen extends ConsumerWidget {
           _buildSection(context, l10n.privacyLegal, [
             _buildCard(
               context: context,
-              icon: Icons.privacy_tip,
+              icon: Icons.privacy_tip_outlined,
               title: l10n.privacyPolicy,
               onTap: () {
                 Navigator.push(
@@ -68,7 +73,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
             _buildCard(
               context: context,
-              icon: Icons.article,
+              icon: Icons.article_outlined,
               title: l10n.termsConditions,
               onTap: () {
                 Navigator.push(
@@ -82,7 +87,7 @@ class SettingsScreen extends ConsumerWidget {
           _buildSection(context, l10n.about, [
             _buildCard(
               context: context,
-              icon: Icons.info,
+              icon: Icons.info_outline,
               title: l10n.aboutApp,
               onTap: () {
                 Navigator.push(
@@ -92,6 +97,22 @@ class SettingsScreen extends ConsumerWidget {
               },
             ),
           ]),
+
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            child: OutlinedButton.icon(
+              onPressed: () => _signOut(context, ref),
+              icon: const Icon(Icons.logout, color: AppColors.bloodRed),
+              label: Text(l10n.logout, style: const TextStyle(color: AppColors.bloodRed, fontWeight: FontWeight.bold)),
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: AppColors.bloodRed),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: AppDesignConstants.borderRadiusMedium),
+              ),
+            ),
+          ),
+          const SizedBox(height: 40),
         ],
       ),
     );
@@ -103,8 +124,16 @@ class SettingsScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 10),
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 8),
+            child: Text(
+              title,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           ...children,
         ],
       ),
@@ -120,10 +149,10 @@ class SettingsScreen extends ConsumerWidget {
   }) {
     return Card(
       child: ListTile(
-        leading: Icon(icon, color: AppColors.primaryRed),
+        leading: Icon(icon, color: Theme.of(context).colorScheme.primary),
         title: Text(title, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w500)),
         subtitle: subtitle != null ? Text(subtitle) : null,
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: AppColors.textGrey),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textGrey),
         onTap: onTap,
       ),
     );
@@ -140,7 +169,7 @@ class SettingsScreen extends ConsumerWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryRed),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.bloodRed),
             onPressed: () => Navigator.pop(context, true),
             child: Text(l10n.yesDelete),
           ),
@@ -181,6 +210,129 @@ class SettingsScreen extends ConsumerWidget {
       );
     }
   }
+
+  Future<void> _signOut(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(l10n.signOut),
+        content: Text(l10n.confirmSignOut),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.bloodRed),
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.signOut),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      ref.read(homeControllerProvider).signOut(context);
+    }
+  }
+}
+
+class _ThemeToggle extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final themeMode = ref.watch(themeModeProvider);
+    final isDark = themeMode == ThemeMode.dark;
+
+    return Card(
+      child: SwitchListTile(
+        secondary: Icon(
+          isDark ? Icons.dark_mode : Icons.light_mode,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        title: Text(l10n.theme),
+        subtitle: Text(isDark ? l10n.darkMode : l10n.appTitle), // Reuse keys if possible, or just text
+        value: isDark,
+        onChanged: (v) => ref.read(themeModeProvider.notifier).toggle(),
+      ),
+    );
+  }
+}
+
+class _LanguageTile extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final currentLocale = ref.watch(localeProvider);
+    final languageName = currentLocale?.languageCode == 'ar' ? l10n.languageArabic : l10n.languageEnglish;
+
+    return Card(
+      child: ListTile(
+        leading: Icon(Icons.translate, color: Theme.of(context).colorScheme.primary),
+        title: Text(l10n.language),
+        subtitle: Text(languageName),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textGrey),
+        onTap: () => _showLanguageSheet(context, ref),
+      ),
+    );
+  }
+
+  void _showLanguageSheet(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
+    final currentCode = ref.read(localeProvider)?.languageCode;
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppDesignConstants.radiusExtraLarge),
+        ),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 44,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.outline,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(l10n.changeLanguage, style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Text('🇺🇸', style: TextStyle(fontSize: 22)),
+                title: Text(l10n.languageEnglish, style: Theme.of(context).textTheme.bodyLarge),
+                trailing: currentCode == 'en'
+                    ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary)
+                    : null,
+                onTap: () async {
+                  await ref.read(localeProvider.notifier).setLocale(const Locale('en'));
+                  if (context.mounted) Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Text('🇸🇦', style: TextStyle(fontSize: 22)),
+                title: Text(l10n.languageArabic, style: Theme.of(context).textTheme.bodyLarge),
+                trailing: currentCode == 'ar'
+                    ? Icon(Icons.check_circle, color: Theme.of(context).colorScheme.primary)
+                    : null,
+                onTap: () async {
+                  await ref.read(localeProvider.notifier).setLocale(const Locale('ar'));
+                  if (context.mounted) Navigator.pop(context);
+                },
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
 class _NotificationToggle extends StatefulWidget {
@@ -209,12 +361,11 @@ class _NotificationToggleState extends State<_NotificationToggle> {
       child: SwitchListTile(
         secondary: Icon(
           _isEnabled ? Icons.notifications_active : Icons.notifications_off,
-          color: AppColors.primaryRed,
+          color: Theme.of(context).colorScheme.primary,
         ),
         title: Text(l10n.notifications),
         subtitle: Text(l10n.receiveAlerts),
         value: _isEnabled,
-        activeColor: AppColors.primaryRed,
         onChanged: (v) async {
           setState(() => _isEnabled = v);
           await NotificationService().setNotificationEnabled(v);
@@ -362,31 +513,6 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  Future<void> _signOut() async {
-    final l10n = AppLocalizations.of(context)!;
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(l10n.signOut),
-        content: Text(l10n.confirmSignOut),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l10n.cancel)),
-          ElevatedButton(onPressed: () => Navigator.pop(context, true), child: Text(l10n.signOut)),
-        ],
-      ),
-    );
-
-    if (confirm == true) {
-      await FirebaseAuth.instance.signOut();
-      if (!mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-        (route) => false,
-      );
-    }
-  }
-
   Future<void> _deleteAccount() async {
     if (user == null) return;
     final l10n = AppLocalizations.of(context)!;
@@ -500,7 +626,7 @@ class _AccountScreenState extends State<AccountScreen> {
         children: [
           Card(
             child: ListTile(
-              leading: const Icon(Icons.email, color: AppColors.primaryRed),
+              leading: Icon(Icons.email_outlined, color: Theme.of(context).colorScheme.primary),
               title: Text(l10n.email),
               subtitle: Text(email),
             ),
@@ -508,7 +634,7 @@ class _AccountScreenState extends State<AccountScreen> {
           const SizedBox(height: 10),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.lock, color: AppColors.primaryRed),
+              leading: Icon(Icons.lock_outline, color: Theme.of(context).colorScheme.primary),
               title: Text(l10n.changePassword),
               onTap: _changePassword,
             ),
@@ -516,7 +642,7 @@ class _AccountScreenState extends State<AccountScreen> {
           const SizedBox(height: 10),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.email_outlined, color: AppColors.primaryRed),
+              leading: Icon(Icons.mail_outline, color: Theme.of(context).colorScheme.primary),
               title: Text(l10n.forgotPassword),
               subtitle: Text(l10n.sendResetLinkTo(email)),
               onTap: _forgotPassword,
@@ -525,18 +651,10 @@ class _AccountScreenState extends State<AccountScreen> {
           const SizedBox(height: 10),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.delete_forever, color: AppColors.primaryRed),
-              title: Text(l10n.deleteAccount),
+              leading: const Icon(Icons.delete_forever_outlined, color: AppColors.bloodRed),
+              title: Text(l10n.deleteAccount, style: const TextStyle(color: AppColors.bloodRed)),
               subtitle: Text(l10n.permanentlyDeleteData),
               onTap: _deleteAccount,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.logout, color: AppColors.primaryRed),
-              title: Text(l10n.signOut),
-              onTap: _signOut,
             ),
           ),
         ],

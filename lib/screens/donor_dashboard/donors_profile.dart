@@ -8,6 +8,7 @@ import 'package:sheryan/core/utils/qr_dialog.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
 import 'package:sheryan/providers/auth/auth_provider.dart';
 import 'package:sheryan/providers/points/points_provider.dart';
+import 'package:sheryan/screens/settings/userside_settings_screen.dart';
 import 'package:sheryan/screens/donor_dashboard/blood_compatibility_screen.dart';
 import 'package:sheryan/screens/donor_dashboard/donation_history_screen.dart';
 import 'package:sheryan/screens/donor_dashboard/profile_sections/basic_info_screen.dart';
@@ -65,9 +66,15 @@ class DonorProfileScreen extends ConsumerWidget {
         title: Text(l10n.myProfile),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.invalidate(userProfileProvider),
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
+            },
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: RefreshIndicator(
