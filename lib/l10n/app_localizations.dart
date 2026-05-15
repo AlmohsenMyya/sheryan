@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Blood Donation App'**
+  /// **'Shreyan'**
   String get appTitle;
 
   /// No description provided for @changeLanguage.

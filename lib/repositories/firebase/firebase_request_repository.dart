@@ -33,6 +33,19 @@ class FirebaseRequestRepository implements RequestRepository {
       .map(_fromSnap);
 
   @override
+  Stream<int> watchUserTotal(String userId) => _countQuery(
+        _fs.collection('blood_requests').where('userId', isEqualTo: userId),
+      );
+
+  @override
+  Stream<int> watchUserFulfilled(String userId) => _countQuery(
+        _fs
+            .collection('blood_requests')
+            .where('userId', isEqualTo: userId)
+            .where('status', whereIn: ['done', 'completed']),
+      );
+
+  @override
   Stream<List<Map<String, dynamic>>> watchAll({String? status}) {
     final col = _fs.collection('blood_requests');
     if (status == null || status.isEmpty) {

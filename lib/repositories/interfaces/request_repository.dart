@@ -7,6 +7,12 @@ abstract class RequestRepository {
   /// Live stream of requests created by [userId], newest first.
   Stream<List<Map<String, dynamic>>> watchByUser(String userId);
 
+  /// Live count of every request created by [userId].
+  Stream<int> watchUserTotal(String userId);
+
+  /// Live count of fulfilled (done/completed) requests created by [userId].
+  Stream<int> watchUserFulfilled(String userId);
+
   /// Live stream of all requests, optionally filtered by [status].
   /// When [status] is null or empty, all requests are returned.
   /// When [status] is `'done'`, documents with status in {done, completed} are returned.

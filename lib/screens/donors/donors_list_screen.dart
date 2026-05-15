@@ -128,9 +128,6 @@ class _DonorListScreenState extends State<DonorListScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.availableDonors),
-      ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : Column(

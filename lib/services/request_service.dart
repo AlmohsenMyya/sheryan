@@ -23,6 +23,11 @@ class RequestService {
   Stream<List<Map<String, dynamic>>> watchByUser(String userId) =>
       _repo.watchByUser(userId);
 
+  Stream<int> watchUserTotal(String userId) => _repo.watchUserTotal(userId);
+
+  Stream<int> watchUserFulfilled(String userId) =>
+      _repo.watchUserFulfilled(userId);
+
   /// [status] null/empty → all; 'done' → done+completed; other → exact match.
   Stream<List<Map<String, dynamic>>> watchAll({String? status}) =>
       _repo.watchAll(status: status);
