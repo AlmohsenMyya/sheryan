@@ -90,4 +90,17 @@ Refactored the donor's profile completion tasks to reduce vertical clutter and i
 - **Modified Files:** `lib/screens/donor_dashboard/donors_profile.dart`.
 
 ---
+
+## 10. Data Integrity: Profile Verification Guard & Point Rarity
+Implemented a security layer to prevent "verification spoofing" and ensure fair point distribution during profile updates.
+- **Verification Integrity:** 
+    - Updated `BasicInfoScreen` to monitor blood group changes.
+    - If a user attempts to change their blood group after it has been verified by a hospital, a **Warning Dialog** appears.
+    - Confirming the change automatically resets the `bloodGroupVerified` flag to `false`, requiring a new hospital scan.
+- **Point Economy:** 
+    - Verified that `PointsService` prevents duplicate milestone rewards. Points for completing profile sections are awarded only once per account lifetime by tracking permanent event logs in `pointsHistory`.
+- **UI Enhancements:** Added a "Verified" badge next to the blood group label in the edit screen to highlight its sensitive status.
+- **Modified Files:** `lib/screens/donor_dashboard/profile_sections/basic_info_screen.dart`.
+
+---
 *Log updated: May 2026*

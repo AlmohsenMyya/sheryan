@@ -25,7 +25,7 @@ class UserWelcomeHeader extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -87,7 +87,7 @@ class UserWelcomeHeader extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 2),
           Row(
             children: [
               _headerStatItem(l10n.bloodGroup, bloodGroup, Icons.bloodtype_outlined),
@@ -101,7 +101,7 @@ class UserWelcomeHeader extends StatelessWidget {
               Center(
                 child: Image.asset(
                   'assets/logo.png',
-                  height: 120,
+                  height: 100,
                   fit: BoxFit.contain,
                 ),
               ),

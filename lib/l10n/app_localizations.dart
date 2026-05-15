@@ -2839,6 +2839,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Donation required to redeem'**
   String get donationRequiredToRedeem;
+
+  /// No description provided for @confirm_changing_blood.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing your blood group will reset your verification status. You will need to verify it again at a hospital. Are you sure?'**
+  String get confirm_changing_blood;
 }
 
 class _AppLocalizationsDelegate

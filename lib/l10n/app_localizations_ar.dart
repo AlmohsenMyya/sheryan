@@ -1472,4 +1472,8 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get donationRequiredToRedeem => 'التبرع مطلوب للاستبدال';
+
+  @override
+  String get confirm_changing_blood =>
+      'تغيير زمرة الدم سيؤدي لإلغاء التوثيق الحالي. ستحتاج للتوثيق مجدداً من المشفى. هل أنت متأكد؟';
 }

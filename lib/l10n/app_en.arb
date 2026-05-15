@@ -601,5 +601,6 @@
   "language": "Language",
   "redeemLockedMessage": "At least one donation is required to redeem points.",
   "firstDonationRequired": "First donation required",
-  "donationRequiredToRedeem": "Donation required to redeem"
+  "donationRequiredToRedeem": "Donation required to redeem",
+  "confirm_changing_blood" : "Changing your blood group will reset your verification status. You will need to verify it again at a hospital. Are you sure?"
 }

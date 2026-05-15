@@ -29,8 +29,8 @@ class HomeAppBar extends ConsumerWidget implements PreferredSizeWidget {
     final isDark = themeMode == ThemeMode.dark;
 
     String title = l10n.appTitle;
-    if (role == UserRole.donor) title = l10n.donorDashboard;
-    if (role == UserRole.hospitalAdmin) title = l10n.hospitalAdminDashboard;
+    // if (role == UserRole.donor) title = l10n.appTitle;
+    // if (role == UserRole.hospitalAdmin) title = l10n.appTitle;
 
     return AppBar(
       elevation: 0,

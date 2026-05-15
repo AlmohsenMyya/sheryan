@@ -1482,4 +1482,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get donationRequiredToRedeem => 'Donation required to redeem';
+
+  @override
+  String get confirm_changing_blood =>
+      'Changing your blood group will reset your verification status. You will need to verify it again at a hospital. Are you sure?';
 }

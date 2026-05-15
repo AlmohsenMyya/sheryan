@@ -635,5 +635,6 @@
   "language": "اللغة",
   "redeemLockedMessage": "يجب إجراء عملية تبرع واحدة على الأقل لتتمكن من استبدال النقاط.",
   "firstDonationRequired": "مطلوب أول تبرع",
-  "donationRequiredToRedeem": "التبرع مطلوب للاستبدال"
+  "donationRequiredToRedeem": "التبرع مطلوب للاستبدال",
+  "confirm_changing_blood" : "تغيير زمرة الدم سيؤدي لإلغاء التوثيق الحالي. ستحتاج للتوثيق مجدداً من المشفى. هل أنت متأكد؟"
 }

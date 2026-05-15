@@ -77,16 +77,48 @@ class _BasicInfoScreenState extends State<BasicInfoScreen> {
           .showSnackBar(SnackBar(content: Text(l10n.requiredField)));
       return;
     }
+
+    final oldBloodGroup = widget.existingData['bloodGroup'];
+    final isVerified = widget.existingData['bloodGroupVerified'] == true;
+    bool shouldResetVerification = false;
+
+    // Check if blood group changed and it was previously verified
+    if (isVerified && _bloodGroup != oldBloodGroup) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l10n.confirmBloodGroupVerification), // Reuse existing key or generic title
+          content: Text(l10n.confirm_changing_blood),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryRed),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l10n.confirm),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true) return;
+      shouldResetVerification = true;
+    }
+
     setState(() => _loading = true);
     try {
       final uid = FirebaseAuth.instance.currentUser!.uid;
-      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+      final Map<String, dynamic> updateData = {
         'name': _nameCtrl.text.trim(),
         'phone': _phoneCtrl.text.trim(),
         'city': _cityCtrl.text.trim(),
         'bloodGroup': _bloodGroup,
         'dateOfBirth': _dobCtrl.text.trim(),
-      });
+      };
+
+      if (shouldResetVerification) {
+        updateData['bloodGroupVerified'] = false;
+      }
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).update(updateData);
 
       // Award points for completed milestones
       final snap = await FirebaseFirestore.instance.collection('users').doc(uid).get();
@@ -111,6 +143,8 @@ class _BasicInfoScreenState extends State<BasicInfoScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final isVerified = widget.existingData['bloodGroupVerified'] == true;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.basicInfoTitle)),
@@ -165,7 +199,15 @@ class _BasicInfoScreenState extends State<BasicInfoScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              Text(l10n.bloodGroup, style: theme.textTheme.titleSmall),
+              Row(
+                children: [
+                  Text(l10n.bloodGroup, style: theme.textTheme.titleSmall),
+                  if (isVerified) ...[
+                    const SizedBox(width: 8),
+                    const Icon(Icons.verified, color: AppColors.success, size: 16),
+                  ],
+                ],
+              ),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
