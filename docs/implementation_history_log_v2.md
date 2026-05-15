@@ -148,4 +148,17 @@ Completed the global UX standardization by integrating the centralized settings 
 - **Modified Files:** `lib/screens/sponsor/sponsor_dashboard.dart`.
 
 ---
+
+## 14. Architecture: Modularization of Super Admin Dashboard
+Transformed the monolithic `AdminDashboard` into a decoupled, feature-first structure to improve maintainability and strictly follow SRP.
+- **Directory Restructuring:** Organized the dashboard into sub-features: `/overview`, `/hospital_admins`, `/hospitals`, `/cities`, `/sponsors`, `/donors`, `/requests`, and `/broadcast`.
+- **State Management (Riverpod):** 
+    - Extracted all asynchronous business logic into dedicated controllers (Notifiers).
+    - Eliminated `setState` for loading indicators in favor of reactive state observers.
+    - Features like `Broadcast`, `HospitalAdmin`, `Sponsor`, and `General Admin` (Cities/Hospitals) now have centralized logic.
+- **Massive Dialog Componentization:** Refactored complex forms (e.g., creating hospital admins or sponsors) into standalone dialog widgets.
+- **Unified Widgets:** Extracted shared admin UI elements (Sidebar, SectionHeader, StatusBadge, etc.) for project-wide consistency.
+- **Technical Benefits:** Dramatically reduced the file size of the main `admin_dashboard.dart` shell and improved code readability and testability.
+
+---
 *Log updated: May 2026*
