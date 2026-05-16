@@ -37,9 +37,17 @@ docs/
 │   ├── hospital_admin_phase1_implementation.md # QR-code driven rapid verification & immediate donation logging
 │   └── recipient_role_enhancement_plan.md     # Active roadmap upgrading recipient view into a reactive analytical matrix
 │
-└── 📂 05_medical_logic/                        # Medical Constraints, Gamification, & Resilience Layers
-    ├── blood_compatibility.md                  # Biological rules matrix via `BloodLogic` utility class
-    ├── donation_history.md                     # Inter-connected atomic donation logs & core transaction triggers
-    ├── offline_mode.md                         # Offline-First architecture via local `PendingActionsService`
-    ├── points_rewards_system.md                # In-app gamification engine, emergency multipliers, & tier structures
-    └── points_rewards_sponsor.md               # Sponsor dashboard, QR redemption flows, & double-spend protection
+├── 📂 05_core_logic/                           # Atomic Transactions, Fulfillment Engines, & Data Integrity
+│   ├── partial_fulfillment_and_ledger_audit.md # Architectural strategy for incremental unit tracking
+│   └── partial_fulfillment_and_ledger_implementation.md # Logic execution ledger for data locking
+│
+├── 📂 05_medical_logic/                        # Medical Constraints, Gamification, & Resilience Layers
+│   ├── blood_compatibility.md                  # Biological rules matrix via `BloodLogic` utility class
+│   ├── donation_history.md                     # Inter-connected atomic donation logs & core transaction triggers
+│   ├── offline_mode.md                         # Offline-First architecture via local `PendingActionsService`
+│   ├── points_rewards_system.md                # In-app gamification engine, emergency multipliers, & tier structures
+│   └── points_rewards_sponsor.md               # Sponsor dashboard, QR redemption flows, & double-spend protection
+│
+└── 📂 06_settings_and_developer/               # App Configuration & Developer Identity
+    └── production_settings_refactor.md         # Enterprise-grade settings overhaul & Developer Profile
+```

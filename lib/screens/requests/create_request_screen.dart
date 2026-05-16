@@ -22,7 +22,7 @@ class RequestBloodScreen extends StatefulWidget {
 class _RequestBloodScreenState extends State<RequestBloodScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _patientName = TextEditingController();
-  final TextEditingController _units = TextEditingController();
+  final TextEditingController _units = TextEditingController(text: '1');
   final TextEditingController _phone = TextEditingController();
 
   final List<String> _bloodGroups = [
@@ -122,7 +122,7 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
         'hospital': _selectedHospitalName ?? '',
         'city': _selectedCity,
         'bloodGroup': _selectedGroup,
-        'units': _units.text.trim(),
+        'requiredUnits': int.tryParse(_units.text.trim()) ?? 1,
         'phone': fullPhone,
         'neededAt': neededAtFormatted,
       });
@@ -151,7 +151,7 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
         'hospital': _selectedHospitalName ?? '',
         'city': _selectedCity,
         'bloodGroup': _selectedGroup,
-        'units': _units.text.trim(),
+        'requiredUnits': int.tryParse(_units.text.trim()) ?? 1,
         'phone': fullPhone,
         'neededAt': neededAtFormatted,
       });
@@ -313,10 +313,11 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
                       child: TextFormField(
                         controller: _units,
                         keyboardType: TextInputType.number,
+                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                         decoration:
-                            InputDecoration(labelText: l10n.units),
+                            InputDecoration(labelText: l10n.requiredUnits),
                         validator: (v) =>
-                            (v == null || v.isEmpty)
+                            (v == null || v.isEmpty || int.tryParse(v) == 0)
                                 ? l10n.requiredField
                                 : null,
                       ),

@@ -33,6 +33,11 @@ class StagedNotificationService {
         if (!requestDoc.exists) throw Exception("Request not found");
 
         final requestData = requestDoc.data()!;
+        final String status = requestData['status'] ?? 'pending';
+        if (status == 'done' || status == 'completed') {
+          debugPrint("🛑 [StagedNotif] Dispatch aborted: Request already completed.");
+          return;
+        }
         
         // 🔒 [Security Shield] Backend Cooldown Validation
         final Timestamp? lastSent = requestData['lastNotificationSentAt'];

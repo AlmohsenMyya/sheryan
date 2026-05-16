@@ -683,15 +683,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutDescription =>
-      'The Blood Donation App is a community-driven platform designed to bridge the gap between blood donors and those in need.\nOur mission is to make finding and donating blood simple, fast, and reliable.\n\nBuilt with ❤ using Flutter and Firebase.\nTogether, we can save lives — one donation at a time.';
+      'Sheryan is a highly optimized, architecturally secured digital ecosystem engineered to streamline blood donation workflows and bridge the critical gap between donors, hospitals, and recipients in real time.\n\nOur mission is to transform life-saving interventions into a smart, resilient, and decentralized emergency response system when seconds count.\n\nProudly engineered with cutting-edge software standards using Flutter and Firebase.\nTogether, we sustain life — one heartbeat at a time.';
 
   @override
   String get privacyPolicyContent =>
-      'Privacy Policy\n\nThank you for using our Blood Donation App.\nYour privacy is important to us.\n\n1. Information We Collect\n• Personal Information: Name, email, phone number, city, blood group, and account type.\n\n2. How We Use Your Information\n• To display your donor or user profile.\n• To manage blood requests and donations.\n\n3. Data Security\nYour data is securely stored using Firebase.\n\n4. Contact Us\n📧 Almohsen@gmail.com';
+      'Sheryan Platform — Privacy Policy\n\nSheryan is strictly committed to protecting and securing your personal and medical data with the highest cloud compliance standards. This policy governs data handling and integrity architecture:\n\n1. Information We Collect & Process:\n• Core Credentials: Name, email address, authenticated phone number, and location (City).\n• Vital Medical Data: Blood type, and official last donation timestamp.\n\n2. Data Processing & Medical Integrity Guards:\n• Medical data is exclusively used for core matching logic and staged notification dispatches.\n• The \'Last Donation Date\' is programmatically locked within the client UI immediately following a hospital-verified donation. This enforces a strict, un-tamperable medical cooldown period to ensure donor safety and recipient health integrity.\n\n3. Storage & Data Security:\n• All records are highly protected and stored utilizing Firebase encrypted backend systems.\n• We strictly enforce a zero-sharing policy with third parties. Minimal essential operational parameters are shared exclusively between verified hospitals, donors, and active recipients to facilitate instant life-saving coordination.\n\n4. Legal & Support Inquiries:\n📧 Almohsen@gmail.com';
 
   @override
   String get termsConditionsContent =>
-      'Terms & Conditions\n\nWelcome to our Blood Donation App. By using this app, you agree to the following terms:\n\n1. User Responsibilities\n• Provide accurate personal information.\n• Donors must ensure they are medically fit to donate.\n\n2. App Usage\n• The app is for humanitarian purposes only.\n\n3. Liability\nWe serve as a platform only.\n\nThank you for using our app to help save lives!';
+      'Sheryan Platform — Terms & Conditions\n\nWelcome to Sheryan. By accessing or interacting with this mobile application, you explicitly agree to bind your usage to the following technical and medical terms:\n\n1. User Responsibility & Compliance:\n• All users must provide 100% accurate, up-to-date, and verified personal and physical profiles.\n• Donors must guarantee medical fitness prior to responding to an alert, subject to the hospital\'s final validation protocol.\n• Requesters are strictly prohibited from publishing duplicate, fraudulent, or ghost blood requests.\n\n2. Autonomous Ledger Locking Protocol:\n• The donor acknowledges and accepts that manual modifications to the \'Last Donation Date\' are disabled once an official hospital confirmation hits the database. Ledger synchronization becomes fully automated and non-editable by the user to maintain rigorous medical safety windows.\n\n3. Limitation of Liability:\n• Sheryan operates purely as a state-of-the-art software orchestration framework to accelerate communication. The platform and its engineering team assume zero liability for clinical outcomes, physical actions, or real-world events occurring after users connect.\n\n4. Anti-Fraud & Account Termination:\n• We reserve the absolute right to suspend, terminate, or completely purge any account (Donor, Recipient, or Hospital) found engaging in malicious, fraudulent, or commercial behavior violating the platform\'s humanitarian purpose.\n\nThank you for standing with Sheryan to sustain lives securely!';
 
   @override
   String get showQrCode => 'Show QR Code';
@@ -1566,4 +1566,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get phonePrefix => '+963 ';
+
+  @override
+  String get developerProfileTitle => 'Developer Profile';
+
+  @override
+  String get developerName => 'Eng. Almohsen Myya';
+
+  @override
+  String get developerBio =>
+      'Senior Flutter Developer & Core Architect of Sheryan Platform';
+
+  @override
+  String get whatsappSupportMessage =>
+      'Hello Sheryan Support, I have a question regarding...';
+
+  @override
+  String appVersion(String version, String build) {
+    return 'Version: $version ($build)';
+  }
+
+  @override
+  String get contactDeveloper => 'Contact Developer';
+
+  @override
+  String get visitGithub => 'Visit GitHub';
+
+  @override
+  String get visitLinkedin => 'Visit LinkedIn';
 }

@@ -207,7 +207,14 @@ class _RequestResponseScreenState extends State<RequestResponseScreen> {
 
             _buildDetailTile(Icons.local_hospital, l10n.hospitalName, _requestData!['hospital'] ?? '—'),
             _buildDetailTile(Icons.location_on, l10n.city, _requestData!['city'] ?? '—'),
-            _buildDetailTile(Icons.invert_colors, l10n.units, _requestData!['units']?.toString() ?? '1'),
+            _buildDetailTile(
+              Icons.invert_colors, 
+              l10n.units, 
+              l10n.unitsFulfillmentStatus(
+                _requestData!['fulfilledUnits'] ?? 0,
+                _requestData!['requiredUnits'] ?? 1
+              )
+            ),
             _buildDetailTile(Icons.access_time, l10n.neededAtLabel(""), _requestData!['neededAt'] ?? '—'),
 
             const SizedBox(height: 40),

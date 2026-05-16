@@ -30,31 +30,47 @@ class FirebaseDonationRepository implements DonationRepository {
     required String adminUid,
     bool manualOverride = false,
   }) async {
-    final batch = _fs.batch();
+    await _fs.runTransaction((transaction) async {
+      final requestRef = _fs.collection('blood_requests').doc(requestId);
+      final donorRef = _fs.collection('users').doc(donorId);
+      final donationRef = _fs.collection('donations').doc();
 
-    batch.update(
-      _fs.collection('blood_requests').doc(requestId),
-      {'status': 'done'},
-    );
+      final requestDoc = await transaction.get(requestRef);
+      if (!requestDoc.exists) throw Exception("Request not found");
 
-    batch.update(
-      _fs.collection('users').doc(donorId),
-      {'lastDonated': DateTime.now().toIso8601String()},
-    );
+      final int required = requestDoc.data()?['requiredUnits'] ?? 1;
+      final int fulfilled = requestDoc.data()?['fulfilledUnits'] ?? 0;
+      final int newFulfilled = fulfilled + 1;
 
-    final donRef = _fs.collection('donations').doc();
-    final donData = <String, dynamic>{
-      'donorId': donorId,
-      'requestId': requestId,
-      'hospitalId': hospitalId,
-      'hospitalName': hospitalName,
-      'timestamp': FieldValue.serverTimestamp(),
-      'verifiedBy': adminUid,
-      if (manualOverride) 'manualOverride': true,
-    };
-    batch.set(donRef, donData);
+      String newStatus = 'partially_fulfilled';
+      if (newFulfilled >= required) {
+        newStatus = 'completed';
+      }
 
-    await batch.commit();
+      // Update Request
+      transaction.update(requestRef, {
+        'fulfilledUnits': newFulfilled,
+        'status': newStatus,
+      });
+
+      // Update Donor Profile (Lock Ledger)
+      transaction.update(donorRef, {
+        'lastDonated': DateTime.now().toIso8601String(),
+        'isLedgerLocked': true,
+      });
+
+      // Create Donation Record
+      final donationData = <String, dynamic>{
+        'donorId': donorId,
+        'requestId': requestId,
+        'hospitalId': hospitalId,
+        'hospitalName': hospitalName,
+        'timestamp': FieldValue.serverTimestamp(),
+        'verifiedBy': adminUid,
+        if (manualOverride) 'manualOverride': true,
+      };
+      transaction.set(donationRef, donationData);
+    });
   }
 
   @override
@@ -68,13 +84,16 @@ class FirebaseDonationRepository implements DonationRepository {
 
     batch.update(
       _fs.collection('users').doc(donorId),
-      {'lastDonated': DateTime.now().toIso8601String()},
+      {
+        'lastDonated': DateTime.now().toIso8601String(),
+        'isLedgerLocked': true,
+      },
     );
 
     final donRef = _fs.collection('donations').doc();
     final donData = <String, dynamic>{
       'donorId': donorId,
-      'requestId': null, // Explicitly null for general donations
+      'requestId': null,
       'hospitalId': hospitalId,
       'hospitalName': hospitalName,
       'timestamp': FieldValue.serverTimestamp(),

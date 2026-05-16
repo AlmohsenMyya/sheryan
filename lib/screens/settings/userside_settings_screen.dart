@@ -11,9 +11,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
-import 'package:url_launcher/url_launcher.dart' as url_launcher;
+import 'package:sheryan/screens/settings/developer_profile_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -59,7 +60,19 @@ class SettingsScreen extends ConsumerWidget {
               context: context,
               icon: Icons.support_agent_outlined,
               title: l10n.contactSupport,
+              subtitle: '+963 996 367 749',
               onTap: () => _contactSupport(context),
+            ),
+            _buildCard(
+              context: context,
+              icon: Icons.terminal_rounded,
+              title: l10n.developerProfileTitle,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DeveloperProfileScreen()),
+                );
+              },
             ),
           ]),
 
@@ -68,35 +81,36 @@ class SettingsScreen extends ConsumerWidget {
               context: context,
               icon: Icons.privacy_tip_outlined,
               title: l10n.privacyPolicy,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const PrivacyTermsScreen(isPrivacy: true)),
-                );
-              },
+              onTap: () => _launchExternalUrl(context, 'https://sheryan-app.web.app/privacy'),
             ),
             _buildCard(
               context: context,
               icon: Icons.article_outlined,
               title: l10n.termsConditions,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const PrivacyTermsScreen(isPrivacy: false)),
-                );
-              },
+              onTap: () => _launchExternalUrl(context, 'https://sheryan-app.web.app/terms'),
             ),
           ]),
 
           _buildSection(context, l10n.about, [
-            _buildCard(
-              context: context,
-              icon: Icons.info_outline,
-              title: l10n.aboutApp,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const AboutScreen()),
+            FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(),
+              builder: (context, snapshot) {
+                final version = snapshot.data?.version ?? '...';
+                final build = snapshot.data?.buildNumber ?? '...';
+                return _buildCard(
+                  context: context,
+                  icon: Icons.info_outline,
+                  title: l10n.aboutApp,
+                  subtitle: l10n.appVersion(version, build),
+                  onTap: () {
+                    showAboutDialog(
+                      context: context,
+                      applicationName: l10n.appTitle,
+                      applicationVersion: 'v$version+$build',
+                      applicationIcon: Image.asset('assets/logo.png', width: 48, height: 48),
+                      applicationLegalese: '© 2026 Sheryan Platform',
+                    );
+                  },
                 );
               },
             ),
@@ -201,17 +215,43 @@ class SettingsScreen extends ConsumerWidget {
 
   Future<void> _contactSupport(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final Uri email = Uri(
-      scheme: 'mailto',
-      path: 'almohsen@gmail.com',
-      query: 'subject=${l10n.supportEmailSubject}',
-    );
-    if (await canLaunchUrl(email)) {
-      await url_launcher.launchUrl(email);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.errorEmailApp)),
-      );
+    final String message = Uri.encodeComponent(l10n.whatsappSupportMessage);
+    final Uri whatsappUrl = Uri.parse("https://wa.me/963996367749?text=$message");
+    
+    try {
+      if (!await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication)) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(l10n.cannotOpenWhatsapp)),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.genericError(e.toString()))),
+        );
+      }
+    }
+  }
+
+  Future<void> _launchExternalUrl(BuildContext context, String urlString) async {
+    final l10n = AppLocalizations.of(context)!;
+    final Uri url = Uri.parse(urlString);
+    try {
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not launch URL')),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.genericError(e.toString()))),
+        );
+      }
     }
   }
 
@@ -662,53 +702,6 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class AboutScreen extends StatelessWidget {
-  const AboutScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(title: Text(l10n.about)),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l10n.appTitle, style: theme.textTheme.titleLarge),
-            const SizedBox(height: 10),
-            Text(l10n.aboutDescription, style: theme.textTheme.bodyLarge),
-            const SizedBox(height: 20),
-            Text(l10n.developedBy("Almohsen Shams"), style: theme.textTheme.bodyMedium),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class PrivacyTermsScreen extends StatelessWidget {
-  final bool isPrivacy;
-  const PrivacyTermsScreen({super.key, required this.isPrivacy});
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    final title = isPrivacy ? l10n.privacyPolicy : l10n.termsConditions;
-    final text = isPrivacy ? l10n.privacyPolicyContent : l10n.termsConditionsContent;
-
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Text(text, style: theme.textTheme.bodyLarge?.copyWith(height: 1.6)),
       ),
     );
   }

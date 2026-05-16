@@ -118,7 +118,12 @@ class FirebaseRequestRepository implements RequestRepository {
 
   @override
   Future<String> create(Map<String, dynamic> data) async {
-    final ref = await _fs.collection('blood_requests').add(data);
+    final Map<String, dynamic> finalData = {
+      ...data,
+      'fulfilledUnits': 0,
+      'requiredUnits': data['requiredUnits'] ?? 1,
+    };
+    final ref = await _fs.collection('blood_requests').add(finalData);
     return ref.id;
   }
 

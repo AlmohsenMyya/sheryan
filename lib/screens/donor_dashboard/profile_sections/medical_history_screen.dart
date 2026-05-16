@@ -21,6 +21,7 @@ class _MedicalHistoryScreenState extends State<MedicalHistoryScreen> {
   final _chronicCtrl = TextEditingController();
   final _allergiesCtrl = TextEditingController();
   bool _loading = false;
+  bool _isLocked = false;
 
   @override
   void initState() {
@@ -29,6 +30,7 @@ class _MedicalHistoryScreenState extends State<MedicalHistoryScreen> {
     _lastDonatedCtrl.text = d['lastDonated'] ?? '';
     _chronicCtrl.text = d['chronicDiseases'] ?? '';
     _allergiesCtrl.text = d['allergies'] ?? '';
+    _isLocked = d['isLedgerLocked'] == true;
   }
 
   @override
@@ -117,11 +119,15 @@ class _MedicalHistoryScreenState extends State<MedicalHistoryScreen> {
             TextFormField(
               controller: _lastDonatedCtrl,
               readOnly: true,
-              onTap: _pickDate,
+              onTap: _isLocked ? null : _pickDate,
               decoration: InputDecoration(
                 labelText: l10n.lastDonated,
                 prefixIcon: const Icon(Icons.calendar_today),
-                suffixIcon: const Icon(Icons.edit_calendar_outlined),
+                suffixIcon: _isLocked 
+                  ? const Icon(Icons.lock_outline, color: Colors.orange, size: 20)
+                  : const Icon(Icons.edit_calendar_outlined),
+                helperText: _isLocked ? l10n.ledgerLockedNote : null,
+                helperStyle: _isLocked ? const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold) : null,
               ),
             ),
             const SizedBox(height: 12),
