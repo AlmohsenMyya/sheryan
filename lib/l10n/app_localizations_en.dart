@@ -691,7 +691,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsConditionsContent =>
-      'Sheryan Platform — Terms & Conditions\n\nWelcome to Sheryan. By accessing or interacting with this mobile application, you explicitly agree to bind your usage to the following technical and medical terms:\n\n1. User Responsibility & Compliance:\n• All users must provide 100% accurate, up-to-date, and verified personal and physical profiles.\n• Donors must guarantee medical fitness prior to responding to an alert, subject to the hospital\'s final validation protocol.\n• Requesters are strictly prohibited from publishing duplicate, fraudulent, or ghost blood requests.\n\n2. Autonomous Ledger Locking Protocol:\n• The donor acknowledges and accepts that manual modifications to the \'Last Donation Date\' are disabled once an official hospital confirmation hits the database. Ledger synchronization becomes fully automated and non-editable by the user to maintain rigorous medical safety windows.\n\n3. Limitation of Liability:\n• Sheryan operates purely as a state-of-the-art software orchestration framework to accelerate communication. The platform and its engineering team assume zero liability for clinical outcomes, physical actions, or real-world events occurring after users connect.\n\n4. Anti-Fraud & Account Termination:\n• We reserve the absolute right to suspend, terminate, or completely purge any account (Donor, Recipient, or Hospital) found engaging in malicious, fraudulent, or commercial behavior violating the platform\'s humanitarian purpose.\n\nThank you for standing with Sheryan to sustain lives securely!';
+      'Sheryan Platform — Terms & Conditions\n\nWelcome to Sheryan. By accessing, interacting with, or registering on this mobile application, you explicitly and unconditionally agree to bind your usage to the following technical, legal, and medical terms:\n\n1. User Responsibility, Compliance & Medical Fitness:\n• All users must provide 100% accurate, truthful, and verified personal, geographical, and physical profiles.\n• Donors must guarantee medical and physical fitness prior to responding to an active alert, subject to the hospital\'s final clinical testing and validation protocols.\n• Requesters are strictly prohibited from publishing duplicate, fraudulent, exaggerated, or ghost blood requests.\n\n2. Autonomous Ledger Locking Protocol:\n• The donor acknowledges and accepts that manual modifications to the \'Last Donation Date\' within the profile UI are permanently disabled once an official hospital confirmation hits the database. Ledger synchronization becomes fully automated and non-editable by the user to strictly maintain rigorous medical safety windows.\n\n3. Incremental Fulfillment & Request Lifecycle:\n• Users acknowledge that blood requests utilize an atomic incremental fulfillment engine. A request is not finalized or closed upon a single donation; rather, the request and its staged notification loop remain fully active and visible to other donors until `fulfilledUnits` completely equals `requiredUnits`.\n\n4. Absolute Limitation of Liability:\n• Sheryan operates purely as a state-of-the-art software orchestration framework designed to accelerate humanitarian communication. The platform and its engineering framework assume zero civil, criminal, or medical liability for clinical outcomes, physical actions, or real-world events occurring after users connect outside the app\'s secure software environment.\n\n5. Anti-Fraud & Account Termination Enforcement:\n• We reserve the absolute, non-negotiable right to suspend, terminate, or completely purge any account (Donor, Recipient, or Hospital) found engaging in malicious, commercial, or fraudulent behavior violating the platform\'s core humanitarian purpose.\n\nThank you for standing with Sheryan to sustain lives securely!';
 
   @override
   String get showQrCode => 'Show QR Code';
@@ -1594,4 +1594,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get visitLinkedin => 'Visit LinkedIn';
+
+  @override
+  String get requiredUnits => 'Required Units';
+
+  @override
+  String get fulfilledUnits => 'Fulfilled Units';
+
+  @override
+  String get ledgerLockedNote => 'Locked: Managed by hospital verifications.';
+
+  @override
+  String get partiallyFulfilled => 'Partially Fulfilled';
+
+  @override
+  String unitsFulfillmentStatus(int fulfilled, int required) {
+    return '$fulfilled of $required units secured';
+  }
 }

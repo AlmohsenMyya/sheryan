@@ -60,9 +60,9 @@ class SettingsScreen extends ConsumerWidget {
               context: context,
               icon: Icons.support_agent_outlined,
               title: l10n.contactSupport,
-              subtitle: '+963 996 367 749',
               onTap: () => _contactSupport(context),
             ),
+            SizedBox(height: 5,),
             _buildCard(
               context: context,
               icon: Icons.terminal_rounded,
@@ -81,13 +81,24 @@ class SettingsScreen extends ConsumerWidget {
               context: context,
               icon: Icons.privacy_tip_outlined,
               title: l10n.privacyPolicy,
-              onTap: () => _launchExternalUrl(context, 'https://sheryan-app.web.app/privacy'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PrivacyTermsScreen(isPrivacy: true)),
+                );
+              },
             ),
+            SizedBox(height: 5,),
             _buildCard(
               context: context,
               icon: Icons.article_outlined,
               title: l10n.termsConditions,
-              onTap: () => _launchExternalUrl(context, 'https://sheryan-app.web.app/terms'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PrivacyTermsScreen(isPrivacy: false)),
+                );
+              },
             ),
           ]),
 
@@ -223,26 +234,6 @@ class SettingsScreen extends ConsumerWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(l10n.cannotOpenWhatsapp)),
-          );
-        }
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.genericError(e.toString()))),
-        );
-      }
-    }
-  }
-
-  Future<void> _launchExternalUrl(BuildContext context, String urlString) async {
-    final l10n = AppLocalizations.of(context)!;
-    final Uri url = Uri.parse(urlString);
-    try {
-      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Could not launch URL')),
           );
         }
       }
@@ -702,6 +693,50 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class PrivacyTermsScreen extends StatelessWidget {
+  final bool isPrivacy;
+  const PrivacyTermsScreen({super.key, required this.isPrivacy});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final title = isPrivacy ? l10n.privacyPolicy : l10n.termsConditions;
+    final content = isPrivacy ? l10n.privacyPolicyContent : l10n.termsConditionsContent;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: theme.colorScheme.outline.withOpacity(0.1)),
+              ),
+              child: Text(
+                content,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  height: 1.8,
+                  letterSpacing: 0.2,
+                ),
+              ),
+            ),
+            const SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
