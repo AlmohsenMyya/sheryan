@@ -1508,4 +1508,24 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get allDonorsNotified => 'تم إخطار جميع المتبرعين المتوافقين';
+
+  @override
+  String get emergencyRequest => 'طلب دم طارئ';
+
+  @override
+  String get declineButton => 'اعتذار';
+
+  @override
+  String get acceptButton => 'قبول';
+
+  @override
+  String get confirmDeclineTitle => 'تأكيد الاعتذار';
+
+  @override
+  String get confirmDeclineBody =>
+      'هل أنت متأكد من الاعتذار عن هذا الطلب؟ سيتيح هذا لمتبرعين آخرين المساعدة بدلاً منك.';
+
+  @override
+  String get declineSuccessMessage =>
+      'شكراً لإعلامنا. تم إخطار متبرع آخر بدلاً منك.';
 }

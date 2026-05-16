@@ -2899,6 +2899,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All compatible donors notified'**
   String get allDonorsNotified;
+
+  /// No description provided for @emergencyRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency Blood Request'**
+  String get emergencyRequest;
+
+  /// No description provided for @declineButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get declineButton;
+
+  /// No description provided for @acceptButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get acceptButton;
+
+  /// No description provided for @confirmDeclineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline Request'**
+  String get confirmDeclineTitle;
+
+  /// No description provided for @confirmDeclineBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to decline this request? This will allow other donors to help instead.'**
+  String get confirmDeclineBody;
+
+  /// No description provided for @declineSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for letting us know. We\'ve notified another donor.'**
+  String get declineSuccessMessage;
 }
 
 class _AppLocalizationsDelegate

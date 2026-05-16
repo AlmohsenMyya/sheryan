@@ -1519,4 +1519,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allDonorsNotified => 'All compatible donors notified';
+
+  @override
+  String get emergencyRequest => 'Emergency Blood Request';
+
+  @override
+  String get declineButton => 'Decline';
+
+  @override
+  String get acceptButton => 'Accept';
+
+  @override
+  String get confirmDeclineTitle => 'Decline Request';
+
+  @override
+  String get confirmDeclineBody =>
+      'Are you sure you want to decline this request? This will allow other donors to help instead.';
+
+  @override
+  String get declineSuccessMessage =>
+      'Thank you for letting us know. We\'ve notified another donor.';
 }

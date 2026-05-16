@@ -655,5 +655,11 @@
     }
   },
   "notifyMoreDonors": "إخطار 10 متبرعين إضافيين",
-  "allDonorsNotified": "تم إخطار جميع المتبرعين المتوافقين"
+  "allDonorsNotified": "تم إخطار جميع المتبرعين المتوافقين",
+  "emergencyRequest": "طلب دم طارئ",
+  "declineButton": "اعتذار",
+  "acceptButton": "قبول",
+  "confirmDeclineTitle": "تأكيد الاعتذار",
+  "confirmDeclineBody": "هل أنت متأكد من الاعتذار عن هذا الطلب؟ سيتيح هذا لمتبرعين آخرين المساعدة بدلاً منك.",
+  "declineSuccessMessage": "شكراً لإعلامنا. تم إخطار متبرع آخر بدلاً منك."
 }

@@ -16,7 +16,7 @@ class StagedNotificationService {
   final NotificationService _notifService = NotificationService();
 
   /// Dispatches the next batch of up to 10 donors for a specific request.
-  /// Handles in-memory filtering for medical cooldowns and ranking.
+  /// Strictly enforces a 30-minute server-side cooldown.
   Future<void> dispatchNextBatch(String requestId) async {
     debugPrint("🚀 [StagedNotif] Starting batch dispatch for request: $requestId");
 
@@ -29,23 +29,23 @@ class StagedNotificationService {
 
         final requestData = requestDoc.data()!;
         
-        // 🔒 [Security] Backend Cooldown Validation
+        // 🔒 [Security Shield] Backend Cooldown Validation
         final Timestamp? lastSent = requestData['lastNotificationSentAt'];
         if (lastSent != null) {
           final DateTime now = DateTime.now();
           final DateTime cooldownExpiry = lastSent.toDate().add(const Duration(minutes: 30));
           if (now.isBefore(cooldownExpiry)) {
             final int remainingSecs = cooldownExpiry.difference(now).inSeconds;
-            debugPrint("🛑 [StagedNotif] Backend Validation Failed: Cooldown active ($remainingSecs seconds left)");
+            debugPrint("🛑 [StagedNotif] Cooldown active ($remainingSecs seconds left)");
             throw Exception("Cooldown active. Please wait $remainingSecs more seconds.");
           }
         }
-        debugPrint("✅ [StagedNotif] Backend Validation: Cooldown check passed.");
+        debugPrint("✅ [StagedNotif] Cooldown check passed.");
 
         final String city = requestData['city'] ?? '';
         final String bloodGroup = requestData['bloodGroup'] ?? '';
-        final List<dynamic> notifiedDonorIds =
-            requestData['notifiedDonorIds'] ?? [];
+        final List<dynamic> notifiedIds = requestData['notifiedDonorIds'] ?? [];
+        final List<dynamic> declinedIds = requestData['declinedDonorIds'] ?? [];
 
         // 1. Fetch Candidate Pool
         final compatibleTypes = BloodLogic.getCompatibleDonors(bloodGroup);
@@ -53,44 +53,45 @@ class StagedNotificationService {
           city: city,
           bloodGroups: compatibleTypes,
         );
-        debugPrint("📊 [StagedNotif] Raw candidate pool from Firestore: ${allCandidates.length} donors");
+        debugPrint("📊 [StagedNotif] Raw candidate pool: ${allCandidates.length} donors");
 
-// 2. In-Memory Filtering
+        // 2. In-Memory Filtering & Medical Blocker
         final now = DateTime.now();
         final sixtyDaysAgo = now.subtract(const Duration(days: 60));
 
-        int excludedAlreadyNotified = 0;
-        int excludedMedicalBlocker = 0;
+        int countExcludedHistory = 0;
+        int countExcludedMedical = 0;
 
         final eligibleCandidates = allCandidates.where((donor) {
           final String uid = donor['id'];
 
-          if (notifiedDonorIds.contains(uid)) {
-            excludedAlreadyNotified++;
+          // Exclusion Filter: Already notified or explicitly declined
+          if (notifiedIds.contains(uid) || declinedIds.contains(uid)) {
+            countExcludedHistory++;
             return false;
           }
 
-          // 💡 الإصلاح هنا: قراءة الحقل كـ String وتحويله برمجياً
+          // Data Integrity Fix: Parsing ISO 8601 String to DateTime
           final String? lastDonatedStr = donor['lastDonated'];
           if (lastDonatedStr != null && lastDonatedStr.isNotEmpty) {
             try {
               final DateTime lastDonatedDate = DateTime.parse(lastDonatedStr);
               if (lastDonatedDate.isAfter(sixtyDaysAgo)) {
-                excludedMedicalBlocker++;
+                countExcludedMedical++;
                 return false;
               }
             } catch (e) {
-              debugPrint("⚠️ [StagedNotif] Failed to parse lastDonated date for user $uid: $e");
+              debugPrint("⚠️ [StagedNotif] Parse error for user $uid: $e");
             }
           }
 
           return true;
         }).toList();
 
-        debugPrint("🧹 [StagedNotif] Filter results: Excluded $excludedAlreadyNotified (already notified), Excluded $excludedMedicalBlocker (medical blocker)");
-        debugPrint("🎯 [StagedNotif] Eligible pool size: ${eligibleCandidates.length}");
+        debugPrint("🧹 [StagedNotif] Excluded: $countExcludedHistory (history), $countExcludedMedical (medical)");
+        debugPrint("🎯 [StagedNotif] Final eligible pool: ${eligibleCandidates.length}");
 
-        // 3. Ranking Logic
+        // 3. Ranking Engine
         eligibleCandidates.sort((a, b) {
           final bool aVerified = a['bloodGroupVerified'] == true;
           final bool bVerified = b['bloodGroupVerified'] == true;
@@ -98,18 +99,18 @@ class StagedNotificationService {
 
           final int aPoints = a['points'] ?? 0;
           final int bPoints = b['points'] ?? 0;
-          return bPoints.compareTo(aPoints); 
+          return bPoints.compareTo(aPoints); // Descending
         });
 
-        // 4. Select the Top 10
-        final selectedBatch = eligibleCandidates.take(10).toList();
-        if (selectedBatch.isEmpty) {
-          debugPrint("⚠️ [StagedNotif] Dispatch aborted: No more eligible donors found.");
+        // 4. Batch Selection (Top 10)
+        final batch = eligibleCandidates.take(10).toList();
+        if (batch.isEmpty) {
+          debugPrint("⚠️ [StagedNotif] Dispatch aborted: Pool exhausted.");
           return;
         }
 
-        final List<String> newUids = selectedBatch.map((e) => e['id'] as String).toList();
-        debugPrint("📦 [StagedNotif] Batch selected: ${newUids.length} donors (IDs: $newUids)");
+        final List<String> newUids = batch.map((e) => e['id'] as String).toList();
+        debugPrint("📦 [StagedNotif] Batch selected: $newUids");
 
         // 5. Atomic State Update
         transaction.update(requestRef, {
@@ -119,23 +120,95 @@ class StagedNotificationService {
           'isVerified': true,
         });
 
-        // 6. Trigger FCM v1 Pushes
-        _fireNotifications(requestId, selectedBatch, bloodGroup, city);
+        // 6. Async FCM Dispatch
+        _fireBatchNotifications(requestId, batch, bloodGroup, city);
       });
     } catch (e) {
-      debugPrint("❌ [StagedNotif] Transaction aborted: $e");
+      debugPrint("❌ [StagedNotif] Transaction failed: $e");
       rethrow;
     }
   }
 
-  /// Sends both Firestore Inbox notifications and direct FCM pushes.
-  void _fireNotifications(
+  /// Triggered when a donor declines a slot. Replenishes by notifying the next 1 best donor.
+  Future<void> declineRequestSlot(String requestId, String donorId) async {
+    debugPrint("🚪 [StagedNotif] Donor $donorId declining slot for request $requestId");
+
+    final requestRef = _fs.collection('blood_requests').doc(requestId);
+
+    try {
+      await _fs.runTransaction((transaction) async {
+        final requestDoc = await transaction.get(requestRef);
+        if (!requestDoc.exists) return;
+
+        final requestData = requestDoc.data()!;
+        final String city = requestData['city'] ?? '';
+        final String bloodGroup = requestData['bloodGroup'] ?? '';
+        final List<dynamic> notifiedIds = requestData['notifiedDonorIds'] ?? [];
+        final List<dynamic> declinedIds = requestData['declinedDonorIds'] ?? [];
+
+        // 1. Fetch Candidates
+        final compatibleTypes = BloodLogic.getCompatibleDonors(bloodGroup);
+        final allCandidates = await _userService.getCompatibleDonors(
+          city: city,
+          bloodGroups: compatibleTypes,
+        );
+
+        // 2. Filter & Medical Blocker
+        final now = DateTime.now();
+        final sixtyDaysAgo = now.subtract(const Duration(days: 60));
+
+        final eligibleCandidates = allCandidates.where((donor) {
+          final String uid = donor['id'];
+          if (notifiedIds.contains(uid) || declinedIds.contains(uid) || uid == donorId) return false;
+
+          final String? lastDonatedStr = donor['lastDonated'];
+          if (lastDonatedStr != null && lastDonatedStr.isNotEmpty) {
+            try {
+              final DateTime d = DateTime.parse(lastDonatedStr);
+              if (d.isAfter(sixtyDaysAgo)) return false;
+            } catch (_) {}
+          }
+          return true;
+        }).toList();
+
+        // 3. Rank
+        eligibleCandidates.sort((a, b) {
+          final bool aV = a['bloodGroupVerified'] == true;
+          final bool bV = b['bloodGroupVerified'] == true;
+          if (aV != bV) return aV ? -1 : 1;
+          return (b['points'] ?? 0).compareTo(a['points'] ?? 0);
+        });
+
+        // 4. Select Next 1
+        final nextDonor = eligibleCandidates.isNotEmpty ? eligibleCandidates.first : null;
+
+        // 5. Update: Add to declined list, and potentially add replacement to notified list
+        final updates = <String, dynamic>{
+          'declinedDonorIds': FieldValue.arrayUnion([donorId]),
+        };
+
+        if (nextDonor != null) {
+          final String nextUid = nextDonor['id'];
+          updates['notifiedDonorIds'] = FieldValue.arrayUnion([nextUid]);
+          debugPrint("🔄 [StagedNotif] Replenishing slot with donor: $nextUid");
+          _fireBatchNotifications(requestId, [nextDonor], bloodGroup, city);
+        } else {
+          debugPrint("⚠️ [StagedNotif] No replacement found for declined slot.");
+        }
+
+        transaction.update(requestRef, updates);
+      });
+    } catch (e) {
+      debugPrint("❌ [StagedNotif] Decline transaction failed: $e");
+    }
+  }
+
+  void _fireBatchNotifications(
     String requestId,
     List<Map<String, dynamic>> batch,
     String bloodGroup,
     String city,
   ) {
-    // Fire-and-forget background execution
     Future.microtask(() async {
       for (final donor in batch) {
         await _notifService.sendDirectNotification(
@@ -148,7 +221,6 @@ class StagedNotificationService {
           type: NotificationType.emergency,
         );
       }
-      debugPrint("✅ [StagedNotif] Batch dispatch complete for ${batch.length} donors.");
     });
   }
 }

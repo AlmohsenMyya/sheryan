@@ -75,10 +75,14 @@ class _StagedCooldownBannerState extends ConsumerState<StagedCooldownBanner> {
     try {
       await StagedNotificationService().dispatchNextBatch(widget.requestId);
     } catch (e) {
-      // Logic inside service handles "pool exhausted" via logging, 
-      // but we can catch errors if the transaction fails or custom flags are added.
-      if (e.toString().contains("No more eligible donors")) {
+      // Catch specific exhaustion flag from service
+      if (e.toString().contains("No more eligible donors") || e.toString().contains("Pool exhausted")) {
         setState(() => _poolExhausted = true);
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString().replaceAll("Exception: ", ""))),
+        );
       }
     } finally {
       if (mounted) setState(() => _isProcessing = false);
@@ -96,7 +100,7 @@ class _StagedCooldownBannerState extends ConsumerState<StagedCooldownBanner> {
       data: (data) {
         if (data == null) return const SizedBox.shrink();
 
-        // 🛑 Hard Blocker: Hide if status is done/completed or request isn't verified yet
+        // 🛡️ Visibility Guards: Hide if done/completed or not verified
         final String status = data['status'] ?? 'pending';
         final bool isVerified = data['isVerified'] ?? false;
         if (status == 'done' || status == 'completed' || !isVerified) {
@@ -107,10 +111,10 @@ class _StagedCooldownBannerState extends ConsumerState<StagedCooldownBanner> {
         final bool isCooldown = _remaining.inSeconds > 0;
 
         return Container(
-          margin: const EdgeInsets.symmetric(vertical: 8),
+          margin: const EdgeInsets.symmetric(vertical: 12),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.2),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
@@ -121,8 +125,8 @@ class _StagedCooldownBannerState extends ConsumerState<StagedCooldownBanner> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.campaign_outlined, size: 20, color: Theme.of(context).colorScheme.primary),
-                  const SizedBox(width: 10),
+                  Icon(Icons.campaign_rounded, size: 22, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       l10n.stagedNotifiedCount(notifiedCount),
@@ -134,7 +138,7 @@ class _StagedCooldownBannerState extends ConsumerState<StagedCooldownBanner> {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               _buildActionButton(l10n, isCooldown),
             ],
           ),
@@ -147,6 +151,7 @@ class _StagedCooldownBannerState extends ConsumerState<StagedCooldownBanner> {
     if (_poolExhausted) {
       return OutlinedButton(
         onPressed: null,
+        style: OutlinedButton.styleFrom(disabledForegroundColor: Colors.grey),
         child: Text(l10n.allDonorsNotified),
       );
     }

@@ -11,6 +11,8 @@ import 'package:sheryan/core/utils/blood_logic.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:googleapis_auth/auth_io.dart' as auth;
+import 'package:sheryan/main.dart';
+import 'package:sheryan/screens/donors/request_response_screen.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -96,7 +98,29 @@ class NotificationService {
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       debugPrint("🚀 [FCM] App opened from notification: ${message.data}");
+      _handleRouting(message.data);
     });
+
+    // Check if app was opened from a terminated state via a notification
+    FirebaseMessaging.instance.getInitialMessage().then((message) {
+      if (message != null) {
+        debugPrint("🚀 [FCM] App opened from initial message: ${message.data}");
+        _handleRouting(message.data);
+      }
+    });
+  }
+
+  void _handleRouting(Map<String, dynamic> data) {
+    final requestId = data['requestId'] as String?;
+    final type = data['type'] as String?;
+
+    if (requestId != null && type == 'emergency') {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (_) => RequestResponseScreen(requestId: requestId),
+        ),
+      );
+    }
   }
 
   /// Saves (or refreshes) the device FCM token into Firestore so we can

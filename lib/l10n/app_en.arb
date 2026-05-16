@@ -621,5 +621,11 @@
     }
   },
   "notifyMoreDonors": "Notify 10 More Donors",
-  "allDonorsNotified": "All compatible donors notified"
+  "allDonorsNotified": "All compatible donors notified",
+  "emergencyRequest": "Emergency Blood Request",
+  "declineButton": "Decline",
+  "acceptButton": "Accept",
+  "confirmDeclineTitle": "Decline Request",
+  "confirmDeclineBody": "Are you sure you want to decline this request? This will allow other donors to help instead.",
+  "declineSuccessMessage": "Thank you for letting us know. We've notified another donor."
 }
