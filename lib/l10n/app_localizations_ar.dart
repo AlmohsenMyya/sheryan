@@ -1548,4 +1548,11 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get requestAlreadyFulfilled =>
       'تم تأمين الدم بنجاح وإغلاق الطلب. شكراً لجهوزيتك!';
+
+  @override
+  String get invalidSyrianPhone =>
+      'يرجى إدخال رقم هاتف سوري صحيح مكون من 9 أرقام';
+
+  @override
+  String get phonePrefix => '+963 ';
 }

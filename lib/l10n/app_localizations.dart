@@ -2971,6 +2971,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This request has been successfully fulfilled. Thank you!'**
   String get requestAlreadyFulfilled;
+
+  /// No description provided for @invalidSyrianPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid 9-digit Syrian phone number'**
+  String get invalidSyrianPhone;
+
+  /// No description provided for @phonePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'+963 '**
+  String get phonePrefix;
 }
 
 class _AppLocalizationsDelegate

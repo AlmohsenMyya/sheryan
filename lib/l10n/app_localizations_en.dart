@@ -1559,4 +1559,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get requestAlreadyFulfilled =>
       'This request has been successfully fulfilled. Thank you!';
+
+  @override
+  String get invalidSyrianPhone =>
+      'Please enter a valid 9-digit Syrian phone number';
+
+  @override
+  String get phonePrefix => '+963 ';
 }
