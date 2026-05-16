@@ -1528,4 +1528,17 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get declineSuccessMessage =>
       'شكراً لإعلامنا. تم إخطار متبرع آخر بدلاً منك.';
+
+  @override
+  String get emergencyAlertsTab => 'نداءات الاستغاثة';
+
+  @override
+  String get allClearTitle => 'الوضع آمن';
+
+  @override
+  String get allClearSubtitle =>
+      'لا توجد نداءات استغاثة نشطة حالياً، شكراً لجهوزيتك!';
+
+  @override
+  String get viewDetailsButton => 'عرض التفاصيل';
 }

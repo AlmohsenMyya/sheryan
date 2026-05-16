@@ -14,17 +14,33 @@ import 'package:sheryan/screens/auth/role_selection_screen.dart';
 import 'package:sheryan/screens/home/home_screen.dart';
 import 'package:sheryan/screens/misc/splash_screen.dart';
 
+import 'package:sheryan/services/notification_service.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+/// Global access to Riverpod container for non-widget contexts (FCM listeners)
+late final ProviderContainer globalContainer;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  globalContainer = ProviderContainer();
+
+  // Initialize notifications early to capture terminated state messages
+  final notificationService = NotificationService();
+  await notificationService.initializeNotificationHandlers();
+
   FirebaseFirestore.instance.settings = const Settings(
     persistenceEnabled: true,
     cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
   );
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(UncontrolledProviderScope(
+    container: globalContainer,
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends ConsumerWidget {

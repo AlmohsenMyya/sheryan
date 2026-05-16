@@ -25,6 +25,8 @@ import 'package:sheryan/screens/donor_dashboard/see_users_request.dart';
 import 'package:sheryan/screens/donor_dashboard/nearby_users_req.dart';
 import 'package:sheryan/screens/misc/awareness_screen.dart';
 
+import 'package:sheryan/screens/donor_dashboard/emergency_alerts_tab.dart';
+
 import 'controllers/home_controller.dart';
 import 'providers/home_providers.dart';
 import 'widgets/home_app_bar.dart';
@@ -162,7 +164,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       _HomeBody(role: role, userData: profile),
       if (role == UserRole.recipient) const DonorListScreen(),
       if (role == UserRole.recipient) const ProfileScreen(),
-      if (role == UserRole.donor) const DonorsList(),
+      if (role == UserRole.donor) const EmergencyAlertsTab(),
       if (role == UserRole.donor) const DonorProfileScreen(),
     ];
 
@@ -173,7 +175,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         BottomNavigationBarItem(icon: const Icon(Icons.person), label: l10n.profileTab),
       ],
       if (role == UserRole.donor) ...[
-        BottomNavigationBarItem(icon: const Icon(Icons.person_3), label: l10n.allDonorsTab),
+        BottomNavigationBarItem(icon: const Icon(Icons.campaign_rounded), label: l10n.emergencyAlertsTab),
         BottomNavigationBarItem(icon: const Icon(Icons.person), label: l10n.profileTab),
       ],
     ];

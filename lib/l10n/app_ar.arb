@@ -661,5 +661,9 @@
   "acceptButton": "قبول",
   "confirmDeclineTitle": "تأكيد الاعتذار",
   "confirmDeclineBody": "هل أنت متأكد من الاعتذار عن هذا الطلب؟ سيتيح هذا لمتبرعين آخرين المساعدة بدلاً منك.",
-  "declineSuccessMessage": "شكراً لإعلامنا. تم إخطار متبرع آخر بدلاً منك."
+  "declineSuccessMessage": "شكراً لإعلامنا. تم إخطار متبرع آخر بدلاً منك.",
+  "emergencyAlertsTab": "نداءات الاستغاثة",
+  "allClearTitle": "الوضع آمن",
+  "allClearSubtitle": "لا توجد نداءات استغاثة نشطة حالياً، شكراً لجهوزيتك!",
+  "viewDetailsButton": "عرض التفاصيل"
 }

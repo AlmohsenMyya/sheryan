@@ -1539,4 +1539,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get declineSuccessMessage =>
       'Thank you for letting us know. We\'ve notified another donor.';
+
+  @override
+  String get emergencyAlertsTab => 'Emergency Alerts';
+
+  @override
+  String get allClearTitle => 'System All Clear';
+
+  @override
+  String get allClearSubtitle =>
+      'No active emergency alerts currently. Thank you for being ready to help!';
+
+  @override
+  String get viewDetailsButton => 'View Details';
 }

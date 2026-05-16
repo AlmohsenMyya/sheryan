@@ -6,6 +6,7 @@ import 'package:sheryan/core/models/app_notification.dart';
 import 'package:sheryan/core/theme/app_colors.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
 import 'package:sheryan/services/notification_service.dart';
+import 'package:sheryan/screens/donors/request_response_screen.dart';
 
 // ─── Tab filter definition ────────────────────────────────────────────────────
 
@@ -255,7 +256,7 @@ class _NotifCard extends StatelessWidget {
     final body = isAr ? notification.bodyAr : notification.bodyEn;
     final timeStr =
         DateFormat('hh:mm a').format(notification.timestamp);
-
+    final l10n = AppLocalizations.of(context)!;
     final typeColor = _typeColor(notification.type);
     final typeIcon = _typeIcon(notification.type);
     final isUnread = !notification.isRead;
@@ -351,6 +352,30 @@ class _NotifCard extends StatelessWidget {
                                   color: colorScheme.onSurface.withOpacity(0.7),
                                 ),
                               ),
+                              if (notification.type == NotificationType.emergency) ...[
+                                const SizedBox(height: 12),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: FilledButton.tonalIcon(
+                                    onPressed: (notification.requestId == null || notification.requestId!.isEmpty)
+                                        ? () => ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text(l10n.genericError("Invalid Request ID"))),
+                                            )
+                                        : () => Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => RequestResponseScreen(requestId: notification.requestId!),
+                                              ),
+                                            ),
+                                    style: FilledButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(vertical: 8),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    ),
+                                    icon: const Icon(Icons.visibility_outlined, size: 18),
+                                    label: Text(l10n.viewDetailsButton, style: const TextStyle(fontSize: 13)),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),

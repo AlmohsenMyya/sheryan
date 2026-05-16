@@ -627,5 +627,9 @@
   "acceptButton": "Accept",
   "confirmDeclineTitle": "Decline Request",
   "confirmDeclineBody": "Are you sure you want to decline this request? This will allow other donors to help instead.",
-  "declineSuccessMessage": "Thank you for letting us know. We've notified another donor."
+  "declineSuccessMessage": "Thank you for letting us know. We've notified another donor.",
+  "emergencyAlertsTab": "Emergency Alerts",
+  "allClearTitle": "System All Clear",
+  "allClearSubtitle": "No active emergency alerts currently. Thank you for being ready to help!",
+  "viewDetailsButton": "View Details"
 }

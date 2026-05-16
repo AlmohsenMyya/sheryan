@@ -1,18 +1,36 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sheryan/core/models/app_notification.dart';
-import 'package:sheryan/core/utils/blood_logic.dart';
-import 'package:sheryan/l10n/app_localizations.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:googleapis_auth/auth_io.dart' as auth;
+
+// استيرادات التطبيق الخاصة بك (تأكد من مساراتك هنا إذا اختلفت)
 import 'package:sheryan/main.dart';
 import 'package:sheryan/screens/donors/request_response_screen.dart';
+import 'package:sheryan/providers/emergency/emergency_provider.dart';
+
+import '../core/models/app_notification.dart';
+import '../core/utils/blood_logic.dart';
+import '../l10n/app_localizations.dart';
+
+// ملاحظة: تأكد من استيراد الموديلات (Models) مثل AppNotification و BloodLogic و NotificationType
+// import 'package:sheryan/models/app_notification.dart';
+// import 'package:sheryan/models/blood_logic.dart';
+
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  debugPrint("📩 [FCM] Handling background message: ${message.messageId}");
+
+  // 🛡️ [Phase A] إظهار إشعار محلي يدوياً لرسائل الـ Data-only في الخلفية
+  final notificationService = NotificationService();
+  await notificationService.setupLocalNotificationsForBackground();
+  notificationService.showLocalNotification(message);
+}
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -44,16 +62,13 @@ class NotificationService {
     "type": "service_account",
     "project_id": dotenv.env['FCM_PROJECT_ID'],
     "private_key_id": dotenv.env['FCM_PRIVATE_KEY_ID'],
-    "private_key":
-    dotenv.env['FCM_PRIVATE_KEY']?.replaceAll('\\n', '\n'),
+    "private_key": dotenv.env['FCM_PRIVATE_KEY']?.replaceAll('\\n', '\n'),
     "client_email": dotenv.env['FCM_CLIENT_EMAIL'],
     "client_id": dotenv.env['FCM_CLIENT_ID'],
     "auth_uri": "https://accounts.google.com/o/oauth2/auth",
     "token_uri": "https://oauth2.googleapis.com/token",
-    "auth_provider_x509_cert_url":
-    "https://www.googleapis.com/oauth2/v1/certs",
-    "client_x509_cert_url":
-    "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40blood-f5990.iam.gserviceaccount.com",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40blood-f5990.iam.gserviceaccount.com",
     "universe_domain": "googleapis.com"
   };
 
@@ -75,10 +90,35 @@ class NotificationService {
     }
   }
 
-  // ─── Initialization ─────────────────────────────────────────────────────────
+  // ─── Initialization & Lifecycle Hooks ───────────────────────────────────────
+
+  Future<void> initializeNotificationHandlers() async {
+    await _setupLocalNotifications();
+
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint("🚀 [FCM] Foreground message received");
+      // 🛡️ [Fix] تحديث حالة التبويب فور وصول الرسالة (بدون نقل المستخدم قسراً)
+      _updateEmergencyState(message.data);
+      _showLocalNotification(message);
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      debugPrint("🚀 [FCM] App opened from background notification");
+      _handleRouting(message.data);
+    });
+
+    final initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      debugPrint("🚀 [FCM] App opened from terminated state");
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _handleRouting(initialMessage.data);
+      });
+    }
+  }
 
   Future<void> init(BuildContext context) async {
-    await _setupLocalNotifications();
     await _saveFcmToken();
 
     final prefs = await SharedPreferences.getInstance();
@@ -89,32 +129,26 @@ class NotificationService {
           prefs.getBool(_prefKeyPermissionRequested) ?? false;
       if (!alreadyRequested) await _requestPermissions(context);
     }
-
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint(
-          "🚀 [FCM] Foreground message: ${message.notification?.title}");
-      _showLocalNotification(message);
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      debugPrint("🚀 [FCM] App opened from notification: ${message.data}");
-      _handleRouting(message.data);
-    });
-
-    // Check if app was opened from a terminated state via a notification
-    FirebaseMessaging.instance.getInitialMessage().then((message) {
-      if (message != null) {
-        debugPrint("🚀 [FCM] App opened from initial message: ${message.data}");
-        _handleRouting(message.data);
-      }
-    });
   }
 
-  void _handleRouting(Map<String, dynamic> data) {
+  // ─── Phase B: The State Shield & Routing ────────────────────────────────────
+
+  void _updateEmergencyState(Map<String, dynamic> data) {
     final requestId = data['requestId'] as String?;
     final type = data['type'] as String?;
 
     if (requestId != null && type == 'emergency') {
+      // تحديث الحالة العالمية ليراها التبويب فوراً
+      globalContainer.read(lastEmergencyRequestIdProvider.notifier).state = requestId;
+      debugPrint("🛡️ [Shield] Emergency state updated with ID: $requestId");
+    }
+  }
+
+  void _handleRouting(Map<String, dynamic> data) {
+    _updateEmergencyState(data); // نضمن تحديث الحالة أولاً
+
+    final requestId = data['requestId'] as String?;
+    if (requestId != null && data['type'] == 'emergency') {
       navigatorKey.currentState?.push(
         MaterialPageRoute(
           builder: (_) => RequestResponseScreen(requestId: requestId),
@@ -123,8 +157,8 @@ class NotificationService {
     }
   }
 
-  /// Saves (or refreshes) the device FCM token into Firestore so we can
-  /// send direct notifications to this user at any time.
+  // ─── Token Management ───────────────────────────────────────────────────────
+
   Future<void> _saveFcmToken() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -132,20 +166,14 @@ class NotificationService {
 
       final token = await _fcm.getToken();
       if (token != null) {
-        await _fs
-            .collection('users')
-            .doc(user.uid)
-            .update({'fcmToken': token});
+        await _fs.collection('users').doc(user.uid).update({'fcmToken': token});
         debugPrint("✅ [FCM] Token saved for ${user.uid}");
       }
 
       _fcm.onTokenRefresh.listen((newToken) async {
         final currentUser = FirebaseAuth.instance.currentUser;
         if (currentUser == null) return;
-        await _fs
-            .collection('users')
-            .doc(currentUser.uid)
-            .update({'fcmToken': newToken});
+        await _fs.collection('users').doc(currentUser.uid).update({'fcmToken': newToken});
         debugPrint("✅ [FCM] Token refreshed for ${currentUser.uid}");
       });
     } catch (e) {
@@ -153,42 +181,69 @@ class NotificationService {
     }
   }
 
+  // ─── Local Notifications Setup ──────────────────────────────────────────────
+
   Future<void> _setupLocalNotifications() async {
-    const androidInit =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosInit = DarwinInitializationSettings();
     await _localNotifications.initialize(
-      settings:
-      InitializationSettings(android: androidInit, iOS: iosInit),
+      settings:  InitializationSettings(android: androidInit, iOS: iosInit),
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        if (response.payload != null) {
+          final data = jsonDecode(response.payload!) as Map<String, dynamic>;
+          _handleRouting(data);
+        }
+      },
     );
     await _localNotifications
-        .resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>()
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(_channel);
   }
 
+  Future<void> setupLocalNotificationsForBackground() async {
+    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iosInit = DarwinInitializationSettings();
+    await _localNotifications.initialize(
+      settings:  InitializationSettings(android: androidInit, iOS: iosInit),
+    );
+  }
+
   void _showLocalNotification(RemoteMessage message) {
-    final notification = message.notification;
-    final android = message.notification?.android;
-    if (notification != null && android != null) {
+    String? title;
+    String? body;
+
+    // 🔒 [Phase A] الدعم الكامل لرسائل الـ Data-only
+    if (message.notification != null) {
+      title = message.notification?.title;
+      body = message.notification?.body;
+    } else {
+      title = message.data['titleEn'] ?? message.data['titleAr'];
+      body = message.data['bodyEn'] ?? message.data['bodyAr'];
+    }
+
+    if (title != null) {
       _localNotifications.show(
-        id: notification.hashCode,
-        title: notification.title,
-        body: notification.body,
+        id: message.hashCode,
+        title: title,
+        body: body,
         notificationDetails: NotificationDetails(
           android: AndroidNotificationDetails(
             _channel.id,
             _channel.name,
             channelDescription: _channel.description,
-            icon: android.smallIcon,
             importance: Importance.max,
             priority: Priority.high,
             playSound: true,
           ),
         ),
+        payload: jsonEncode(message.data),
       );
     }
   }
+
+  void showLocalNotification(RemoteMessage message) => _showLocalNotification(message);
+
+  // ─── Permissions & Preferences ──────────────────────────────────────────────
 
   Future<void> _requestPermissions(BuildContext context) async {
     if (!context.mounted) return;
@@ -200,12 +255,8 @@ class NotificationService {
         title: Text(l10n.notificationPermissionTitle),
         content: Text(l10n.notificationPermissionBody),
         actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(l10n.later)),
-          ElevatedButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(l10n.allow)),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.later)),
+          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: Text(l10n.allow)),
         ],
       ),
     );
@@ -219,8 +270,6 @@ class NotificationService {
     }
   }
 
-  // ─── Preferences ────────────────────────────────────────────────────────────
-
   Future<void> setNotificationEnabled(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_prefKeyEnabled, enabled);
@@ -231,8 +280,6 @@ class NotificationService {
     return prefs.getBool(_prefKeyEnabled) ?? true;
   }
 
-  /// Called after login to refresh the FCM token in Firestore.
-  /// Topic subscriptions have been removed — we use Direct FCM instead.
   Future<void> sendUserTags({
     required String uid,
     required String city,
@@ -244,12 +291,7 @@ class NotificationService {
 
   // ─── Public Notification Methods ────────────────────────────────────────────
 
-  /// [1] Emergency broadcast: sent when a hospital admin verifies a request
-  /// OR when SuperAdmin sends a filtered broadcast.
-  ///
-  /// If [city] is empty, it targets all cities.
-  /// If [bloodGroup] is empty, it targets all blood groups.
-  /// If both are empty, it targets ALL donors.
+  /// [1] Emergency broadcast (Phase A: Pure Data Payload)
   Future<void> sendEmergencyNotification({
     required String city,
     required String bloodGroup,
@@ -259,17 +301,14 @@ class NotificationService {
     String? bodyAr,
     String? bodyEn,
   }) async {
-    debugPrint(
-        "🔍 [FCM] Emergency broadcast for \"$bloodGroup\" in \"$city\"...");
+    debugPrint("🔍 [FCM] Emergency broadcast for \"$bloodGroup\" in \"$city\"...");
 
     Query query = _fs.collection('users').where('role', isEqualTo: 'donor');
 
-    // 1. Apply City filter if provided
     if (city.isNotEmpty) {
       query = query.where('city', isEqualTo: city);
     }
 
-    // 2. Apply Blood Group filter if provided (uses compatible types logic)
     if (bloodGroup.isNotEmpty) {
       final compatibleTypes = BloodLogic.getCompatibleDonors(bloodGroup);
       query = query.where('bloodGroup', whereIn: compatibleTypes);
@@ -282,13 +321,11 @@ class NotificationService {
       return;
     }
 
-    debugPrint(
-        "📋 [FCM] Found ${donorsSnap.docs.length} donor(s) to notify");
+    debugPrint("📋 [FCM] Found ${donorsSnap.docs.length} donor(s) to notify");
 
     final accessToken = await _getAccessToken();
     final projectId = dotenv.env['FCM_PROJECT_ID'];
 
-    // If custom strings are missing, fall back to default emergency template
     final finalTitleAr = titleAr ?? "🆘 طلب دم طارئ";
     final finalTitleEn = titleEn ?? "🆘 Emergency Blood Request";
     final finalBodyAr = bodyAr ??
@@ -311,46 +348,37 @@ class NotificationService {
       requestId: requestId,
     );
 
-    // Batch Firestore writes + fire FCM pushes concurrently
     final firestoreBatch = _fs.batch();
-    final fcmFutures = <Future>[];
+    final fcmFutures = <Future<void>>[];
 
     for (final donor in donorsSnap.docs) {
-      // 1. Firestore in-app notification
-      final notifRef = _fs
-          .collection('users')
-          .doc(donor.id)
-          .collection('notifications')
-          .doc();
+      final notifRef = _fs.collection('users').doc(donor.id).collection('notifications').doc();
       firestoreBatch.set(notifRef, notificationData.toMap());
 
-      // 2. Direct FCM push
-      // Cast the data to a Map to allow subscript access []
       final data = donor.data() as Map<String, dynamic>?;
-
-      // Use the null-aware operator ?. to get the token
       final fcmToken = data?['fcmToken'] as String?;
 
       if (fcmToken != null && accessToken != null) {
         final message = {
           "message": {
             "token": fcmToken,
-            "notification": {
-              "title": finalTitleEn,
-              "body": finalBodyEn
-            },
+            // 🔒 [Phase A] Data-only payload. NO "notification" block.
             "data": {
               "requestId": requestId,
               "type": "emergency",
               "bloodGroup": bloodGroup,
+              "titleEn": finalTitleEn,
+              "titleAr": finalTitleAr,
+              "bodyEn": finalBodyEn,
+              "bodyAr": finalBodyAr,
               "click_action": "FLUTTER_NOTIFICATION_CLICK"
             }
           }
         };
-        fcmFutures.add(_sendV1NotificationWithToken(
-            message, accessToken, projectId!));
+        fcmFutures.add(_sendV1NotificationWithToken(message, accessToken, projectId!));
       }
     }
+
     await Future.wait([
       firestoreBatch.commit(),
       ...fcmFutures,
@@ -359,8 +387,7 @@ class NotificationService {
     debugPrint("✅ [FCM] Emergency broadcast complete");
   }
 
-  /// [2] Notify all hospital admins of a specific hospital.
-  /// Called when a user creates a new blood request.
+  /// [2] Notify Hospital Admins
   Future<void> sendToHospitalAdmins({
     required String hospitalId,
     required String titleEn,
@@ -369,8 +396,7 @@ class NotificationService {
     required String bodyAr,
     String? requestId,
   }) async {
-    debugPrint(
-        "🔍 [FCM] Notifying admins of hospital: $hospitalId");
+    debugPrint("🔍 [FCM] Notifying admins of hospital: $hospitalId");
 
     final adminsSnap = await _fs
         .collection('users')
@@ -378,10 +404,7 @@ class NotificationService {
         .where('hospitalId', isEqualTo: hospitalId)
         .get();
 
-    if (adminsSnap.docs.isEmpty) {
-      debugPrint("⚠️ [FCM] No admins found for hospital $hospitalId");
-      return;
-    }
+    if (adminsSnap.docs.isEmpty) return;
 
     for (final admin in adminsSnap.docs) {
       await sendDirectNotification(
@@ -394,15 +417,10 @@ class NotificationService {
         requestId: requestId,
       );
     }
-    debugPrint(
-        "✅ [FCM] Notified ${adminsSnap.docs.length} admin(s)");
   }
 
-  /// [3] Notify the matched donor when the requester manually closes a request.
-  /// Looks up the donations collection to find the donor linked to this request.
-  Future<void> sendRequestClosedNotification({
-    required String requestId,
-  }) async {
+  /// [3] Notify Matched Donor (Request Closed)
+  Future<void> sendRequestClosedNotification({required String requestId}) async {
     try {
       final donationsSnap = await _fs
           .collection('donations')
@@ -412,18 +430,15 @@ class NotificationService {
 
       if (donationsSnap.docs.isEmpty) return;
 
-      final donorId =
-      donationsSnap.docs.first.data()['donorId'] as String?;
+      final donorId = donationsSnap.docs.first.data()['donorId'] as String?;
       if (donorId == null) return;
 
       await sendDirectNotification(
         targetUid: donorId,
         titleEn: "Request Confirmed Closed ✅",
         titleAr: "تم تأكيد إغلاق الطلب ✅",
-        bodyEn:
-        "The recipient confirmed the blood request has been fulfilled. Thank you for your contribution! 🙏",
-        bodyAr:
-        "أكد صاحب الطلب اكتمال التبرع. شكراً جزيلاً لمساهمتك في إنقاذ حياة! 🙏",
+        bodyEn: "The recipient confirmed the blood request has been fulfilled. Thank you for your contribution! 🙏",
+        bodyAr: "أكد صاحب الطلب اكتمال التبرع. شكراً جزيلاً لمساهمتك في إنقاذ حياة! 🙏",
         type: NotificationType.requestClosed,
         requestId: requestId,
       );
@@ -432,7 +447,7 @@ class NotificationService {
     }
   }
 
-  /// Sends a direct push notification + saves to Firestore inbox for one user.
+  /// Sends Direct Push Notification
   Future<void> sendDirectNotification({
     required String targetUid,
     required String titleEn,
@@ -442,7 +457,7 @@ class NotificationService {
     NotificationType type = NotificationType.general,
     String? requestId,
   }) async {
-    debugPrint("🔍 [FCM] sendDirectNotification → $targetUid");
+    debugPrint("🔍 [FCM] sendDirectNotification → $targetUid ($type)");
 
     final userDoc = await _fs.collection('users').doc(targetUid).get();
     final fcmToken = userDoc.data()?['fcmToken'] as String?;
@@ -451,26 +466,32 @@ class NotificationService {
       final accessToken = await _getAccessToken();
       final projectId = dotenv.env['FCM_PROJECT_ID'];
       if (accessToken != null && projectId != null) {
+
+        final isEmergency = type == NotificationType.emergency;
+
         final message = {
           "message": {
             "token": fcmToken,
-            "notification": {"title": titleEn, "body": bodyEn},
+            // 🔒 [Phase A] Data-only check applies here as well
+            if (!isEmergency)
+              "notification": {"title": titleEn, "body": bodyEn},
             "data": {
               "requestId": requestId ?? '',
               "type": type.name,
+              "titleEn": titleEn,
+              "titleAr": titleAr,
+              "bodyEn": bodyEn,
+              "bodyAr": bodyAr,
               "click_action": "FLUTTER_NOTIFICATION_CLICK"
             }
           }
         };
-        await _sendV1NotificationWithToken(
-            message, accessToken, projectId);
+        await _sendV1NotificationWithToken(message, accessToken, projectId);
       }
     } else {
-      debugPrint(
-          "⚠️ [FCM] No fcmToken for user $targetUid — saving to Firestore only");
+      debugPrint("⚠️ [FCM] No fcmToken for user $targetUid — saving to Firestore only");
     }
 
-    // Always save to Firestore inbox regardless of push result
     await _fs
         .collection('users')
         .doc(targetUid)
@@ -496,8 +517,7 @@ class NotificationService {
       ) async {
     try {
       final response = await http.post(
-        Uri.parse(
-            "https://fcm.googleapis.com/v1/projects/$projectId/messages:send"),
+        Uri.parse("https://fcm.googleapis.com/v1/projects/$projectId/messages:send"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $accessToken",
@@ -507,8 +527,7 @@ class NotificationService {
       if (response.statusCode == 200) {
         debugPrint("✅ [FCM] Push sent successfully");
       } else {
-        debugPrint(
-            "❌ [FCM] Push failed (${response.statusCode}): ${response.body}");
+        debugPrint("❌ [FCM] Push failed (${response.statusCode}): ${response.body}");
       }
     } catch (e) {
       debugPrint("⚠️ [FCM] Exception sending push: $e");

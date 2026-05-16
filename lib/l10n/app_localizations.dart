@@ -2935,6 +2935,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Thank you for letting us know. We\'ve notified another donor.'**
   String get declineSuccessMessage;
+
+  /// No description provided for @emergencyAlertsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency Alerts'**
+  String get emergencyAlertsTab;
+
+  /// No description provided for @allClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'System All Clear'**
+  String get allClearTitle;
+
+  /// No description provided for @allClearSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No active emergency alerts currently. Thank you for being ready to help!'**
+  String get allClearSubtitle;
+
+  /// No description provided for @viewDetailsButton.
+  ///
+  /// In en, this message translates to:
+  /// **'View Details'**
+  String get viewDetailsButton;
 }
 
 class _AppLocalizationsDelegate
