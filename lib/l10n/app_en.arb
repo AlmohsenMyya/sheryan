@@ -503,7 +503,7 @@
   "tierPlatinum": "Platinum",
   "pointsHistory": "Points History",
   "noPointsYet": "No points yet",
-  "rewardsTab": "Earn points and redeem rewards from sponsor organizations",
+  "rewardsTab": "redeem rewards from sponsor organizations",
   "availableRewards": "Available Rewards",
   "noRewardsFound": "No rewards found in this city",
   "rewardTitle": "Reward Title",
@@ -631,5 +631,7 @@
   "emergencyAlertsTab": "Emergency Alerts",
   "allClearTitle": "System All Clear",
   "allClearSubtitle": "No active emergency alerts currently. Thank you for being ready to help!",
-  "viewDetailsButton": "View Details"
+  "viewDetailsButton": "View Details",
+  "requestAlreadyDeclined": "You have already declined this request.",
+  "requestAlreadyFulfilled": "This request has been successfully fulfilled. Thank you!"
 }

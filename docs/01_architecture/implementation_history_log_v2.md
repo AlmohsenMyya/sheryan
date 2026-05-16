@@ -161,4 +161,15 @@ Transformed the monolithic `AdminDashboard` into a decoupled, feature-first stru
 - **Technical Benefits:** Dramatically reduced the file size of the main `admin_dashboard.dart` shell and improved code readability and testability.
 
 ---
+
+## 15. Feature: Staged Notification Ecosystem & Donor UX Optimization
+Implemented a highly reliable, multi-batch emergency notification engine and optimized the donor navigation experience.
+- **Smart Staged Dispatch:** Replaced global broadcasts with a server-side validated cooldown loop (30 min) targeting 10 compatible donors at a time.
+- **Data-Only Routing (Phase A):** Eliminated "OS Hijack" by switching to pure FCM Data payloads, ensuring 100% routing accuracy via a custom `navigatorKey` handler.
+- **Emergency State Shield (Phase B):** Refactored the Donor's Bottom Navigation Bar to replace "All Donors" with a reactive "Emergency Alerts" tab driven by a `lastEmergencyRequestIdProvider`.
+- **In-App Action Bridge (Phase C):** Injected contextual "View Details" buttons inside emergency notification cards.
+- **UI Safety & Locking:** Implemented server-side state-aware locking in `RequestResponseScreen` for fulfilled or already declined requests.
+- **UX Refinement:** Removed the redundant "All Donors" dashboard card and replaced it with a prominent "Available Rewards" entry point to enhance gamification engagement.
+
+---
 *Log updated: May 2026*

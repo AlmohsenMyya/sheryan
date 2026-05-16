@@ -665,5 +665,7 @@
   "emergencyAlertsTab": "نداءات الاستغاثة",
   "allClearTitle": "الوضع آمن",
   "allClearSubtitle": "لا توجد نداءات استغاثة نشطة حالياً، شكراً لجهوزيتك!",
-  "viewDetailsButton": "عرض التفاصيل"
+  "viewDetailsButton": "عرض التفاصيل",
+  "requestAlreadyDeclined": "لقد قمت بالاعتذار عن هذا الطلب مسبقاً.",
+  "requestAlreadyFulfilled": "تم تأمين الدم بنجاح وإغلاق الطلب. شكراً لجهوزيتك!"
 }

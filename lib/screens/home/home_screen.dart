@@ -23,6 +23,7 @@ import 'package:sheryan/screens/donors/nearby_donors_screen.dart';
 import 'package:sheryan/screens/hospitals/nearby_hospitals_screen.dart';
 import 'package:sheryan/screens/donor_dashboard/see_users_request.dart';
 import 'package:sheryan/screens/donor_dashboard/nearby_users_req.dart';
+import 'package:sheryan/screens/donor_dashboard/rewards_screen.dart';
 import 'package:sheryan/screens/misc/awareness_screen.dart';
 
 import 'package:sheryan/screens/donor_dashboard/emergency_alerts_tab.dart';
@@ -269,13 +270,13 @@ class _HomeBody extends StatelessWidget {
                     ),
                   ),
                   ActionCard(
-                    title: l10n.allDonorsTab,
-                    subtitle: l10n.viewAllDonors,
-                    icon: Icons.people_outline,
+                    title: l10n.availableRewards,
+                    subtitle: l10n.rewardsTab,
+                    icon: Icons.card_giftcard_rounded,
                     color: Colors.orange,
                     onTap: () => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const DonorsList()),
+                      MaterialPageRoute(builder: (_) => const RewardsScreen()),
                     ),
                   ),
                   ActionCard(

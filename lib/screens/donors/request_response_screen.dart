@@ -212,34 +212,89 @@ class _RequestResponseScreenState extends State<RequestResponseScreen> {
 
             const SizedBox(height: 40),
 
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _handleDecline,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: const BorderSide(color: AppColors.error),
-                    ),
-                    child: Text(l10n.declineButton),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: _handleAccept,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.success,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
-                    child: Text(l10n.acceptButton),
-                  ),
-                ),
-              ],
-            ),
+            _buildActionArea(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildActionArea() {
+    final l10n = AppLocalizations.of(context)!;
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final String status = _requestData?['status'] ?? 'pending';
+    final List<dynamic> declinedIds = _requestData?['declinedDonorIds'] as List<dynamic>? ?? [];
+
+    // Scenario B: Completed Lock
+    if (status == 'done' || status == 'completed') {
+      return _buildLockedBanner(
+        icon: Icons.check_circle_outline,
+        color: Colors.green,
+        text: l10n.requestAlreadyFulfilled,
+      );
+    }
+
+    // Scenario A: Declined Lock
+    if (currentUser != null && declinedIds.contains(currentUser.uid)) {
+      return _buildLockedBanner(
+        icon: Icons.info_outline,
+        color: Colors.orange,
+        text: l10n.requestAlreadyDeclined,
+      );
+    }
+
+    // Standard Actions
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: _handleDecline,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.error,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              side: const BorderSide(color: AppColors.error),
+            ),
+            child: Text(l10n.declineButton),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: FilledButton(
+            onPressed: _handleAccept,
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.success,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: Text(l10n.acceptButton),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLockedBanner({required IconData icon, required Color color, required String text}) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: color.withOpacity(0.9),
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

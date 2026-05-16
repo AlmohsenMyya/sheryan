@@ -2297,7 +2297,7 @@ abstract class AppLocalizations {
   /// No description provided for @rewardsTab.
   ///
   /// In en, this message translates to:
-  /// **'Earn points and redeem rewards from sponsor organizations'**
+  /// **'redeem rewards from sponsor organizations'**
   String get rewardsTab;
 
   /// No description provided for @availableRewards.
@@ -2959,6 +2959,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View Details'**
   String get viewDetailsButton;
+
+  /// No description provided for @requestAlreadyDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'You have already declined this request.'**
+  String get requestAlreadyDeclined;
+
+  /// No description provided for @requestAlreadyFulfilled.
+  ///
+  /// In en, this message translates to:
+  /// **'This request has been successfully fulfilled. Thank you!'**
+  String get requestAlreadyFulfilled;
 }
 
 class _AppLocalizationsDelegate

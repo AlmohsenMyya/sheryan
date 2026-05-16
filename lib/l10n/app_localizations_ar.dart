@@ -1541,4 +1541,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get viewDetailsButton => 'عرض التفاصيل';
+
+  @override
+  String get requestAlreadyDeclined => 'لقد قمت بالاعتذار عن هذا الطلب مسبقاً.';
+
+  @override
+  String get requestAlreadyFulfilled =>
+      'تم تأمين الدم بنجاح وإغلاق الطلب. شكراً لجهوزيتك!';
 }

@@ -1207,8 +1207,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noPointsYet => 'No points yet';
 
   @override
-  String get rewardsTab =>
-      'Earn points and redeem rewards from sponsor organizations';
+  String get rewardsTab => 'redeem rewards from sponsor organizations';
 
   @override
   String get availableRewards => 'Available Rewards';
@@ -1552,4 +1551,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewDetailsButton => 'View Details';
+
+  @override
+  String get requestAlreadyDeclined =>
+      'You have already declined this request.';
+
+  @override
+  String get requestAlreadyFulfilled =>
+      'This request has been successfully fulfilled. Thank you!';
 }
