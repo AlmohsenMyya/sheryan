@@ -1492,4 +1492,20 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get confirm_changing_blood =>
       'تغيير زمرة الدم سيؤدي لإلغاء التوثيق الحالي. ستحتاج للتوثيق مجدداً من المشفى. هل أنت متأكد؟';
+
+  @override
+  String stagedNotifiedCount(int count) {
+    return 'تم إرسال إشعارات لـ $count متبرعين متوافقين.';
+  }
+
+  @override
+  String nextBatchAvailable(String time) {
+    return 'الدفعة القادمة متاحة خلال $time';
+  }
+
+  @override
+  String get notifyMoreDonors => 'إخطار 10 متبرعين إضافيين';
+
+  @override
+  String get allDonorsNotified => 'تم إخطار جميع المتبرعين المتوافقين';
 }

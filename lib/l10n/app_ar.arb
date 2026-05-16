@@ -641,5 +641,19 @@
   "redeemLockedMessage": "يجب إجراء عملية تبرع واحدة على الأقل لتتمكن من استبدال النقاط.",
   "firstDonationRequired": "مطلوب أول تبرع",
   "donationRequiredToRedeem": "التبرع مطلوب للاستبدال",
-  "confirm_changing_blood" : "تغيير زمرة الدم سيؤدي لإلغاء التوثيق الحالي. ستحتاج للتوثيق مجدداً من المشفى. هل أنت متأكد؟"
+  "confirm_changing_blood" : "تغيير زمرة الدم سيؤدي لإلغاء التوثيق الحالي. ستحتاج للتوثيق مجدداً من المشفى. هل أنت متأكد؟",
+  "stagedNotifiedCount": "تم إرسال إشعارات لـ {count} متبرعين متوافقين.",
+  "@stagedNotifiedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "nextBatchAvailable": "الدفعة القادمة متاحة خلال {time}",
+  "@nextBatchAvailable": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "notifyMoreDonors": "إخطار 10 متبرعين إضافيين",
+  "allDonorsNotified": "تم إخطار جميع المتبرعين المتوافقين"
 }

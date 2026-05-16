@@ -2875,6 +2875,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Changing your blood group will reset your verification status. You will need to verify it again at a hospital. Are you sure?'**
   String get confirm_changing_blood;
+
+  /// No description provided for @stagedNotifiedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications sent to {count} compatible donors.'**
+  String stagedNotifiedCount(int count);
+
+  /// No description provided for @nextBatchAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Next batch available in {time}'**
+  String nextBatchAvailable(String time);
+
+  /// No description provided for @notifyMoreDonors.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify 10 More Donors'**
+  String get notifyMoreDonors;
+
+  /// No description provided for @allDonorsNotified.
+  ///
+  /// In en, this message translates to:
+  /// **'All compatible donors notified'**
+  String get allDonorsNotified;
 }
 
 class _AppLocalizationsDelegate

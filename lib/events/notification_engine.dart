@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:sheryan/core/models/app_notification.dart';
 import 'package:sheryan/events/app_event.dart';
-import 'package:sheryan/services/notification_service.dart';
+import 'package:sheryan/services/staged_notification_service.dart';
+
+import '../services/notification_service.dart';
 
 /// Central notification engine — the **only** class that calls
 /// [NotificationService] for outbound push/inbox writes.
@@ -87,12 +89,7 @@ class NotificationEngine {
     }
 
     futures.add(
-      _notif.sendEmergencyNotification(
-        city: e.city,
-        bloodGroup: e.bloodGroup,
-        requestId: e.requestId,
-        // No custom strings passed here -> uses defaults in NotificationService
-      ),
+      StagedNotificationService().dispatchNextBatch(e.requestId),
     );
 
     await Future.wait(futures);

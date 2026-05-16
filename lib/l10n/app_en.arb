@@ -607,5 +607,19 @@
   "redeemLockedMessage": "At least one donation is required to redeem points.",
   "firstDonationRequired": "First donation required",
   "donationRequiredToRedeem": "Donation required to redeem",
-  "confirm_changing_blood" : "Changing your blood group will reset your verification status. You will need to verify it again at a hospital. Are you sure?"
+  "confirm_changing_blood" : "Changing your blood group will reset your verification status. You will need to verify it again at a hospital. Are you sure?",
+  "stagedNotifiedCount": "Notifications sent to {count} compatible donors.",
+  "@stagedNotifiedCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "nextBatchAvailable": "Next batch available in {time}",
+  "@nextBatchAvailable": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "notifyMoreDonors": "Notify 10 More Donors",
+  "allDonorsNotified": "All compatible donors notified"
 }

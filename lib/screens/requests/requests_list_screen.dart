@@ -8,6 +8,7 @@ import 'package:sheryan/core/theme/app_colors.dart';
 import 'package:sheryan/core/theme/app_design_constants.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
 import 'package:sheryan/services/request_service.dart';
+import 'package:sheryan/screens/requests/widgets/staged_cooldown_banner.dart';
 import 'package:intl/intl.dart';
 
 class RequestsListScreen extends StatefulWidget {
@@ -156,6 +157,10 @@ class _RequestsScreenState extends State<RequestsListScreen> {
                             data['neededAt']),
 
                         const SizedBox(height: 8),
+
+                        // [STAGED NOTIFICATION BANNER]
+                        StagedCooldownBanner(requestId: docId),
+
                         Text(
                           l10n.requestedOnLabel(formattedDate),
                           style: theme.textTheme.labelSmall,

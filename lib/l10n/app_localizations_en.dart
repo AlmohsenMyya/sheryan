@@ -1503,4 +1503,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get confirm_changing_blood =>
       'Changing your blood group will reset your verification status. You will need to verify it again at a hospital. Are you sure?';
+
+  @override
+  String stagedNotifiedCount(int count) {
+    return 'Notifications sent to $count compatible donors.';
+  }
+
+  @override
+  String nextBatchAvailable(String time) {
+    return 'Next batch available in $time';
+  }
+
+  @override
+  String get notifyMoreDonors => 'Notify 10 More Donors';
+
+  @override
+  String get allDonorsNotified => 'All compatible donors notified';
 }
