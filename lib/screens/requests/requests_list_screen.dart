@@ -165,29 +165,41 @@ class _RequestsScreenState extends State<RequestsListScreen> {
                         if (!isDone) ...[
                           const SizedBox(height: 12),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              TextButton.icon(
+                              // تأكد من تعريف الـ theme في بداية الـ build method إذا لم يكن معرفاً:
+// final theme = Theme.of(context);
+
+                              OutlinedButton.icon(
                                 onPressed: () => QrDialog.show(
                                   context,
                                   data: docId,
-                                  label: data['patientName'] ??
-                                      l10n.unknownPatient,
+                                  label: data['patientName'] ?? l10n.unknownPatient,
                                   idLabel: l10n.requestId,
                                 ),
-                                icon: const Icon(Icons.qr_code,
-                                    color: AppColors.textSecondary),
-                                label: Text(l10n.showQrCode,
-                                    style: const TextStyle(
-                                        color: AppColors.textSecondary)),
-                              ),
-                              const SizedBox(width: 8),
-                              ElevatedButton.icon(
-                                onPressed: () =>
-                                    _markAsDone(docId, data),
-                                icon: const Icon(Icons.check),
-                                label: Text(l10n.markAsDone),
-                              ),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: theme.colorScheme.primary, // اللون يتكيف تلقائياً مع الفاتح والداكن
+                                  side: BorderSide(
+                                    color: theme.colorScheme.primary.withOpacity(0.3), // إطار خفيف وناعم
+                                    width: 1.5,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10), // حواف دائرية ناعمة
+                                  ),
+                                  elevation: 0,
+                                ),
+                                // استخدمت أيقونة qr_code_scanner لأنها تعطي طابعاً تفاعلياً أكثر
+                                icon: const Icon(Icons.qr_code_scanner, size: 20),
+                                label: Text(
+                                  l10n.showQrCode,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              )
+
                             ],
                           ),
                         ],
