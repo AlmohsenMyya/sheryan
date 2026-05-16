@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
 import 'package:sheryan/services/hospital_service.dart';
@@ -50,7 +51,20 @@ class _CreateSponsorDialogState extends ConsumerState<CreateSponsorDialog> {
                 const SizedBox(height: 12),
                 TextFormField(controller: _passCtrl, obscureText: true, decoration: InputDecoration(labelText: l10n.password, prefixIcon: const Icon(Icons.lock_outline)), validator: (v) => (v == null || v.length < 6) ? l10n.passwordMinLength : null),
                 const SizedBox(height: 12),
-                TextFormField(controller: _phoneCtrl, decoration: InputDecoration(labelText: l10n.sponsorPhone, prefixIcon: const Icon(Icons.phone_outlined)), validator: (v) => (v == null || v.isEmpty) ? l10n.requiredField : null),
+                TextFormField(
+                  controller: _phoneCtrl,
+                  keyboardType: TextInputType.phone,
+                  maxLength: 9,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: InputDecoration(
+                    labelText: l10n.sponsorPhone,
+                    prefixIcon: const Icon(Icons.phone_outlined),
+                    prefixText: l10n.phonePrefix,
+                    hintText: '9XXXXXXXX',
+                    counterText: '',
+                  ),
+                  validator: (v) => (v == null || v.isEmpty) ? l10n.requiredField : null,
+                ),
                 const SizedBox(height: 12),
                 StreamBuilder<List<Map<String, dynamic>>>(
                   stream: HospitalService().watchCities(),
@@ -70,7 +84,23 @@ class _CreateSponsorDialogState extends ConsumerState<CreateSponsorDialog> {
         FilledButton(
           onPressed: state.isLoading ? null : () {
             if (_formKey.currentState!.validate() && _selectedCity != null) {
-              ref.read(sponsorProvider.notifier).createSponsor(context: context, name: _nameCtrl.text.trim(), email: _emailCtrl.text.trim(), password: _passCtrl.text, phone: _phoneCtrl.text.trim(), city: _selectedCity!, onSuccess: () => Navigator.pop(context));
+              if (_phoneCtrl.text.trim().length != 9) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.invalidSyrianPhone)),
+                );
+                return;
+              }
+
+              final fullPhone = '+963${_phoneCtrl.text.trim()}';
+              ref.read(sponsorProvider.notifier).createSponsor(
+                context: context, 
+                name: _nameCtrl.text.trim(), 
+                email: _emailCtrl.text.trim(), 
+                password: _passCtrl.text, 
+                phone: fullPhone, 
+                city: _selectedCity!, 
+                onSuccess: () => Navigator.pop(context)
+              );
             }
           },
           child: state.isLoading ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text(l10n.createSponsor),

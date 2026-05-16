@@ -633,5 +633,7 @@
   "allClearSubtitle": "No active emergency alerts currently. Thank you for being ready to help!",
   "viewDetailsButton": "View Details",
   "requestAlreadyDeclined": "You have already declined this request.",
-  "requestAlreadyFulfilled": "This request has been successfully fulfilled. Thank you!"
+  "requestAlreadyFulfilled": "This request has been successfully fulfilled. Thank you!",
+  "invalidSyrianPhone": "Please enter a valid 9-digit Syrian phone number",
+  "phonePrefix": "+963 "
 }

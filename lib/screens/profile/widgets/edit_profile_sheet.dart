@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sheryan/core/theme/app_design_constants.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
@@ -25,7 +26,11 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
   void initState() {
     super.initState();
     _name = TextEditingController(text: widget.userData['name']);
-    _phone = TextEditingController(text: widget.userData['phone']);
+    String phone = widget.userData['phone'] ?? '';
+    if (phone.startsWith('+963')) {
+      phone = phone.substring(4);
+    }
+    _phone = TextEditingController(text: phone);
     _selectedCity = widget.userData['city'];
   }
 
@@ -72,9 +77,14 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
               TextFormField(
                 controller: _phone,
                 keyboardType: TextInputType.phone,
+                maxLength: 9,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   labelText: l10n.phone,
                   prefixIcon: const Icon(Icons.phone_outlined),
+                  prefixText: l10n.phonePrefix,
+                  hintText: '9XXXXXXXX',
+                  counterText: '',
                 ),
                 validator: (v) => v == null || v.isEmpty ? l10n.requiredField : null,
               ),
@@ -102,11 +112,19 @@ class _EditProfileSheetState extends ConsumerState<EditProfileSheet> {
               ElevatedButton(
                 onPressed: _loading ? null : () async {
                   if (!_formKey.currentState!.validate()) return;
+                  if (_phone.text.trim().length != 9) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.invalidSyrianPhone)),
+                    );
+                    return;
+                  }
+
                   setState(() => _loading = true);
+                  final fullPhone = '+963${_phone.text.trim()}';
                   await ref.read(profileControllerProvider).updateProfile(
                     context: context,
                     name: _name.text.trim(),
-                    phone: _phone.text.trim(),
+                    phone: fullPhone,
                     city: _selectedCity!,
                   );
                   if (mounted) Navigator.pop(context);

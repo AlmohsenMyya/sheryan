@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:sheryan/core/theme/app_colors.dart';
 import 'package:sheryan/core/theme/app_design_constants.dart';
@@ -34,7 +35,11 @@ class _BasicInfoScreenState extends State<BasicInfoScreen> {
     super.initState();
     final d = widget.existingData;
     _nameCtrl.text = d['name'] ?? '';
-    _phoneCtrl.text = d['phone'] ?? '';
+    String phone = d['phone'] ?? '';
+    if (phone.startsWith('+963')) {
+      phone = phone.substring(4);
+    }
+    _phoneCtrl.text = phone;
     _cityCtrl.text = d['city'] ?? '';
     _dobCtrl.text = d['dateOfBirth'] ?? '';
     _bloodGroup = d['bloodGroup'];
@@ -72,6 +77,12 @@ class _BasicInfoScreenState extends State<BasicInfoScreen> {
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context)!;
     if (!_formKey.currentState!.validate()) return;
+    if (_phoneCtrl.text.trim().length != 9) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.invalidSyrianPhone)),
+      );
+      return;
+    }
     if (_bloodGroup == null) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(l10n.requiredField)));
@@ -106,9 +117,10 @@ class _BasicInfoScreenState extends State<BasicInfoScreen> {
     setState(() => _loading = true);
     try {
       final uid = FirebaseAuth.instance.currentUser!.uid;
+      final fullPhone = '+963${_phoneCtrl.text.trim()}';
       final Map<String, dynamic> updateData = {
         'name': _nameCtrl.text.trim(),
-        'phone': _phoneCtrl.text.trim(),
+        'phone': fullPhone,
         'city': _cityCtrl.text.trim(),
         'bloodGroup': _bloodGroup,
         'dateOfBirth': _dobCtrl.text.trim(),
@@ -170,9 +182,14 @@ class _BasicInfoScreenState extends State<BasicInfoScreen> {
               TextFormField(
                 controller: _phoneCtrl,
                 keyboardType: TextInputType.phone,
+                maxLength: 9,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   labelText: l10n.phoneNumber,
                   prefixIcon: const Icon(Icons.phone_outlined),
+                  prefixText: l10n.phonePrefix,
+                  hintText: '9XXXXXXXX',
+                  counterText: '',
                 ),
                 validator: (v) =>
                     (v == null || v.isEmpty) ? l10n.requiredField : null,

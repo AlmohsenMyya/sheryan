@@ -11,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
@@ -100,9 +101,17 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       return;
     }
 
+    if (_phone.text.trim().length != 9) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.invalidSyrianPhone)),
+      );
+      return;
+    }
+
     setState(() => _loading = true);
 
     try {
+      final fullPhone = '+963${_phone.text.trim()}';
       final lastDonatedString = _lastDonated == null
           ? null
           : DateFormat('yyyy-MM-dd').format(_lastDonated!);
@@ -114,7 +123,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         bloodGroup: _selectedRole == UserRole.donor ? _selectedBlood : '',
         city: _selectedCity,
         role: _selectedRole == UserRole.donor ? 'donor' : 'user',
-        phone: _phone.text.trim(),
+        phone: fullPhone,
         lastDonated: lastDonatedString,
       );
 
@@ -229,7 +238,18 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 const SizedBox(height: 12),
                 _buildTextField(_password, l10n.password, Icons.lock, obscure: true),
                 const SizedBox(height: 12),
-                _buildTextField(_phone, l10n.phoneWithCountryCode, Icons.phone),
+                TextField(
+                  controller: _phone,
+                  keyboardType: TextInputType.phone,
+                  maxLength: 9,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: InputDecoration(
+                    hintText: '9XXXXXXXX',
+                    prefixIcon: const Icon(Icons.phone),
+                    prefixText: l10n.phonePrefix,
+                    counterText: '',
+                  ),
+                ),
                 const SizedBox(height: 12),
 
                 // Role dropdown

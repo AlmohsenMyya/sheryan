@@ -667,5 +667,7 @@
   "allClearSubtitle": "لا توجد نداءات استغاثة نشطة حالياً، شكراً لجهوزيتك!",
   "viewDetailsButton": "عرض التفاصيل",
   "requestAlreadyDeclined": "لقد قمت بالاعتذار عن هذا الطلب مسبقاً.",
-  "requestAlreadyFulfilled": "تم تأمين الدم بنجاح وإغلاق الطلب. شكراً لجهوزيتك!"
+  "requestAlreadyFulfilled": "تم تأمين الدم بنجاح وإغلاق الطلب. شكراً لجهوزيتك!",
+  "invalidSyrianPhone": "يرجى إدخال رقم هاتف سوري صحيح مكون من 9 أرقام",
+  "phonePrefix": "+963 "
 }

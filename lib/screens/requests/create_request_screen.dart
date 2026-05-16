@@ -9,6 +9,7 @@ import 'package:sheryan/events/notification_engine.dart';
 import 'package:sheryan/services/hospital_service.dart';
 import 'package:sheryan/services/pending_actions_service.dart';
 import 'package:sheryan/services/request_service.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class RequestBloodScreen extends StatefulWidget {
@@ -95,6 +96,13 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
     }
 
     final l10n = AppLocalizations.of(context)!;
+    if (_phone.text.trim().length != 9) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.invalidSyrianPhone)),
+      );
+      return;
+    }
+
     setState(() => _loading = true);
 
     final connectivityResult = await Connectivity().checkConnectivity();
@@ -105,6 +113,8 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
         ? DateFormat('dd MMM yyyy, hh:mm a').format(_neededAt!)
         : l10n.notSpecified;
 
+    final fullPhone = '+963${_phone.text.trim()}';
+
     if (!isOnline) {
       await PendingActionsService().saveRequest({
         'patientName': _patientName.text.trim(),
@@ -113,7 +123,7 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
         'city': _selectedCity,
         'bloodGroup': _selectedGroup,
         'units': _units.text.trim(),
-        'phone': _phone.text.trim(),
+        'phone': fullPhone,
         'neededAt': neededAtFormatted,
       });
 
@@ -142,7 +152,7 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
         'city': _selectedCity,
         'bloodGroup': _selectedGroup,
         'units': _units.text.trim(),
-        'phone': _phone.text.trim(),
+        'phone': fullPhone,
         'neededAt': neededAtFormatted,
       });
 
@@ -266,8 +276,14 @@ class _RequestBloodScreenState extends State<RequestBloodScreen> {
                 TextFormField(
                   controller: _phone,
                   keyboardType: TextInputType.phone,
-                  decoration:
-                      InputDecoration(labelText: l10n.phoneNumber),
+                  maxLength: 9,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: InputDecoration(
+                    labelText: l10n.phoneNumber,
+                    prefixText: l10n.phonePrefix,
+                    hintText: '9XXXXXXXX',
+                    counterText: '',
+                  ),
                   validator: (v) =>
                       (v == null || v.isEmpty) ? l10n.requiredField : null,
                 ),

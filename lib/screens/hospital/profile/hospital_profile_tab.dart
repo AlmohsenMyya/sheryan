@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sheryan/services/hospital_service.dart';
 import 'package:sheryan/l10n/app_localizations.dart';
@@ -42,7 +43,11 @@ class _HospitalProfileTabState extends ConsumerState<HospitalProfileTab> {
         if (!_initialized) {
           _nameController.text = data['name'] ?? '';
           _cityController.text = data['city'] ?? '';
-          _phoneController.text = data['phone'] ?? '';
+          String phone = data['phone'] ?? '';
+          if (phone.startsWith('+963')) {
+            phone = phone.substring(4);
+          }
+          _phoneController.text = phone;
           _addressController.text = data['address'] ?? '';
           _initialized = true;
         }
@@ -60,15 +65,42 @@ class _HospitalProfileTabState extends ConsumerState<HospitalProfileTab> {
                 const SizedBox(height: 16),
                 TextFormField(controller: _cityController, enabled: false, decoration: InputDecoration(labelText: l10n.city, prefixIcon: const Icon(Icons.location_city))),
                 const SizedBox(height: 16),
-                TextFormField(controller: _phoneController, keyboardType: TextInputType.phone, decoration: InputDecoration(labelText: l10n.inquiryPhone, prefixIcon: const Icon(Icons.phone_in_talk), hintText: 'e.g., +963...')),
+                TextFormField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  maxLength: 9,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  decoration: InputDecoration(
+                    labelText: l10n.inquiryPhone,
+                    prefixIcon: const Icon(Icons.phone_in_talk),
+                    prefixText: l10n.phonePrefix,
+                    hintText: '9XXXXXXXX',
+                    counterText: '',
+                  ),
+                ),
                 const SizedBox(height: 16),
                 TextFormField(controller: _addressController, maxLines: 2, decoration: InputDecoration(labelText: l10n.fullAddress, prefixIcon: const Icon(Icons.place), hintText: 'Street, Building, Near...')),
                 const SizedBox(height: 32),
                 FilledButton.icon(
                   onPressed: _loading ? null : () async {
                     if (!_formKey.currentState!.validate()) return;
+                    if (_phoneController.text.trim().length != 9) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.invalidSyrianPhone)),
+                      );
+                      return;
+                    }
+
                     setState(() => _loading = true);
-                    await ref.read(hospitalProfileControllerProvider).updateProfile(context: context, hospitalId: widget.hospitalId, name: _nameController.text.trim(), city: _cityController.text.trim(), phone: _phoneController.text.trim(), address: _addressController.text.trim());
+                    final fullPhone = '+963${_phoneController.text.trim()}';
+                    await ref.read(hospitalProfileControllerProvider).updateProfile(
+                      context: context,
+                      hospitalId: widget.hospitalId,
+                      name: _nameController.text.trim(),
+                      city: _cityController.text.trim(),
+                      phone: fullPhone,
+                      address: _addressController.text.trim(),
+                    );
                     if (mounted) setState(() => _loading = false);
                   },
                   icon: _loading ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Icon(Icons.save),
